@@ -10,7 +10,8 @@ benchmarks that we have fetched from github.
 
 ### Using Vagrant
 
-- vagrant 2.1.2
+- VirtualBox 5.2.22
+- vagrant 2.2.2
 
 The system can be run using Vagrant.
 
