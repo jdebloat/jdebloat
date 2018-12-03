@@ -1,3 +1,24 @@
 [submodule "tools/jvmhs"]
 	path = tools/jvmhs
 	url = https://github.com/ucla-pls/jvmhs.git
+[submodule "benchmarks/02"]
+	path = benchmarks/02
+	url = https://github.com/JakeWharton/DiskLruCache
+[submodule "benchmarks/03"]
+	path = benchmarks/03
+	url = https://github.com/VerbalExpressions/JavaVerbalExpressions
+[submodule "benchmarks/04"]
+	path = benchmarks/04
+	url = https://github.com/Netflix/curator
+[submodule "benchmarks/05"]
+	path = benchmarks/05
+	url = https://github.com/junit-team/junit4
+[submodule "benchmarks/06"]
+	path = benchmarks/06
+	url = https://github.com/dieforfree/qart4j
+[submodule "benchmarks/07"]
+	path = benchmarks/07
+	url = https://github.com/JakeWharton/RxRelay
+[submodule "benchmarks/01"]
+	path = benchmarks/01
+	url = https://github.com/square/javapoet

@@ -27,8 +27,6 @@ git submodule add <git-repo> <name>
 
 ### JReduce: A reducer for Compiled Java Program
 
-
-
 ### ...
  
 ### ...
@@ -36,5 +34,10 @@ git submodule add <git-repo> <name>
 
 
 ## Benchmarks
+
+| id  | url                                    | rev                                      |
+| --- | ---                                    | ---                                      |
+| 01  | https://github.com/netflix/curator.git | 7fa8c085f45977be1db980731f4faf580925db08 |
+|     |                                        |                                          |
 
 ## Todo's
