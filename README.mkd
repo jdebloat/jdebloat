@@ -1,0 +1,40 @@
+# UCLA PLS ONR Integration Repository
+
+This repository contains the current integration effort of the UCLA PLS ONR
+team. The repository contains 3 different tools; JReduce, ..., and ... .
+
+This file details installation of the tools and how to run them on the
+benchmarks that we have fetched from github.
+
+## Prerequisites
+
+### Using Vagrant
+
+- vagrant 2.1.2
+
+The system can be run using Vagrant.
+
+### Running on a Linux machine
+
+## Tools
+
+Adding new tools is as easy as:
+
+```
+cd tools/
+git submodule add <git-repo> <name>
+```
+
+### JReduce: A reducer for Compiled Java Program
+
+
+
+### ...
+ 
+### ...
+
+
+
+## Benchmarks
+
+## Todo's
