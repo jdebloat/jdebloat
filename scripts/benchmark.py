@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+import json
 import re
 import shutil
 import csv
@@ -22,7 +23,7 @@ def changedir(dir):
 
 def read(*args, **kwargs):
     try:
-        return check_output(args, universal_newlines=True, **kwargs).split('\n')
+        return check_output(args, universal_newlines=True, **kwargs).splitlines()
     except CalledProcessError as e:
         print('Failed, while running: ', ' '.join('{!r}'.format(c) for c in args), file=sys.stderr)
         raise
@@ -63,14 +64,21 @@ def extract_classpath(benchmark, scope):
 def extract_jar(jar, tofolder):
     tofolder.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(jar) as zfile:
-        zfile.extractall(
-                path=str(tofolder), 
-                members=[f for f in zfile.namelist() if f.endswith(".class")])
+        only = []
+        for f in zfile.namelist():
+            current = tofolder / Path(f)
+            if current.is_file():
+                shutil.rmtree(str(current), ignore_errors=True)
+            if not f.startswith("META-INF"):
+                only.append(f)
+        zfile.extractall(path=str(tofolder), members=only)
 
 def copy_classes(src, dst):
-    for file in src.rglob("*.class"):
+    for file in src.rglob("*"):
+        if not file.is_file(): continue
         dst_file = dst / file.relative_to(src)
         dst_file.parent.mkdir(parents=True, exist_ok=True)
+        shutil.rmtree(str(dst_file), ignore_errors=True)
         shutil.copyfile(str(file), str(dst_file))
 
 def make_jar(src, libs, jar, stage_folder=None):
@@ -92,30 +100,42 @@ def extract_testclasses(target):
     return test_classes
 
 def main(argv):
-    benchmark, output = [Path(a) for a in argv[1:]]
-    
+    excludedtest, benchmark, output = [Path(a) for a in argv[1:]]
+  
+    excluded = set(excludedtest.read_text().splitlines())
+
     extract = output / "extracted" / benchmark.name
+
+    shutil.rmtree(str(extract), ignore_errors=True)
     extract.mkdir(parents=True, exist_ok=True)
 
-    benchmarkscsv = output / "benchmarks.csv"
-    with open(str(benchmarkscsv), "a") as w: 
-        writer = csv.DictWriter(w, ["id", "url", "rev"])
+    dct = extract_gitinfo(benchmark)
+    
+    target = benchmark / "target" 
 
-        dct = extract_gitinfo(benchmark)
-        writer.writerow(dct)
-
+    if not target.exists():
         build(benchmark)
-        
-        target = benchmark / "target" 
 
-        compile_cp = set(extract_classpath(benchmark, "compile"))
-        make_jar(target / "classes", compile_cp, extract / "jars" / "app+lib.jar") 
-        
-        test_cp = set(extract_classpath(benchmark, "test"))
-        make_jar(target / "test-classes", test_cp - compile_cp, extract / "jars" / "test.jar")
-        
-        test_classes = extract_testclasses(target)
-        (extract / "test.classes.txt").write_text('\n'.join(test_classes))
+    test_classes = set(extract_testclasses(target)) - excluded
+    (extract / "test.classes.txt").write_text('\n'.join(test_classes) + '\n')
+    
+    compile_cp = set(extract_classpath(benchmark, "compile"))
+    make_jar(target / "classes", compile_cp, extract / "jars" / "app+lib.jar") 
+    
+    test_cp = set(extract_classpath(benchmark, "test"))
+    make_jar(target / "test-classes", test_cp - compile_cp, extract / "jars" / "test.jar")
+    
+
+    dct["classpath"] = {
+        "app+lib": sorted(compile_cp),
+        "test": sorted(test_cp - compile_cp)
+        }
+
+    dct["test"] = sorted(test_classes)
+
+    with open(str(extract / "extract.json"), "w") as w: 
+        json.dump(dct, w)
+
 
 if __name__ == "__main__":
     main(sys.argv)
