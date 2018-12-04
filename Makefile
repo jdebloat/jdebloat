@@ -1,8 +1,12 @@
 
 .PHONY: clean 
 
-output/benchmarks.csv: 
-	./scripts/benchmark.py benchmarks output
+extractions = $(patsubst benchmarks/%, output/extracted/%, $(wildcard benchmarks/*))
+
+all: $(extractions)
+
+output/extracted/%: benchmarks/%
+	./scripts/benchmark.py $< output
 
 clean: 
 	rm -rf output

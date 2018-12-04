@@ -85,36 +85,37 @@ def make_jar(src, libs, jar, stage_folder=None):
         run(["jar", "cf", str(absjar), "."])
    
 def extract_testclasses(target):
-    expr = re.compile(r'.*/surefire-reports/(.*)-output.txt$')
+    expr = re.compile(r'.*/surefire-reports/TEST-(.*)\.xml$')
     test_classes = []
-    for x in (target / "surefire-reports").rglob("*-output.txt"):
+    for x in (target / "surefire-reports").rglob("*.xml"):
         test_classes.append(expr.match(str(x)).group(1))
     return test_classes
 
 def main(argv):
-    output = Path(argv[2])
-    output.mkdir(parents=True)
-    with open(str(output / "benchmarks.csv"), "w") as w: 
+    benchmark, output = [Path(a) for a in argv[1:]]
+    
+    extract = output / "extracted" / benchmark.name
+    extract.mkdir(parents=True, exist_ok=True)
+
+    benchmarkscsv = output / "benchmarks.csv"
+    with open(str(benchmarkscsv), "a") as w: 
         writer = csv.DictWriter(w, ["id", "url", "rev"])
-        writer.writeheader()
-        for benchmark in sorted(Path(argv[1]).iterdir()):
-            extract = output / "extracted" / benchmark.name
 
-            dct = extract_gitinfo(benchmark)
-            writer.writerow(dct)
+        dct = extract_gitinfo(benchmark)
+        writer.writerow(dct)
 
-            build(benchmark)
-            
-            target = benchmark / "target" 
+        build(benchmark)
+        
+        target = benchmark / "target" 
 
-            compile_cp = set(extract_classpath(benchmark, "compile"))
-            make_jar(target / "classes", compile_cp, extract / "jars" / "app+lib.jar") 
-            
-            test_cp = set(extract_classpath(benchmark, "test"))
-            make_jar(target / "test-classes", test_cp - compile_cp, extract / "jars" / "test.jar")
-            
-            test_classes = extract_testclasses(target)
-            (extract / "test.classes.txt").write_text('\n'.join(test_classes))
+        compile_cp = set(extract_classpath(benchmark, "compile"))
+        make_jar(target / "classes", compile_cp, extract / "jars" / "app+lib.jar") 
+        
+        test_cp = set(extract_classpath(benchmark, "test"))
+        make_jar(target / "test-classes", test_cp - compile_cp, extract / "jars" / "test.jar")
+        
+        test_classes = extract_testclasses(target)
+        (extract / "test.classes.txt").write_text('\n'.join(test_classes))
 
 if __name__ == "__main__":
     main(sys.argv)
