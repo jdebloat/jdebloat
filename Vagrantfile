@@ -2,7 +2,7 @@
 # vi: set ft=ruby :
 
 Vagrant.configure("2") do |config|
-  config.vm.box = "ubuntu/trusty64"
+  config.vm.box = "ubuntu/xenial64"
   # Share an additional folder to the guest VM. The first argument is
   # the path on the host to the actual folder. The second argument is
   # the path on the guest to mount the folder. And the optional third
@@ -22,10 +22,10 @@ Vagrant.configure("2") do |config|
   # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
   # documentation for more information about their specific syntax and use.
   config.vm.provision "shell", inline: <<-SHELL
-    sudo add-apt-repository ppa:openjdk-r/ppa
-    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 575159689BEFB442
-    echo 'deb http://download.fpcomplete.com/ubuntu trusty main'|sudo tee /etc/apt/sources.list.d/fpco.list
+    # curl -sSL https://get.haskellstack.org/ | sh
+    
     apt-get update
-    apt-get install -y stack git python3 make openjdk-8-jdk maven
+    apt-get install -y git python3 make openjdk-8-jdk maven
+
   SHELL
 end

@@ -1,13 +1,10 @@
 
 .PHONY: clean 
 
-build/benchmarks.csv: build
-	./scripts/benchmark.py benchmarks build/benchmarks.csv
-
-build/: 
-	mkdir build
+output/benchmarks.csv: 
+	./scripts/benchmark.py benchmarks output
 
 clean: 
-	rm -rf build
+	rm -rf output
 
 
