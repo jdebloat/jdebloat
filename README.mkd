@@ -17,6 +17,18 @@ The system can be run using Vagrant.
 
 ### Running on a Linux machine
 
+In the same directory as `README.mkd` run the benchmarks with the following
+commands:
+
+```
+vagrant up
+vagrant ssh
+cd /vagrant
+git submodule init
+git submodule update
+make -j 4
+```
+
 ## Tools
 
 Adding new tools is as easy as:
