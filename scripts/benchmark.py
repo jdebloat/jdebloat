@@ -63,15 +63,16 @@ def extract_classpath(benchmark, scope):
 
 def extract_jar(jar, tofolder):
     tofolder.mkdir(parents=True, exist_ok=True)
-    with zipfile.ZipFile(jar) as zfile:
-        only = []
-        for f in zfile.namelist():
-            current = tofolder / Path(f)
-            if current.is_file():
-                shutil.rmtree(str(current), ignore_errors=True)
-            if not f.startswith("META-INF"):
-                only.append(f)
-        zfile.extractall(path=str(tofolder), members=only)
+    run(["unzip", "-o", str(jar), "-d", str(tofolder)])
+#    with zipfile.ZipFile(jar) as zfile:
+#        only = []
+#        for f in zfile.namelist():
+#            current = tofolder / Path(f)
+#            if current.is_file():
+#                shutil.rmtree(str(current), ignore_errors=True)
+#            if not f.endswith("/"):
+#                only.append(f)
+#        zfile.extractall(path=str(tofolder), members=only)
 
 def copy_classes(src, dst):
     for file in src.rglob("*"):
@@ -113,7 +114,9 @@ def main(argv):
     
     target = benchmark / "target" 
 
-    if not target.exists():
+    print("Looking at: " + str(target))
+    if not target.exists() or not (benchmark / "libs").exists():
+        print("Building: " + str(target))
         build(benchmark)
 
     test_classes = set(extract_testclasses(target)) - excluded
