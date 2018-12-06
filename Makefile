@@ -9,7 +9,7 @@ $(extractions): output/extracted/%/extract.json: benchmarks/%
 
 $(testoutputs): output/tests/%.txt: output/extracted/% ./scripts/runtest.sh
 	mkdir -p output/tests
-	APPCP=$</jars/app+lib.jar TESTCP=$</jars/test.jar TEST_CLASSES=$</test.classes.txt ./scripts/runtest.sh 2>&1 | tee $@
+	./scripts/runtest.sh $</jars/test.jar $</test.classes.txt $</jars/app+lib.jar 2>&1 | tee $@
 
 output/benchmarks.csv: $(extractions)
 	jq -rs '["id","url","rev"],(sort_by(.id) | .[] | [.id,.url,.rev])| @csv' $^ > $@
