@@ -4,18 +4,16 @@ testoutputs = $(patsubst benchmarks/%, output/tests/%.txt, $(wildcard benchmarks
 .PHONY: all
 all: output/benchmarks.csv $(testoutputs)
 
-output/benchmarks.csv: $(extractions)
-	jq -rs '["id","url","rev"],(sort_by(.id) | .[] | [.id,.url,.rev])| @csv' $^ > $@
+$(extractions): output/extracted/%/extract.json: benchmarks/%
+	./scripts/benchmark.py data/excluded-tests.txt $< output
 
-output/tests/%.txt: output/extracted/% ./scripts/runtest.sh
+$(testoutputs): output/tests/%.txt: output/extracted/% ./scripts/runtest.sh
 	mkdir -p output/tests
 	APPCP=$</jars/app+lib.jar TESTCP=$</jars/test.jar TEST_CLASSES=$</test.classes.txt ./scripts/runtest.sh 2>&1 | tee $@
 
-output/extracted/%/extract.json: benchmarks/%
-	./scripts/benchmark.py data/excluded-tests.txt $< output
+output/benchmarks.csv: $(extractions)
+	jq -rs '["id","url","rev"],(sort_by(.id) | .[] | [.id,.url,.rev])| @csv' $^ > $@
 
 .PHONY: clean
 clean:
 	rm -rf output
-
-
