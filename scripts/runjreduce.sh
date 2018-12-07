@@ -2,13 +2,13 @@
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 
-TESTCP=$1
-TEST_CLASSES=$2
-APPCP=$3
+TESTCP=$1; shift
+TEST_CLASSES=$1; shift
+APPCP=$1; shift
 
-WORK_FOLDER=$4
+WORK_FOLDER=$1; shift
 
-jreduce -v \
+jreduce $@\
     --work-folder "$WORK_FOLDER" \
     --stdlib \
     --cp "$TESTCP" \
