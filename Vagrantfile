@@ -25,6 +25,6 @@ Vagrant.configure("2") do |config|
     # curl -sSL https://get.haskellstack.org/ | sh
     
     apt-get update
-    apt-get install -y git python3 make openjdk-8-jdk maven jq
+    apt-get install -y git python3 make openjdk-8-jdk maven jq unzip
   SHELL
 end

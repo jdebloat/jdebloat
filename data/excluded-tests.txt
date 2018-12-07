@@ -1,1 +1,2 @@
 org.junit.tests.running.core.SystemExitTest
+org.I0Itec.zkclient.ContentWatcherTest
