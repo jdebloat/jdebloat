@@ -1,5 +1,13 @@
 SHELL := /bin/bash
 
+.PHONY: all
+all: build/inliner.jar
+
+build/inliner.jar: src/java/InlinerTool/StaticInliner.java src/java/InlinerTool/MainDriver.java
+	javac -cp build/soot.jar $^ -d build
+	jar cf $@ -C build 'InlinerTool'
+	rm -rf build/InlinerTool
+
 .PHONY: setup
 setup:
 	cd src/python; python3 -m venv venv; source venv/bin/activate; pip install -r requirements.txt; python manage.py migrate
