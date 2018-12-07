@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <p class="subtitle">{{ log.date }}</p>
+
+  <div class="content">
+
+    <table class="table">
+      <thead>
+	<tr>
+	  <th>Tag</th>
+	  <th>Count</th>
+	</tr>
+      </thead>
+      <tbody>
+	{% for entry in tag_entries %}
+	<tr>
+	  <td>{{ entry.tag }}</td>
+	  <td>{{ entry.count }}</td>
+	</tr>
+	{% endfor %}
+      </tbody>
+    </table>
+
+    <table class="table">
+      <thead>
+	<tr>
+	  <th>Tag</th>
+	  <th>Reason</th>
+	  <th>Count</th>
+	</tr>
+      </thead>
+      <tbody>
+	{% for entry in reason_entries %}
+	<tr>
+	  <td>{{ entry.tag }}</td>
+	  <td>{{ entry.reason }}</td>
+	  <td>{{ entry.count }}</td>
+	</tr>
+	{% endfor %}
+      </tbody>
+    </table>
+
+  </div>
+{% endblock %}
