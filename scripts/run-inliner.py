@@ -4,14 +4,27 @@ import argparse
 import os
 import subprocess
 import sys
+import shutil
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 def main(args):
     extracted_dir = os.path.join(BASE_DIR, 'output', 'extracted',
                                  args.benchmark)
+    output_dir = os.path.join(BASE_DIR, 'output', 'inliner', args.benchmark)
+    tool_dir = os.path.join(BASE_DIR, 'tools', 'inliner')
+    build_dir = os.path.join(tool_dir, 'build')
+    script_path = os.path.join(tool_dir, 'scripts', 'create-inline-targets.sh') 
+    inline_targets_path = os.path.join(output_dir, 'inline-targets.txt')
+    soot_output_path = os.path.join(output_dir, 'sootOutput')
+    extracted_jar_path = os.path.join(extracted_dir, "app+lib")
+    new_jar_classfiles_path = os.path.join(soot_output_path, 'app+lib')
+    new_app_lib_jar_path = os.path.join(BASE_DIR, output_dir, "app+lib.jar")
+    
+
     test_jar = os.path.join(extracted_dir, 'jars', 'test.jar')
     app_lib_jar = os.path.join(extracted_dir, 'jars', 'app+lib.jar')
+    
     classpath = '{}:{}'.format(test_jar, app_lib_jar)
 
     test_runner = None
@@ -30,8 +43,51 @@ def main(args):
         for line in f:
             test_classes.append(line.strip())
 
-    cmd = ['java', '-cp', classpath, test_runner] + test_classes
-    subprocess.run(cmd)
+    os.makedirs(output_dir, exist_ok=True)
+
+    print("Generate log compilation")
+    cmd = ['java', "-XX:+UnlockDiagnosticVMOptions", "-XX:+LogCompilation",
+           "-Xcomp", "-XX:MinInliningThreshold=1", "-XX:MaxInlineSize=70", 
+           '-cp', classpath, test_runner, ] + test_classes
+    #subprocess.run(cmd, cwd=output_dir)
+
+
+    print("Get inline targets")
+    #for path in os.listdir(output_dir):
+    #    if path.endswith('.log'):
+    #        subprocess.run([script_path, args.benchmark, 
+    #                       os.path.join(output_dir, path), inline_targets_path])
+
+    print("Do transformation")
+    soot_tool_cmd = ['java', '-cp', "{}:{}".format(os.path.join(build_dir, 'soot.jar'), build_dir),
+                     'SootTest.MainDriver', '-process-dir', 
+                     extracted_jar_path,
+                     '-d', soot_output_path, inline_targets_path]
+    #subprocess.run(soot_tool_cmd)
+
+    print("Create new jar")
+    print("copy old classfiles")
+    cp_original_classfiles_cmd = ['cp', '-r', extracted_jar_path, soot_output_path]
+    subprocess.run(cp_original_classfiles_cmd)
+ 
+    print("copy new classfiles") 
+    new_classfile_dirs = []
+    for filename in os.listdir(soot_output_path):
+        if filename != 'app+lib':
+            new_classfile_dirs.append(os.path.join(soot_output_path,filename))
+    cp_new_classfiles_cmd = ['cp', '-r'] + new_classfile_dirs + [new_jar_classfiles_path]
+    subprocess.run(cp_new_classfiles_cmd)
+
+    print("run jar command")
+    create_jar_cmd = ['jar', 'cf', new_app_lib_jar_path, '-C', new_jar_classfiles_path, '.']
+    subprocess.run(create_jar_cmd)
+
+
+    print("Re-check tests")
+    classpath = '{}:{}'.format(test_jar, new_app_lib_jar_path)
+    recheck_cmd = ['java', '-cp', classpath, test_runner] + test_classes
+    subprocess.run(recheck_cmd)
+    
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run inliner tool.')
