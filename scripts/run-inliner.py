@@ -49,21 +49,22 @@ def main(args):
     cmd = ['java', "-XX:+UnlockDiagnosticVMOptions", "-XX:+LogCompilation",
            "-Xcomp", "-XX:MinInliningThreshold=1", "-XX:MaxInlineSize=70", 
            '-cp', classpath, test_runner, ] + test_classes
-    #subprocess.run(cmd, cwd=output_dir)
+    subprocess.run(cmd, cwd=output_dir)
 
 
     print("Get inline targets")
-    #for path in os.listdir(output_dir):
-    #    if path.endswith('.log'):
-    #        subprocess.run([script_path, args.benchmark, 
-    #                       os.path.join(output_dir, path), inline_targets_path])
+    for path in os.listdir(output_dir):
+       if path.endswith('.log'):
+           subprocess.run([script_path, args.benchmark,
+                          os.path.join(output_dir, path), inline_targets_path])
 
     print("Do transformation")
-    soot_tool_cmd = ['java', '-cp', "{}:{}".format(os.path.join(build_dir, 'soot.jar'), build_dir),
-                     'SootTest.MainDriver', '-process-dir', 
+    soot_tool_cmd = ['java', '-cp', "{}:{}".format(os.path.join(build_dir, 'soot.jar'),
+                                                   os.path.join(build_dir, 'inliner.jar')),
+                     'InlinerTool.MainDriver', '-process-dir',
                      extracted_jar_path,
                      '-d', soot_output_path, inline_targets_path]
-    #subprocess.run(soot_tool_cmd)
+    subprocess.run(soot_tool_cmd)
 
     print("Create new jar")
     print("copy old classfiles")
