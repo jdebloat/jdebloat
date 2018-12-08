@@ -19,7 +19,6 @@ public class MainDriver {
 		String inlineTargetsPath = args[args.length-1];
 		List<String> argsList = new ArrayList<String>(Arrays.asList(args));
 		String removed = argsList.remove(argsList.size()-1);
-		System.out.println("removed = " + removed);
 		argsList.addAll(Arrays.asList(new String[] {"-pp",
 				    "-keep-offset",
 				    "-w"}));

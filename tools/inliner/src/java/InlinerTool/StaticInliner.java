@@ -19,6 +19,8 @@ import soot.Unit;
 import soot.SootMethod;
 import soot.SootClass;
 import soot.Scene;
+import soot.Value;
+import soot.jimple.InvokeExpr;
 
 import soot.jimple.toolkits.invoke.SiteInliner;
 
@@ -40,8 +42,8 @@ public class StaticInliner extends SceneTransformer {
 			BufferedReader br = new BufferedReader(fr);
 			String line = null;
 			while ((line = br.readLine()) != null) {
-				String[] lineSplit = line.split(" ");			
-				inlineCalls.put(lineSplit[0], lineSplit[1]);
+				String[] lineSplit = line.split(" ");
+				inlineCalls.put(lineSplit[0].replace('/', '.'), lineSplit[1].replace('/', '.'));
 			}
 		} catch (IOException e) {
 			System.out.println("Unable to open \"" + inlineOutput + "\"");
@@ -53,6 +55,7 @@ public class StaticInliner extends SceneTransformer {
 	public void internalTransform(String phaseName, Map options) {
 		HashMap<String, SootMethod> methodMap = new HashMap<>();
 
+		//for (SootClass sc : Scene.v().getClasses()) {
 		for (SootClass sc : Scene.v().getApplicationClasses()) {
 			for (SootMethod m : sc.getMethods()) {
 				String className = m.getDeclaringClass().getName();
@@ -76,7 +79,10 @@ public class StaticInliner extends SceneTransformer {
 			
 			SootMethod sootCallsite = methodMap.get(callsiteMethodName);
 			SootMethod sootCallee = methodMap.get(calleeMethodName);
-			handleMethod(sootCallsite.retrieveActiveBody(), sootCallee, callsiteBci);
+			if (sootCallsite.isJavaLibraryMethod()) {
+				continue;
+			}
+			handleMethod(sootCallsite, sootCallee, callsiteBci);
 		}
 
 		System.out.println("entry set =");
@@ -86,40 +92,51 @@ public class StaticInliner extends SceneTransformer {
 
 	}
 
-	private void handleMethod(Body b, SootMethod callee, int callsiteBci) {
+	private void handleMethod(SootMethod callsite, SootMethod callee, int callsiteBci) {
+		Body b = callsite.retrieveActiveBody();
 		callee.retrieveActiveBody();
 		Iterator units = b.getUnits().snapshotIterator();
 		while (units.hasNext()) {
 			Stmt stmt = (Stmt) units.next();
 			if (stmt.containsInvokeExpr()) {
-				
-				String className =  b.getMethod().getDeclaringClass().getName();
-				String methodName =  b.getMethod().getName();
-				int bci = -1;
-				for (Tag t : stmt.getTags()) {
-					if (t instanceof BytecodeOffsetTag) {
-						bci = ((BytecodeOffsetTag)t).getBytecodeOffset();
+				InvokeExpr ie = stmt.getInvokeExpr();
+				boolean hasNullArg = false;
+				for (Value v : ie.getArgs()) {
+					if (v == null) {
+						hasNullArg = true;
 					}
 				}
 
-				//System.out.println("Stmt: " + stmt + " bci=" + bci + " callsiteBci=" + callsiteBci);
+				if (hasNullArg) {
+					continue;
+				}
+				String className =  b.getMethod().getDeclaringClass().getName();
+				String methodName =  b.getMethod().getName();
+				BytecodeOffsetTag tag = (BytecodeOffsetTag) stmt.getTag("BytecodeOffsetTag");
+
+				if (tag == null) {
+					continue;
+				}
+
+				int bci = tag.getBytecodeOffset();
+
 				if (callsiteBci == bci) {
-					String callsiteString = className + "." + methodName + "@" + bci;
+					String qualifiedCallsiteMethodName = className + "." + methodName;
+					String callsiteString = qualifiedCallsiteMethodName + "@" + bci;
 					String calleeString = callee.getName();
-					successfulInlines.put(callsiteString, calleeString);
-					SiteInliner.inlineSite(callee, stmt, b.getMethod());
-				} 
-				//String callsite = className + "." + methodName + "@" + bci;
-				
-			
-				//System.out.println("found: " + inlineCalls.get(callsite));
-				//String callee = inlineCalls.get(callsite);
-				// use callee string to look up site
-					
-				//SiteInliner.inlineSite(<>, stmt, b.getMethod());
-				//if (toInline.getName().equals("b")) {
-				//	SiteInliner.inlineSite(toInline, stmt, b.getMethod());
-				//}
+					String qualifiedCalleeName = callee.getDeclaringClass().getName() + "." + calleeString;
+
+					if (!qualifiedCallsiteMethodName.equals(qualifiedCalleeName)) {
+						System.out.println("attempt " + callsiteString + " " + qualifiedCalleeName);
+						if (callee == null || stmt == null || b == null || callsite  == null) {
+							System.out.println("found a null");
+							continue;
+						}
+						SiteInliner.inlineSite(callee, stmt, callsite);
+						System.out.println("success on " + callsiteString + " " + qualifiedCalleeName);
+						successfulInlines.put(callsiteString, calleeString);
+					}
+				}
 			}
 		}
 
