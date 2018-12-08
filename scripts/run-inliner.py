@@ -20,8 +20,6 @@ def main(args):
     extracted_jar_path = os.path.join(extracted_dir, "app+lib")
     new_jar_classfiles_path = os.path.join(soot_output_path, 'app+lib')
     new_app_lib_jar_path = os.path.join(BASE_DIR, output_dir, "app+lib.jar")
-    
-
     test_jar = os.path.join(extracted_dir, 'jars', 'test.jar')
     app_lib_jar = os.path.join(extracted_dir, 'jars', 'app+lib.jar')
     
@@ -45,7 +43,8 @@ def main(args):
 
     os.makedirs(output_dir, exist_ok=True)
 
-    print("Generate log compilation")
+    print('\033[1;34mInliner: {}\033[m'.format(output_dir))
+
     skip_log = False
     for path in os.listdir(output_dir):
         if path.endswith('.log'):
@@ -55,27 +54,32 @@ def main(args):
            '-cp', classpath, test_runner, ] + test_classes
 
     if not skip_log:
+        print('\033[36mRunning original tests...\033[m')
         subprocess.run(cmd, cwd=output_dir)
+    else:
+        print('\033[33mSkipped running original tests and generating inline targets...\033[m')
 
-
-    print("Get inline targets")
     if not skip_log:
         for path in os.listdir(output_dir):
             if path.endswith('.log'):
+                print('\033[36mGenerating inline targets...\033[m')
                 subprocess.run([script_path, args.benchmark,
                                os.path.join(output_dir, path), inline_targets_path])
 
-    print("Do transformation")
-    soot_tool_cmd = ['java', '-cp', "{}:{}".format(os.path.join(build_dir, 'soot.jar'),
-                                                   os.path.join(build_dir, 'inliner.jar')),
+    print('\033[36mTransforming class files...\033[m')
+    soot_tool_cmd = ['java', '-Xmx2g',
+                     '-cp', "{}:{}".format(os.path.join(build_dir, 'soot.jar'),
+                                           os.path.join(build_dir, 'inliner.jar')),
                      'InlinerTool.MainDriver', '-process-dir',
                      extracted_jar_path,
                      '-d', soot_output_path, inline_targets_path]
+    print('[DEBUG]', ' '.join(soot_tool_cmd))
     subprocess.run(soot_tool_cmd)
 
     print("Create new jar")
     print("copy old classfiles")
     cp_original_classfiles_cmd = ['cp', '-r', extracted_jar_path, soot_output_path]
+    print('\033[36m[REMOVE] Running:\033[m {}'.format(' '.join(cp_original_classfiles_cmd)))
     subprocess.run(cp_original_classfiles_cmd)
  
     print("copy new classfiles") 
@@ -84,16 +88,19 @@ def main(args):
         if filename != 'app+lib':
             new_classfile_dirs.append(os.path.join(soot_output_path,filename))
     cp_new_classfiles_cmd = ['cp', '-r'] + new_classfile_dirs + [new_jar_classfiles_path]
+    print('\033[36m[REMOVE] Running:\033[m {}'.format(' '.join(cp_new_classfiles_cmd)))
     subprocess.run(cp_new_classfiles_cmd)
 
     print("run jar command")
     create_jar_cmd = ['jar', 'cf', new_app_lib_jar_path, '-C', new_jar_classfiles_path, '.']
+    print('\033[36m[REMOVE] Running:\033[m {}'.format(' '.join(create_jar_cmd)))
     subprocess.run(create_jar_cmd)
 
 
     print("Re-check tests")
     classpath = '{}:{}'.format(test_jar, new_app_lib_jar_path)
     recheck_cmd = ['java', '-cp', classpath, test_runner] + test_classes
+    print('\033[36m[REMOVE] Running:\033[m {}'.format(' '.join(recheck_cmd)))
     subprocess.run(recheck_cmd)
     
 
