@@ -29,17 +29,18 @@ def main(args):
     TEST_RUNNER_CHOICES = ['org.junit.runner.JUnitCore',
                            'junit.textui.TestRunner']
     for test_runner_choice in TEST_RUNNER_CHOICES:
-        p = subprocess.run(['java', '-cp', classpath, 'org.junit.runner.JUnitCore'],
+        p = subprocess.run(['javap', '-cp', classpath, test_runner_choice],
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         if p.returncode == 0:
             test_runner = test_runner_choice
             break
     assert test_runner is not None
 
-    test_classes = []
+    test_args = []
     with open(os.path.join(extracted_dir, 'test.classes.txt'), 'r') as f:
+        test_args.append(test_runner)
         for line in f:
-            test_classes.append(line.strip())
+            test_args.append(line.strip())
 
     os.makedirs(output_dir, exist_ok=True)
 
@@ -51,7 +52,7 @@ def main(args):
             skip_log = True
     cmd = ['java', "-XX:+UnlockDiagnosticVMOptions", "-XX:+LogCompilation",
            "-Xcomp", "-XX:MinInliningThreshold=1", "-XX:MaxInlineSize=70", 
-           '-cp', classpath, test_runner, ] + test_classes
+           '-cp', classpath] + test_args
 
     if not skip_log:
         print('\033[36mRunning original tests...\033[m')
@@ -99,7 +100,7 @@ def main(args):
 
     print("Re-check tests")
     classpath = '{}:{}'.format(test_jar, new_app_lib_jar_path)
-    recheck_cmd = ['java', '-cp', classpath, test_runner] + test_classes
+    recheck_cmd = ['java', '-cp', classpath] + test_args
     print('\033[36m[REMOVE] Running:\033[m {}'.format(' '.join(recheck_cmd)))
     subprocess.run(recheck_cmd)
     
