@@ -1,7 +1,10 @@
 SHELL := /bin/bash
 
 .PHONY: all
-all: build/inliner.jar
+all: build build/inliner.jar
+
+build:
+	mkdir build
 
 build/inliner.jar: src/java/InlinerTool/StaticInliner.java src/java/InlinerTool/MainDriver.java
 	javac -cp build/soot.jar $^ -d build
