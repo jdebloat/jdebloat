@@ -15,7 +15,7 @@ fi
 ls ${BENCHMARKS_DIR} | while read test; do
 	item="${BENCHMARKS_DIR}/${test}"
 
-	mvn -f "${BENCHMARKS_DIR}/${test}/pom.xml" clean
+	mvn -f "${BENCHMARKS_DIR}/${test}/pom.xml" clean 2>&1 >/dev/null
 
 	temp_file=$(mktemp /tmp/XXXX)
 	echo "Processing "${item}"..." >>${SIZE_INFO_OUTPUT}
