@@ -9,6 +9,9 @@ all: output/benchmarks.csv $(testoutputs)
 .PHONY: jreduce
 jreduce: $(jreduce-outs)
 
+.PHONY: debloat
+debloat: output/debloat
+
 $(extractions): output/extracted/%/extract.json: benchmarks/%
 	./scripts/benchmark.py data/excluded-tests.txt $< output
 
@@ -22,6 +25,17 @@ $(jreduce-outs): output/jreduce/%: output/extracted/% ./scripts/runjreduce.sh ./
 
 output/benchmarks.csv: $(extractions)
 	jq -rs '["id","url","rev"],(sort_by(.id) | .[] | [.id,.url,.rev])| @csv' $^ > $@
+
+output/debloat: ~/.tamiflex/poa.properties
+	mkdir -p output/debloat
+	cp -r benchmarks output/debloat/benchmarks
+	./scripts/rundebloat.sh output/debloat/benchmarks
+
+~/.tamiflex/poa.properties: ~/.tamiflex
+	cp tools/debloat/poa.properties ~/.tamiflex/poa.properties
+
+~/.tamiflex:
+	mkdir ~/.tamiflex
 
 .PHONY: clean
 clean:
