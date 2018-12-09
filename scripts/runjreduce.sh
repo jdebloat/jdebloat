@@ -8,10 +8,11 @@ APPCP=$1; shift
 
 WORK_FOLDER=$1; shift
 
+rm -r "$WORK_FOLDER" &>/dev/null || true
 jreduce $@\
     --work-folder "$WORK_FOLDER" \
-    --stdlib \
     --cp "$TESTCP" \
     --target "$APPCP" \
+    --core "@$TEST_CLASSES" \
     $(realpath "$SCRIPT_DIR/runtest.sh") \
     $(realpath "$TESTCP") $(realpath "$TEST_CLASSES")
