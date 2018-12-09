@@ -1,0 +1,39 @@
+diff --git a/src/test/java/com/jakewharton/rxrelay2/BehaviorRelayTest.java b/src/test/java/com/jakewharton/rxrelay2/BehaviorRelayTest.java
+index 73d38b6..9d937a4 100644
+--- a/src/test/java/com/jakewharton/rxrelay2/BehaviorRelayTest.java
++++ b/src/test/java/com/jakewharton/rxrelay2/BehaviorRelayTest.java
+@@ -82,7 +82,7 @@ public class BehaviorRelayTest {
+         verify(observer, Mockito.never()).onComplete();
+     }
+ 
+-    @Test(timeout = 1000)
++    @Test(timeout = 5000)
+     public void testUnsubscriptionCase() {
+         BehaviorRelay<String> src = BehaviorRelay.createDefault("null"); // FIXME was plain null which is not allowed
+ 
+diff --git a/src/test/java/com/jakewharton/rxrelay2/PublishRelayTest.java b/src/test/java/com/jakewharton/rxrelay2/PublishRelayTest.java
+index fadc30d..ab3b246 100644
+--- a/src/test/java/com/jakewharton/rxrelay2/PublishRelayTest.java
++++ b/src/test/java/com/jakewharton/rxrelay2/PublishRelayTest.java
+@@ -129,7 +129,7 @@ public class PublishRelayTest {
+         ts2.dispose();
+     }
+ 
+-    @Test(timeout = 1000)
++    @Test(timeout = 5000)
+     public void testUnsubscriptionCase() {
+         PublishRelay<String> src = PublishRelay.create();
+ 
+diff --git a/src/test/java/com/jakewharton/rxrelay2/ReplayRelayTest.java b/src/test/java/com/jakewharton/rxrelay2/ReplayRelayTest.java
+index 832c3f8..eeb1930 100644
+--- a/src/test/java/com/jakewharton/rxrelay2/ReplayRelayTest.java
++++ b/src/test/java/com/jakewharton/rxrelay2/ReplayRelayTest.java
+@@ -51,7 +51,7 @@ public class ReplayRelayTest {
+         assertEquals(0, subject.observerCount());
+     }
+ 
+-    @Test(timeout = 1000)
++    @Test(timeout = 5000)
+     public void testUnsubscriptionCase() {
+         ReplayRelay<String> src = ReplayRelay.create();
+ 
