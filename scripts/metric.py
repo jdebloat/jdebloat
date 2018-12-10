@@ -16,9 +16,9 @@ from subprocess import check_output, DEVNULL, STDOUT, CalledProcessError
 from collections import OrderedDict, defaultdict
 
 
-def get_metric(classpath): 
+def get_metric(categories, classpath): 
     out = check_output(['javaq', '--format', 'json-metric', '--cp', str(classpath)], universal_newlines=True)
-    final = defaultdict(lambda: 0)
+    final = { c: 0 for c in categories } 
     for line in out.splitlines():
         dct = json.loads(line)
         del dct["name"]
@@ -29,8 +29,9 @@ def get_metric(classpath):
     return dict(**final)
 
 
-RE_FAILURE = re.compile(r"Test run: ([0-9]+), Failures: ([0-9]+)")
-RE_SUCCESS = re.compile(r"OK \(([0-9]+) tests\)")
+RE_TESTRUN = re.compile(r"Tests run: ([0-9]+)") 
+RE_FAILURES = re.compile(r"Failures: ([0-9]+)")
+RE_SUCCESS = re.compile(r"OK \(([0-9]+) tests*\)")
 
 def run_test(extracted, classpath):
 
@@ -41,22 +42,22 @@ def run_test(extracted, classpath):
                 str(extracted / "test.classes.txt"),
                 str(classpath),
                 ]
-        print(cmd)
         out = check_output(cmd,
             universal_newlines=True,
             stderr=STDOUT
             )
    
-        print(out)
         res = RE_SUCCESS.search(out)
         if res:
             return int(res.group(1)) 
 
     except CalledProcessError as e:
-        print(e.output)
-        res = RE_FAILURE.search(e.output)
-        if res:
-            return int(res.group(1)) - int(res.group(2))
+        try: 
+            tests = RE_TESTRUN.search(str(e.output))
+            failures = RE_FAILURES.search(str(e.output))
+            return int(tests.group(1)) - int(failures.group(1))
+        except AttributeError:
+            return 0
 
 
 def parseArg(a):
@@ -64,9 +65,9 @@ def parseArg(a):
     return (a,b)
 
 def main(args): 
-    dct = OrderedDict(parseArg(a) for a in args[1:])
+    dct = OrderedDict(parseArg(a) for a in args[2:])
 
-    base = Path("output/extracted/")
+    base = Path(args[1])
     
     categories = ["size", "methods", "classes", "fields", "instructions", "tests"]
     columns = list(itertools.product(categories, dct))
@@ -81,8 +82,7 @@ def main(args):
         line["id"] = id
 
         basecp = p / "jars" / "app+lib.jar"
-        base = get_metric(basecp)
-    
+        base = get_metric(categories, basecp)
         base["tests"] = run_test(p, basecp)
 
         line.update(**base)
@@ -90,7 +90,7 @@ def main(args):
         results = {}
         for (key, path) in dct.items():
             cp = path.replace("%", id)
-            results[key] = dict(get_metric(cp))
+            results[key] = dict(get_metric(categories[:-1], cp))
             results[key]["tests"] = run_test(p, cp)
             print(id, key, results[key], file=sys.stderr)
 

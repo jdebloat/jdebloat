@@ -20,14 +20,18 @@ $(testoutputs): output/tests/%.txt: output/extracted/% ./scripts/runtest.sh
 output/benchmarks.csv: $(extractions)
 	jq -rs '["id","url","rev"],(sort_by(.id) | .[] | [.id,.url,.rev])| @csv' $^ > $@
 
+output/reductions.csv: $(jreduce-outs) $(extractions) 
+	./scripts/metric.py output/extracted jreduce:output/jreduce/%/output >$@
+
 ## JREDUCE
 
 .PHONY: jreduce
 jreduce: $(jreduce-outs)
 
-$(jreduce-outs): output/jreduce/%: output/extracted/% ./scripts/runjreduce.sh ./scripts/runtest.sh
+
+$(jreduce-outs): output/jreduce/%/output: output/extracted/% ./scripts/runjreduce.sh ./scripts/runtest.sh
 	mkdir -p output/jreduce
-	./scripts/runjreduce.sh $</jars/test.jar $</test.classes.txt $</jars/app+lib.jar $@ -o $@/output -v
+	./scripts/runjreduce.sh $</jars/test.jar $</test.classes.txt $</jars/app+lib.jar output/jreduce/$* -o $@ -v
 
 
 ## Debloat
