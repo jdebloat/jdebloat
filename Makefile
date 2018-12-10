@@ -27,7 +27,7 @@ jreduce: $(jreduce-outs)
 
 $(jreduce-outs): output/jreduce/%: output/extracted/% ./scripts/runjreduce.sh ./scripts/runtest.sh
 	mkdir -p output/jreduce
-	./scripts/runjreduce.sh $</jars/test.jar $</test.classes.txt $</jars/app+lib.jar $@ -o $@/output 
+	./scripts/runjreduce.sh $</jars/test.jar $</test.classes.txt $</jars/app+lib.jar $@ -o $@/output -v
 
 
 ## Debloat
