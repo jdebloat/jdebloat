@@ -1,6 +1,8 @@
-extractions = $(patsubst benchmarks/%, output/extracted/%/extract.json, $(wildcard benchmarks/*))
-testoutputs = $(patsubst benchmarks/%, output/tests/%.txt, $(wildcard benchmarks/*))
-jreduce-outs = $(patsubst benchmarks/%, output/jreduce/%, $(wildcard benchmarks/*))
+benchmarks = $(wildcard benchmarks/*)
+extractions = $(patsubst benchmarks/%, output/extracted/%/extract.json, $(benchmarks))
+testoutputs = $(patsubst benchmarks/%, output/tests/%.txt, $(benchmarks))
+jreduce-outs = $(patsubst benchmarks/%, output/jreduce/%, $(benchmarks))
+debloat-outs = $(patsubst benchmarks/%, output/debloat/%/TIMESTAMP, $(benchmarks))
 
 .PHONY: all
 all: output/benchmarks.csv $(testoutputs)
@@ -33,10 +35,13 @@ $(jreduce-outs): output/jreduce/%: output/extracted/% ./scripts/runjreduce.sh ./
 .PHONY: debloat
 debloat: output/debloat
 
-output/debloat: ~/.tamiflex/poa.properties
-	mkdir -p output/debloat
-	cp -r benchmarks output/debloat/benchmarks
-	./scripts/rundebloat.sh output/debloat/benchmarks
+output/debloat: $(debloat-outs)
+
+$(debloat-outs): output/debloat/%/TIMESTAMP: benchmarks/% output/extracted/% ./scripts/rundebloat.sh
+	mkdir -p output/debloat/
+	cp -r benchmarks/$* output/debloat/$*
+	./scripts/rundebloat.sh output/debloat/$*
+	touch $@
 
 ~/.tamiflex/poa.properties: ~/.tamiflex
 	cp tools/debloat/poa.properties ~/.tamiflex/poa.properties
