@@ -26,6 +26,19 @@ vagrant ssh
 cd /vagrant
 git submodule init
 git submodule update
+```
+
+Some of the methods requires `javaq` to be installed. You can install
+that by going to the jvmhs folder and run stack install:
+
+```
+cd tools/jvmhs
+stack install
+```
+
+Finally running all targets can be done by running:
+
+```
 make -j 4
 ```
 
