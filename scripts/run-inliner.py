@@ -91,7 +91,6 @@ def main(args):
                     '-d', output_soot_path,
                     inline_targets_path])
 
-    print(output_soot_path)
     if not os.path.exists(output_soot_path):
         print('\033[31mNo Soot output, exiting...\033[m')
         exit(1)
