@@ -224,6 +224,8 @@ class Visitor:
                 pass
             elif child.tag == 'method':
                 self.visit_method(child)
+            elif child.tag == 'method_not_compilable_at_tier':
+                pass
             elif child.tag == 'parse':
                 self.visit_parse(child)
             elif child.tag == 'phase':
