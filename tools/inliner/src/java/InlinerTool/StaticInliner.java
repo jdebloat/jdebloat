@@ -60,8 +60,6 @@ public class StaticInliner extends SceneTransformer {
 	@Override
 	public void internalTransform(String phaseName, Map options) {
 		HashMap<String, SootMethod> methodMap = new HashMap<>();
-        	String modifierOptions = PhaseOptions.getString(options, "allowed-modifier-changes");
-
 
 		//for (SootClass sc : Scene.v().getClasses()) {
 		for (SootClass sc : Scene.v().getApplicationClasses()) {
@@ -90,7 +88,7 @@ public class StaticInliner extends SceneTransformer {
 			if (sootCallsite.isJavaLibraryMethod()) {
 				continue;
 			}
-			handleMethod(sootCallsite, sootCallee, callsiteBci, modifierOptions);
+			handleMethod(sootCallsite, sootCallee, callsiteBci);
 		}
 
 		System.out.println("entry set =");
@@ -100,7 +98,7 @@ public class StaticInliner extends SceneTransformer {
 
 	}
 
-	private void handleMethod(SootMethod callsite, SootMethod callee, int callsiteBci, String options) {
+	private void handleMethod(SootMethod callsite, SootMethod callee, int callsiteBci) {
 		Body b = callsite.retrieveActiveBody();
 		callee.retrieveActiveBody();
 		Iterator units = b.getUnits().snapshotIterator();
@@ -141,7 +139,7 @@ public class StaticInliner extends SceneTransformer {
 							continue;
 						}
 
-						if (InlinerSafetyManager.ensureInlinability(callee, stmt, callsite, options)) {
+						if (InlinerSafetyManager.ensureInlinability(callee, stmt, callsite, "unsafe")) {
 							SiteInliner.inlineSite(callee, stmt, callsite);
 							System.out.println("success on " + callsiteString + " " + qualifiedCalleeName);
 							successfulInlines.put(callsiteString, calleeString);
