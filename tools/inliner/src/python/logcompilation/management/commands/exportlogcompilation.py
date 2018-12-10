@@ -12,5 +12,12 @@ class Command(BaseCommand):
         project, _ = Project.objects.get_or_create(name=options['project'])
         with open(options['out_file'], 'w') as f:
             for inline_call in InlineCall.objects.filter(project=project):
+                callsite = inline_call.caller
+                if InlineCall.objects.filter(project=project, caller=callsite).count() > 1:
+                    continue
+
+                if InvokeVirtualTerminator.objects.filter(compile_thread__log__project=project, callsite=callsite, tag='inline_fail').count() > 0:
+                    continue
+
                 f.write(str(inline_call))
                 f.write('\n')

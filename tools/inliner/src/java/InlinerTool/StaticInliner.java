@@ -1,28 +1,34 @@
 package InlinerTool;
 
-import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.io.File;
+import java.util.Map;
+
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
 import soot.Body;
-import soot.SceneTransformer;
 import soot.PackManager;
+import soot.PhaseOptions;
+import soot.SceneTransformer;
 import soot.Transform;
+
 import soot.options.Options;
 
-import soot.jimple.Stmt;
-import soot.Unit;
 import soot.SootMethod;
 import soot.SootClass;
 import soot.Scene;
+import soot.Unit;
 import soot.Value;
-import soot.jimple.InvokeExpr;
 
+import soot.jimple.InvokeExpr;
+import soot.jimple.Stmt;
+
+import soot.jimple.toolkits.invoke.InlinerSafetyManager;
 import soot.jimple.toolkits.invoke.SiteInliner;
+
 
 import soot.tagkit.Tag;
 import soot.tagkit.BytecodeOffsetTag;
@@ -54,6 +60,8 @@ public class StaticInliner extends SceneTransformer {
 	@Override
 	public void internalTransform(String phaseName, Map options) {
 		HashMap<String, SootMethod> methodMap = new HashMap<>();
+        	String modifierOptions = PhaseOptions.getString(options, "allowed-modifier-changes");
+
 
 		//for (SootClass sc : Scene.v().getClasses()) {
 		for (SootClass sc : Scene.v().getApplicationClasses()) {
@@ -82,7 +90,7 @@ public class StaticInliner extends SceneTransformer {
 			if (sootCallsite.isJavaLibraryMethod()) {
 				continue;
 			}
-			handleMethod(sootCallsite, sootCallee, callsiteBci);
+			handleMethod(sootCallsite, sootCallee, callsiteBci, modifierOptions);
 		}
 
 		System.out.println("entry set =");
@@ -92,7 +100,7 @@ public class StaticInliner extends SceneTransformer {
 
 	}
 
-	private void handleMethod(SootMethod callsite, SootMethod callee, int callsiteBci) {
+	private void handleMethod(SootMethod callsite, SootMethod callee, int callsiteBci, String options) {
 		Body b = callsite.retrieveActiveBody();
 		callee.retrieveActiveBody();
 		Iterator units = b.getUnits().snapshotIterator();
@@ -132,9 +140,12 @@ public class StaticInliner extends SceneTransformer {
 							System.out.println("found a null");
 							continue;
 						}
-						SiteInliner.inlineSite(callee, stmt, callsite);
-						System.out.println("success on " + callsiteString + " " + qualifiedCalleeName);
-						successfulInlines.put(callsiteString, calleeString);
+
+						if (InlinerSafetyManager.ensureInlinability(callee, stmt, callsite, options)) {
+							SiteInliner.inlineSite(callee, stmt, callsite);
+							System.out.println("success on " + callsiteString + " " + qualifiedCalleeName);
+							successfulInlines.put(callsiteString, calleeString);
+						}
 					}
 				}
 			}
