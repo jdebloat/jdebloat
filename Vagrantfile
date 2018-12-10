@@ -23,7 +23,7 @@ Vagrant.configure("2") do |config|
   # documentation for more information about their specific syntax and use.
   config.vm.provision "shell", inline: <<-SHELL
     apt-get update
-    apt-get install -y git python3 make openjdk-8-jdk maven jq unzip bc
+    apt-get install -y git python3 make openjdk-8-jdk maven jq unzip bc python3-venv
 
     curl -sSL https://get.haskellstack.org/ | sh
   SHELL
