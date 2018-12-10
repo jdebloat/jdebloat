@@ -12,7 +12,7 @@ Vagrant.configure("2") do |config|
   #
   config.vm.provider "virtualbox" do |vb|
     # Customize the amount of memory on the VM:
-    vb.memory = "3072"
+    vb.memory = "4096"
   end
   #
   # View the documentation for the provider you are using for more
@@ -22,9 +22,9 @@ Vagrant.configure("2") do |config|
   # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
   # documentation for more information about their specific syntax and use.
   config.vm.provision "shell", inline: <<-SHELL
-    # curl -sSL https://get.haskellstack.org/ | sh
-    
     apt-get update
-    apt-get install -y git python3 make openjdk-8-jdk maven jq unzip python3-venv
+    apt-get install -y git python3 make openjdk-8-jdk maven jq unzip bc
+
+    curl -sSL https://get.haskellstack.org/ | sh
   SHELL
 end
