@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 
 .PHONY: all
-all: soot build build/inliner.jar 
+all: build soot build/inliner.jar 
 
 .PHONY: soot
 soot:

@@ -42,7 +42,7 @@ import java.util.Map;
 
 public class InlinerTransformer extends SceneTransformer {
 
-	private HashMap<String, String> inlineTargets = new HashMap<>();
+	private HashMap<String, HashMap<Integer, String>> inlineTargets = new HashMap<>();
 	private HashMap<String, SootMethod> methodMap = new HashMap<>();
 	
 	public InlinerTransformer(String inlineTargetsPath) throws IOException {
@@ -51,7 +51,21 @@ public class InlinerTransformer extends SceneTransformer {
 		String line = null;
 		while ((line = bufferedReader.readLine()) != null) {
 			String[] lineSplit = line.split(" ");
-			inlineTargets.put(lineSplit[0], lineSplit[1]);
+			String callsiteSignature = lineSplit[0];
+			String calleeHotSpotSignature = lineSplit[1];
+
+			String[] callsiteSignatureSplit =
+				callsiteSignature.split("@");
+			String callerHotSpotSignature =
+				callsiteSignatureSplit[0];
+			Integer callsiteBytecodeOffset =
+				Integer.valueOf(callsiteSignatureSplit[1]);
+
+			if (!inlineTargets.containsKey(callerHotSpotSignature)) {
+				inlineTargets.put(callerHotSpotSignature, new HashMap<>());
+			}
+			inlineTargets.get(callerHotSpotSignature)
+			             .put(callsiteBytecodeOffset, calleeHotSpotSignature);
 		}
 	}
 
@@ -146,37 +160,26 @@ public class InlinerTransformer extends SceneTransformer {
 			}
 		}
 
-		for (Map.Entry<String, String> entry
+		int count = 0;
+		for (Map.Entry<String, HashMap<Integer, String>> entry
 		     : inlineTargets.entrySet()) {
-			String callsiteSignature = entry.getKey();
-			String calleeHotSpotSignature = entry.getValue();
+			String callerHotSpotSignature = entry.getKey();
+			HashMap<Integer, String> bytecodeOffsetCalleeMap =
+				entry.getValue();
 
-			String[] callsiteSignatureSplit =
-				callsiteSignature.split("@");
-			String callerHotSpotSignature =
-				callsiteSignatureSplit[0];
-			int callsiteBytecodeOffset =
-				Integer.parseInt(callsiteSignatureSplit[1]);
-
-			if (!methodMap.containsKey(callerHotSpotSignature)
-			    || !methodMap.containsKey(calleeHotSpotSignature)) {
+			if (!methodMap.containsKey(callerHotSpotSignature)) {
 				continue;
 			}
 
 			SootMethod sootCaller = methodMap.get(
 				callerHotSpotSignature);
-			SootMethod sootCallee = methodMap.get(
-				calleeHotSpotSignature);
-			handleInline(sootCaller, callsiteBytecodeOffset,
-			             sootCallee);
+			handleInline(sootCaller, bytecodeOffsetCalleeMap);
 		}
 	}
 
-	private boolean handleInline(SootMethod sootCaller,
-	                             int callsiteBytecodeOffset,
-	                             SootMethod sootCallee) {
+	private void handleInline(SootMethod sootCaller,
+	                          HashMap<Integer, String> bytecodeOffsetCalleeMap) {
 		Body body = sootCaller.retrieveActiveBody();
-		sootCallee.retrieveActiveBody();
 		Iterator unitsIter = body.getUnits().snapshotIterator();
 		while (unitsIter.hasNext()) {
 			Stmt stmt = (Stmt) unitsIter.next();
@@ -192,10 +195,17 @@ public class InlinerTransformer extends SceneTransformer {
 			if (bytecodeOffsetTag == null) {
 				continue;
 			}
-			if (bytecodeOffsetTag.getBytecodeOffset()
-			    != callsiteBytecodeOffset) {
+			int bytecodeOffset = bytecodeOffsetTag.getBytecodeOffset();
+			Integer bytecodeOffsetKey = Integer.valueOf(bytecodeOffset);
+			if (!bytecodeOffsetCalleeMap.containsKey(bytecodeOffsetKey)) {
 				continue;
 			}
+			String calleeHotSpotSignature = bytecodeOffsetCalleeMap.get(bytecodeOffsetKey);
+			if (!methodMap.containsKey(calleeHotSpotSignature)) {
+			    continue;
+			}
+			SootMethod sootCallee = methodMap.get(calleeHotSpotSignature);
+			sootCallee.retrieveActiveBody();
 
 			boolean safeToInline =
 				InlinerSafetyManager.ensureInlinability(
@@ -204,8 +214,6 @@ public class InlinerTransformer extends SceneTransformer {
 				continue;
 			}
 			SiteInliner.inlineSite(sootCallee, stmt, sootCaller);
-			return true;
 		}
-		return false;
 	}
 }	
