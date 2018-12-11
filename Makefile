@@ -3,6 +3,7 @@ extractions = $(patsubst benchmarks/%, output/extracted/%/extract.json, $(benchm
 testoutputs = $(patsubst benchmarks/%, output/tests/%.txt, $(benchmarks))
 jreduce-outs = $(patsubst benchmarks/%, output/jreduce/%/output, $(benchmarks))
 debloat-outs = $(patsubst benchmarks/%, output/debloat/%/TIMESTAMP, $(benchmarks))
+inliner-outs = $(patsubst benchmarks/%, output/inliner/%/app+lib.jar, $(benchmarks))
 
 .PHONY: all
 all: output/benchmarks.csv $(testoutputs)
@@ -20,8 +21,8 @@ $(testoutputs): output/tests/%.txt: output/extracted/%/extract.json ./scripts/ru
 output/benchmarks.csv: $(extractions)
 	jq -rs '["id","url","rev"],(sort_by(.id) | .[] | [.id,.url,.rev])| @csv' $^ > $@
 
-output/reductions.csv: $(jreduce-outs) $(extractions) 
-	./scripts/metric.py output/extracted jreduce:output/jreduce/%/output >$@
+output/reductions.csv: $(jreduce-outs) $(inliner-outs) $(extractions) 
+	./scripts/metric.py output/extracted inliner:output/inline/%/app+lib.jar jreduce:output/jreduce/%/output >$@
 
 ## JREDUCE
 
@@ -37,9 +38,7 @@ $(jreduce-outs): output/jreduce/%/output: output/extracted/%/extract.json ./scri
 ## Debloat
 
 .PHONY: debloat
-debloat: output/debloat
-
-output/debloat: $(debloat-outs)
+debloat: $(debloat-outs)
 
 $(debloat-outs): output/debloat/%/TIMESTAMP: benchmarks/% output/extracted/%/extract.json ./scripts/rundebloat.sh
 	mkdir -p output/debloat/
@@ -52,6 +51,16 @@ $(debloat-outs): output/debloat/%/TIMESTAMP: benchmarks/% output/extracted/%/ext
 
 ~/.tamiflex:
 	mkdir ~/.tamiflex
+
+## Inliner
+
+.PHONY: inliner
+inliner: $(inliner-outs)
+
+$(inliner-outs): output/inliner/%/app+lib.jar: benchmarks/% output/extracted/%/extract.json ./scripts/run-inliner.py
+	mkdir -p output/inliner/
+	./scripts/run-inliner.py $*
+
 
 .PHONY: clean
 clean:
