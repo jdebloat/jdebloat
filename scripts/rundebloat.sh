@@ -18,7 +18,7 @@ OUTPUT_FILE="$BENCHMARK/output.txt"
 echo "Processing "${BENCHMARK}"..." >>${SIZE_INFO_OUTPUT}
 java -Xmx4G -jar ${DEBLOAT} --maven-project "${BENCHMARK}" \
      --test-entry --public-entry --main-entry --prune-app \
-     --tamiflex "${TAMIFLEX}" --verbose 2>&1 | tee ${OUTPUT_FILE}
+     --tamiflex "${TAMIFLEX}" --verbose 2>&1 > ${OUTPUT_FILE}
 echo "Done!" >>${SIZE_INFO_OUTPUT}
 
 
@@ -29,3 +29,4 @@ after=$(cat ${OUTPUT_FILE} | awk -F, '($1 ~ "app_size_decompressed_after_*"){val
 echo "Size before (in bytes): "${before} >>${SIZE_INFO_OUTPUT}
 echo "Size after (in bytes): "${after} >>${SIZE_INFO_OUTPUT}
 echo "Percentage reduction: "$(echo "(${before} - ${after})*100/${before}" | bc -l) >>${SIZE_INFO_OUTPUT}
+cat ${SIZE_INFO_OUTPUT}
