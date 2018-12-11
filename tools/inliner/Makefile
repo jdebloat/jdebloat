@@ -6,7 +6,7 @@ all: build build/inliner.jar
 build:
 	mkdir build
 
-build/inliner.jar: src/java/InlinerTool/StaticInliner.java src/java/InlinerTool/MainDriver.java
+build/inliner.jar: src/java/InlinerTool/InlinerTransformer.java src/java/InlinerTool/Main.java
 	javac -cp build/soot.jar $^ -d build
 	jar cf $@ -C build 'InlinerTool'
 	rm -rf build/InlinerTool

@@ -86,7 +86,7 @@ def main(args):
     subprocess.run(['java', '-Xmx2g',
                     '-cp', "{}:{}".format(os.path.join(build_dir, 'soot.jar'),
                                           os.path.join(build_dir, 'inliner.jar')),
-                    'InlinerTool.MainDriver',
+                    'InlinerTool.Main',
                     '-process-dir', extracted_jar_path,
                     '-d', output_soot_path,
                     inline_targets_path])
