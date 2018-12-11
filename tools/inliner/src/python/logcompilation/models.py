@@ -1,7 +1,7 @@
 from django.db import models
 
 class Project(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, unique=True)
 
     def __str__(self):
         return self.name
@@ -25,7 +25,7 @@ class CompileThread(models.Model):
         return self.name
 
 class Klass(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, unique=True)
 
     def __str__(self):
         return self.name
@@ -33,10 +33,10 @@ class Klass(models.Model):
 class Method(models.Model):
     klass = models.ForeignKey(Klass, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
+    signature = models.CharField(max_length=500, unique=True)
 
     def __str__(self):
-        return '{}.{}'.format(self.klass, self.name)
-
+        return self.signature
 
 class Callsite(models.Model):
     caller = models.ForeignKey(Method, on_delete=models.CASCADE)
@@ -45,13 +45,19 @@ class Callsite(models.Model):
     def __str__(self):
         return '{}@{}'.format(self.caller, self.bci)
 
+    class Meta:
+        unique_together = ('caller', 'bci')
+
 class InlineCall(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    caller = models.ForeignKey(Callsite, on_delete=models.CASCADE)
+    callsite = models.ForeignKey(Callsite, on_delete=models.CASCADE)
     callee = models.ForeignKey(Method, on_delete=models.CASCADE)
 
     def __str__(self):
-        return '{} {}'.format(str(self.caller), str(self.callee))
+        return '{} {}'.format(str(self.callsite), str(self.callee))
+
+    class Meta:
+        unique_together = ('project', 'callsite')
    
 class InvokeVirtualTerminator(models.Model):
     compile_thread = models.ForeignKey(CompileThread, on_delete=models.CASCADE)
@@ -63,4 +69,4 @@ class InvokeVirtualTerminator(models.Model):
         return '{} {} {}{}'.format(self.compile_thread,
                                    self.callsite,
                                    self.tag,
-                                   ' ({})'.format(self.reason) if self.reason != '' else '')
+                                   ' [{}]'.format(self.reason) if self.reason != '' else '')

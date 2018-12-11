@@ -1,6 +1,8 @@
 from django.core.management.base import BaseCommand, CommandError
 from logcompilation.models import Log, CompileThread, Klass, Method, Callsite, InvokeVirtualTerminator, InlineCall, Project
 
+import collections
+
 from xml.etree import ElementTree
 
 class Visitor:
@@ -10,16 +12,41 @@ class Visitor:
         self.current_compile_thread = None
         self.log_klass_lookup = {}
         self.log_method_lookup = {}
+        self.log_type_lookup = {}
+        self.model_klass_lookup = {}
+        self.model_method_lookup = {}
+        self.possible_inline_callsites = collections.defaultdict(list)
+        self.blacklisted_inline_callsites = set()
 
     def add_log_klass_entry(self, klass_id, name):
-        klass, _ = Klass.objects.get_or_create(name=name)
+        if name in self.model_klass_lookup:
+            klass = self.model_klass_lookup[name]
+        else:
+            klass, _ = Klass.objects.get_or_create(name=name)
+            self.model_klass_lookup[name] = klass
         self.log_klass_lookup[klass_id] = klass
 
-    def add_log_method_entry(self, method_id, klass_id, name):
-        assert klass_id in self.log_klass_lookup
-        method, _ = Method.objects.get_or_create(klass=self.log_klass_lookup[klass_id],
-                                                 name=name)
+    def add_log_method_entry(self, method_id, klass_id, name, arguments):
+        klass = self.log_klass_lookup[klass_id]
+        argument_names = []
+        for argument in arguments:
+            if argument in self.log_type_lookup:
+                assert argument not in self.log_klass_lookup
+                argument_names.append(self.log_type_lookup[argument])
+            else:
+                argument_names.append(self.log_klass_lookup[argument].name)
+        signature = '{}.{}({})'.format(klass.name, name, ','.join(argument_names))
+        if signature in self.model_method_lookup:
+            method = self.model_method_lookup[signature]
+        else:
+            method, _ = Method.objects.get_or_create(klass=klass,
+                                                     name=name,
+                                                     signature=signature)
+            self.model_method_lookup[signature] = method
         self.log_method_lookup[method_id] = method
+
+    def add_type_entry(self, type_id, name):
+        self.log_type_lookup[type_id] = name
 
     def get_callsite(self, caller_method_id, bci):
         caller = self.log_method_lookup[caller_method_id]
@@ -27,14 +54,21 @@ class Visitor:
                                                      bci=bci)
         return callsite
 
-    def get_inline_call(self, callsite, callee):
+    def create_possible_inline_call(self, callsite, callee):
         assert callsite is not None
         assert callee is not None
-        inline_call, _ = InlineCall.objects.get_or_create(project=self.project,
-                                                          caller=callsite,
-                                                          callee=callee)
-        return inline_call
+        self.possible_inline_callsites[callsite].append(callee)
 
+    def create_inline_calls(self):
+        for callsite, callees in self.possible_inline_callsites.items():
+            if len(callees) != 1:
+                continue
+            callee = callees[0]
+            if callsite in self.blacklisted_inline_callsites:
+                continue
+            inline_call, _ = InlineCall.objects.get_or_create(project=self.project,
+                                                              callsite=callsite,
+                                                              callee=callee)
 
     def add_terminator(self, callsite, tag, reason=''):
         InvokeVirtualTerminator.objects.create(compile_thread=self.current_compile_thread,
@@ -45,6 +79,17 @@ class Visitor:
     def reset_log_lookups(self):
         self.log_klass_lookup = {}
         self.log_method_lookup = {}
+        self.log_type_lookup = {}
+
+    def handle_inline_fail(self, callsite, reason):
+        if reason in ['callee is too large', 'inlining prohibited by policy']:
+            return
+
+        # if reason in ['native method', 'no static binding', 'not inlineable',
+        #               'recursive inlining too deep']:
+        #     return
+
+        self.blacklisted_inline_callsites.add(callsite)
 
     def visit_klass(self, node):
         assert node.tag == 'klass'
@@ -62,7 +107,8 @@ class Visitor:
         # 'compile_id'?, 'compiler'?, 'level'?, 'iicount'
         self.add_log_method_entry(int(node.attrib['id']),
                                   int(node.attrib['holder']),
-                                  node.attrib['name'])
+                                  node.attrib['name'],
+                                  [int(x) for x in node.attrib['arguments'].split()] if 'arguments' in node.attrib else [])
 
     def visit_parse(self, node):
         assert node.tag == 'parse'
@@ -131,6 +177,7 @@ class Visitor:
                 assert child.text is None
                 if current_callsite:
                     self.add_terminator(current_callsite, child.tag, child.attrib['reason'])
+                    self.handle_inline_fail(current_callsite, child.attrib['reason'])
                     current_callsite = None
                     current_call = None
             elif child.tag == 'inline_level_discount':
@@ -145,7 +192,7 @@ class Visitor:
                     # clear variables every add_terminator
                     # only var should be call
                     self.add_terminator(current_callsite, child.tag, child.attrib['reason'])
-                    self.get_inline_call(current_callsite, current_call)
+                    self.create_possible_inline_call(current_callsite, current_call)
                     current_callsite = None
                     current_call = None
             elif child.tag == 'intrinsic':
@@ -178,6 +225,7 @@ class Visitor:
             elif child.tag == 'type':
                 assert len(child) == 0
                 assert child.text is None
+                self.visit_type(child)
             elif child.tag == 'uncommon_trap':
                 assert len(child) == 0
                 assert child.text is None
@@ -238,7 +286,7 @@ class Visitor:
             elif child.tag == 'replace_string_concat':
                 pass
             elif child.tag == 'type':
-                pass
+                self.visit_type(child)
             elif child.tag == 'uncommon_trap':
                 # Warning: this is also in parse
                 pass
@@ -272,6 +320,13 @@ class Visitor:
                 assert False, 'unhandled tag %r' % child.tag
 
         self.reset_log_lookups()
+
+    def visit_type(self, node):
+        assert node.tag == 'type'
+        assert len(node) == 0
+        if node.text:
+            assert len(node.text.strip()) == 0
+        self.add_type_entry(int(node.attrib['id']), node.attrib['name'])
 
     def visit_start_compile_thread(self, node):
         assert node.tag == 'start_compile_thread'
@@ -329,3 +384,4 @@ class Command(BaseCommand):
         log = Log.objects.create(project=project, name=options['name'])
         visitor = Visitor(log)
         visitor.visit_hotspot_log(root)
+        visitor.create_inline_calls()
