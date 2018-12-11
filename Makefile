@@ -1,7 +1,7 @@
-benchmarks = $(wildcard benchmarks/*)
+benchmarks = $(sort $(wildcard benchmarks/*))
 extractions = $(patsubst benchmarks/%, output/extracted/%/extract.json, $(benchmarks))
 testoutputs = $(patsubst benchmarks/%, output/tests/%.txt, $(benchmarks))
-jreduce-outs = $(patsubst benchmarks/%, output/jreduce/%, $(benchmarks))
+jreduce-outs = $(patsubst benchmarks/%, output/jreduce/%/output, $(benchmarks))
 debloat-outs = $(patsubst benchmarks/%, output/debloat/%/TIMESTAMP, $(benchmarks))
 
 .PHONY: all
@@ -11,7 +11,7 @@ $(extractions): output/extracted/%/extract.json: benchmarks/%
 	-(cd $<; git apply ../../data/$*.patch)
 	./scripts/benchmark.py data/excluded-tests.txt $< output
 
-$(testoutputs): output/tests/%.txt: output/extracted/% ./scripts/runtest.sh
+$(testoutputs): output/tests/%.txt: output/extracted/%/extract.json ./scripts/runtest.sh
 	mkdir -p output/tests
 	./scripts/runtest.sh $</jars/test.jar $</test.classes.txt $</jars/app+lib.jar 2>&1 | tee $@
 
@@ -29,7 +29,7 @@ output/reductions.csv: $(jreduce-outs) $(extractions)
 jreduce: $(jreduce-outs)
 
 
-$(jreduce-outs): output/jreduce/%/output: output/extracted/% ./scripts/runjreduce.sh ./scripts/runtest.sh
+$(jreduce-outs): output/jreduce/%/output: output/extracted/%/extract.json ./scripts/runjreduce.sh ./scripts/runtest.sh
 	mkdir -p output/jreduce
 	./scripts/runjreduce.sh $</jars/test.jar $</test.classes.txt $</jars/app+lib.jar output/jreduce/$* -o $@ -v
 
@@ -41,7 +41,7 @@ debloat: output/debloat
 
 output/debloat: $(debloat-outs)
 
-$(debloat-outs): output/debloat/%/TIMESTAMP: benchmarks/% output/extracted/% ./scripts/rundebloat.sh
+$(debloat-outs): output/debloat/%/TIMESTAMP: benchmarks/% output/extracted/%/extract.json ./scripts/rundebloat.sh
 	mkdir -p output/debloat/
 	cp -r benchmarks/$* output/debloat/$*
 	./scripts/rundebloat.sh output/debloat/$*
