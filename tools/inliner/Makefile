@@ -1,7 +1,12 @@
 SHELL := /bin/bash
 
 .PHONY: all
-all: build build/inliner.jar
+all: build build/inliner.jar soot
+
+.PHONY: soot
+soot:
+	cd external/soot; mvn clean compile assembly:single
+	cp external/soot/target/sootclasses-trunk-jar-with-dependencies.jar build/soot.jar
 
 build:
 	mkdir build
