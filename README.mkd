@@ -26,6 +26,19 @@ vagrant ssh
 cd /vagrant
 git submodule init
 git submodule update
+```
+
+Some of the methods requires `javaq` to be installed. You can install
+that by going to the jvmhs folder and run stack install:
+
+```
+cd tools/jvmhs
+stack install
+```
+
+Finally running all targets can be done by running:
+
+```
 make -j 4
 ```
 
@@ -46,22 +59,26 @@ git submodule add <git-repo> <name>
 
 ## Benchmarks
 
-| id | url                                                        | rev                                      |
-| -- | ---                                                        | ---                                      |
-| 01 | https://github.com/square/javapoet                         | 791cb9631ab76fc07bf8825f23464ecd616acccc |
-| 02 | https://github.com/JakeWharton/DiskLruCache                | 3e016356cfc7e5f9644a7a732fe0223e9742e024 |
-| 03 | https://github.com/VerbalExpressions/JavaVerbalExpressions | 4ee34e6c96ea2cf8335e3b425afa44c535229347 |
-| 04 | https://github.com/Netflix/curator                         | 7fa8c085f45977be1db980731f4faf580925db08 |
-| 05 | https://github.com/junit-team/junit4                       | 67d424b26f061c57a0a625a8be2b0c68f7a413b4 |
-| 06 | https://github.com/dieforfree/qart4j                       | 70b9abb2d458848b9212da8229c584ebc0e3047b |
-| 07 | https://github.com/JakeWharton/RxRelay                     | 82db28c4126f4cec6d762804c38adb1b95475b3c |
+| id | url                                                        | rev                                        |
+| -- | ---                                                        | ---                                        |
+| 01 | https://github.com/square/javapoet                         | `791cb9631ab76fc07bf8825f23464ecd616acccc` |
+| 02 | https://github.com/JakeWharton/DiskLruCache                | `3e016356cfc7e5f9644a7a732fe0223e9742e024` |
+| 03 | https://github.com/VerbalExpressions/JavaVerbalExpressions | `4ee34e6c96ea2cf8335e3b425afa44c535229347` |
+| 04 | https://github.com/Netflix/curator                         | `7fa8c085f45977be1db980731f4faf580925db08` |
+| 05 | https://github.com/junit-team/junit4                       | `67d424b26f061c57a0a625a8be2b0c68f7a413b4` |
+| 06 | https://github.com/dieforfree/qart4j                       | `70b9abb2d458848b9212da8229c584ebc0e3047b` |
+| 07 | https://github.com/JakeWharton/RxRelay                     | `82db28c4126f4cec6d762804c38adb1b95475b3c` |
+
+After extraction we get these metrics: 
+
+| id | size (kB) | methods | classes | fields | instructions | tests |
+| -- | ---       | ---     | ---     | ---    | ---          |   --- |
+| 01 | 16,287    | 37,250  | 4,736   | 16,470 | 992,335      |   338 |
+| 02 | 39        | 98      | 10      | 55     | 2,312        |    61 |
+| 03 | 14        | 70      | 4       | 6      | 841          |    83 |
+| 04 | 10,153    | 26,339  | 3,532   | 8,915  | 437,854      |    37 |
+| 05 | 796       | 2,139   | 391     | 494    | 24,405       | 1,076 |
+| 06 | 3,560     | 7,362   | 1,116   | 4,710  | 282,669      |     1 |
+| 07 | 5,101     | 9,793   | 1,658   | 5,332  | 154,397      |    55 |
 
 
-### Status 
-
-01 and 05 has missing files. I will find a way to extract them correctly.
-
-06 has missing JUnitCore...
-
-
-## Todo's

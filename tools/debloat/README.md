@@ -5,6 +5,9 @@ methods and classes based on Call Graph analysis and, if specified,
 [TamiFlex](https://doi.org/10.1145/1985793.1985827) reflection call 
 analysis.
 
+**Warning :** This tool is still under development. We present this tool
+with no guarantees of correctness or stability.
+
 ## Technical Details
 
 The Debloat tool works by generating a call graph of the input program.
@@ -12,7 +15,7 @@ It then proceeds to remove methods that are not utilized within it. The
 user is required to specify entry points to this call graph. We provide
  three pre-programmed options : all main methods, all public methods 
 (excluding tests), and/or all JUnit Tests. The user may also specify custom 
-entry point/points if required.
+entry point/points if desired.
 
 Using the 
 [Soot Bytecode optimization framework
@@ -24,7 +27,8 @@ replacing the method's body with a RuntimeException.
 Due to 
 [Java's Reflection functionality
 ](https://en.wikipedia.org/wiki/Reflection_(computer_programming)#Java)
-Spark is incapable of creating a complete call graph. To overcome this
+we are incapable of creating a complete call graph with standard call
+graph analysis libraries alone. To overcome this
 we use [TamiFlex](https://doi.org/10.1145/1985793.1985827). TamiFlex
 observes the execution of a Java program and notes the reflective
 method invocations (their locations within the Java application, and
@@ -32,16 +36,17 @@ what they invoke).
 
 Our Debloat tool runs TamiFlex with the target Java project's tests as
 input. We then extract all the method invocations achieved via
-reflection. We set these as entry points for the  call graph
+reflection. We set these as additional entry points for the call graph
 analysis. This thereby results in a safer debloating. 
 
 ## Usage
 
-To execute our debloat tool with the benchmarks provided, simply run
+To execute our debloat tool with the benchmarks, simply run
 `make debloat` in the VM provided. The debloated programs, can be found in
-`output/debloat`.
+`output/debloat`, along with a a summary of the size redution achieved
+in `output/debloat/size_info.dat`.
 
-If running the tool independently directory is required, please read the 
+If running the tool independently is required, please read the 
 follwing usage notes:
 
 ```
@@ -95,11 +100,10 @@ wipe unused methods
                                               analysed and methods touched
 ``` 
 
-Some current restrictions:
+Some restrictions:
 
 * There must be an entry point specified.
-* At present, the `--tamiflex` option only works when targeting a
-   Maven Project.
+* At present, the `--tamiflex` option only works when targeting Maven Projects.
 * If the `--tamiflex` option is specified, the `--test-entry` option is
    automatically set (tamiflex uses tests as entry points to analyze
    reflective calls).
@@ -126,7 +130,7 @@ by the tool.
 points to generate the call graph.
 
 `--prune-app` specifies that that the application code should be
-debloated as well as the dependency code.
+debloated as well as the library code.
 
 `--remove-methods` specifies that methods should be removed in their
 entirety. By default, only their bodies are removed.
@@ -157,4 +161,4 @@ with the message "ERROR, METHOD REMOVE".
 removed, and contain no accessible static methods, are to be removed
 completely.
 
-`--use-spark` specifies that Spark Call Graph analysis is to be used.
+`--use-spark` specifies that Spark Call Graph analysis should be used.
