@@ -249,7 +249,44 @@ completely.</p>
     <hr class="sectionTitleRule">
     <hr class="sectionTitleRule2">
     <div class="section2Content">
-	To include here
+    <p>The <code>inliner.jar</code> takes a Java program and statically inlines methods that were
+    found to be inlined at runtime.</p>
+    <h2 id="technicaldetails">Technical Details</h2>
+    <p>We provide optimal inline parameters to the JVM to produce JIT compilation
+    information. In particular, this information provides inlining decisions that were made at runtime.
+    These inlining decisions reveal which methods were inlined and the JVM's reasoning for doing so.</p>
+
+    <p>We export these JVM inlining decisions to our customized
+    database. Our database allows us to filter out aggressive inlinings which would cause the Java program to
+    lose generality if applied statically. Our technique finds inline targets that might not
+    otherwise be detectable by purely static approaches.</p>
+
+    <p>Using this information, the Inliner tool uses the Soot Bytecode optimization framework to statically
+    inline method calls without affecting the semantics of the program. Within this Soot transformation,
+    we check various attributes of the inline targets such as: argument counts, argument types, and
+    bytecode offsets. With these checks, we ensure that only the appropriate targets are inlined.
+    </p>
+    <h2 id="usage">Usage</h2>
+    <p>To run the Inliner tool, simply run <code>make inliner</code>.</p>
+
+    <p>The output programs will be found in output/inliner as jars. If running
+    the tool indepently is required, please read the following usage notes:</p>
+
+    <pre><code>usage: run-inliner.py [-h] [-o OUTPUT_JAR]
+                      test_jar test_classes app_lib_jar output_dir
+
+Run inliner tool.
+
+positional arguments:
+  test_jar       JAR containing the test suite
+  test_classes   Text file of test classes
+  app_lib_jar    JAR containing application and libraries
+  output_dir     Output directory
+
+optional arguments:
+  -h, --help     show this help message and exit
+  -o OUTPUT_JAR  Modified JAR file path
+    </code></pre>
     </div>
 </section>
   
