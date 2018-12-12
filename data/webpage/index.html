@@ -27,10 +27,15 @@
     <hr>
     <p>
 
-    Please download here... [TODO]
+Welcome to our ONR Debloat project webpage.
+<br>
+<a href="./people.html">Click here to view the people involved in the ONR Debloat project.</a>
+<br>
+<a href="" download>Download the ONR tools here.</a>
+<br>
 
-    ...Some other collective blurb here if needed...
-</div>
+    </p>
+  </div>
 </header>
 <!-- content -->
 <div class="mainContent"> 
@@ -240,7 +245,90 @@ completely.</p>
     <hr class="sectionTitleRule">
     <hr class="sectionTitleRule2">
     <div class="section2Content">
-	To include here...
+	<h1 id="jreduce">JReduce</h1>
+
+<p>JReduce is a tool that uses a variant of delta-debugging to reduce the
+classes of a project given a property. The tool was originally build to
+reduce the bytecode that caused bugs in decompilers. We categorized a
+bug as any set of classes with no external dependencies, was not able to
+decompile and then compile again. The goal was therefore to find the
+smallest set of classes, that still had all their dependencies. This
+work has been submitted to ICSE'19.</p>
+
+<p>In this case, we use the test suite as the property that we want to
+preserve and then reduce to the smallest set of classes we need.</p>
+
+<h2 id="technicaldetails">Technical Details</h2>
+
+<p>JReduce works by calculating a dependency graph from classes to other
+classes. We create the graph by creating an edge from a class to another
+if the second class is mentioned in the first.</p>
+
+<p>We then calculate all the strongly connected components (SCC) in the
+project. If we include one of the classes in an SCC, all classes in the
+SCC needs to be included. This means that we can reduce the program, by
+reducing this list of SCCs.</p>
+
+<p>It is rare that a program runs outside the SCC that contains the main
+class but can happens when the program uses reflection. We have
+therefore developed a new reduction technique called <em>Binary Reduction</em>,
+which can quickly search the list for a few SCC needed to satisfy the
+predicate.</p>
+
+<p>Our tool is also able to set a core. The core is code that should not be
+removed. SCC that contains a class from the core will not be removed. In
+our case, we set the test-cases as a core.</p>
+
+<h2 id="usage">Usage</h2>
+
+<p>To run JReduce on the benchmarks of this project, first install the
+tool by running <code>stack install</code> in the <code>tools/jvmhs</code> folder.</p>
+
+<p>Then run <code>make jreduce</code> and the output can be found in the
+<code>output/jreduce</code> folder.</p>
+
+<p>You can also run the tool on your own benchmarks. Either use
+the <code>script/runjreduce.sh</code> script or you can run JReduce directly:</p>
+
+<pre><code>jreduce -v -o output --cp test.jar -t app.jar -c @classes-in-core.txt \
+  &lt;runpredicate&gt; &lt;args..&gt;
+</code></pre>
+
+<p>Where <code>runpredicate.sh</code> is a script that takes a reduced <code>app.jar</code> and
+has exit code 0 if the predicate succeeded. In the <code>runjreduce.sh</code>
+script we use <code>runtest.sh</code> with the <code>test.jar</code> and <code>test.classes.txt</code>.</p>
+
+<p>In the case you want to be adventures; consult the help notes:</p>
+
+<pre><code>Usage: jreduce [-v] [-q] [-D|--log-depth ARG] [-c|--core CORE] [--cp CLASSPATH]
+               [--stdlib] [--jre JRE] (-t|--target FILE) (-o|--output FILE)
+               [-R|--reducer ARG] [-W|--work-folder ARG] [-K|--keep-folders]
+               [-E|--exit-code CODE] [--stdout] [--stderr] [-T|--timelimit SECS]
+               CMD [ARG..]
+  A command line tool for reducing java programs.
+
+Available options:
+  -v                       make it more verbose.
+  -q                       make it more quiet.
+  -D,--log-depth ARG       set the log depth. (default: -1)
+  -c,--core CORE           the core classes to not reduce.
+  --cp CLASSPATH           the library classpath, of things not reduced.
+  --stdlib                 load the standard library.
+  --jre JRE                the location of the stdlib.
+  -t,--target FILE         the path to the jar or folder to reduce.
+  -o,--output FILE         the path output folder.
+  -R,--reducer ARG         the reducing algorithm to use. (default: Binary)
+  -W,--work-folder ARG     the work folder.
+  -K,--keep-folders        keep the work folders after use?
+  -E,--exit-code CODE      preserve exit-code (default: 0)
+  --stdout                 preserve stdout.
+  --stderr                 preserve stderr.
+  -T,--timelimit SECS      the maximum number of seconds to run the process,
+                           negative means no timelimit. (default: -1.0)
+  CMD                      the command to run
+  ARG..                    arguments to the command.
+  -h,--help                Show this help text
+</code></pre>
 	</div>
 </section>
 
@@ -259,7 +347,6 @@ completely.</p>
     <hr class="sectionTitleRule">
     <hr class="sectionTitleRule2">
     <div class="section1Content">
-	    <p><span>Email : <b>[EMAIL Address here]</b>  </span></p> 
 	    <p><span>Address :</span> <a href="https://www.openstreetmap.org/?mlat=34.069364&mlon=-118.444489&zoom=20">Engineering VI, 404 Westwood Plaza, Los Angeles, CA 90095</a></p>
     </div>
   </section>
