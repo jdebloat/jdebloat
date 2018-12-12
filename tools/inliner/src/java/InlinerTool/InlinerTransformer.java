@@ -180,6 +180,49 @@ public class InlinerTransformer extends SceneTransformer {
 	private void handleInline(SootMethod sootCaller,
 	                          HashMap<Integer, String> bytecodeOffsetCalleeMap) {
 		Body body = sootCaller.retrieveActiveBody();
+
+		// The bytecode offsets could be wrong (there are bugs in ASM)
+		// This block of code checks that the offsets actually line up,
+		// if not we skip this method
+		HashMap<Integer, SootMethod> bytecodeOffsetFoundMap = new HashMap<>();
+		for (Unit u : body.getUnits()) {
+			Stmt stmt = (Stmt) u;
+			if (!stmt.containsInvokeExpr()) {
+				continue;
+			}
+			InvokeExpr invokeExpr = stmt.getInvokeExpr();
+			BytecodeOffsetTag bytecodeOffsetTag =
+				(BytecodeOffsetTag)
+				stmt.getTag("BytecodeOffsetTag");
+			if (bytecodeOffsetTag == null) {
+				continue;
+			}
+			int bytecodeOffset = bytecodeOffsetTag.getBytecodeOffset();
+			Integer bytecodeOffsetKey = Integer.valueOf(bytecodeOffset);
+			bytecodeOffsetFoundMap.put(bytecodeOffsetKey, invokeExpr.getMethod());
+		}
+		String callerSignature = getHotSpotSignature(sootCaller);
+		boolean match = true;
+		for (Integer bytecodeOffsetKey : bytecodeOffsetCalleeMap.keySet()) {
+			if (!bytecodeOffsetFoundMap.containsKey(bytecodeOffsetKey)) {
+				match = false;
+				break;
+			}
+			SootMethod foundSootCallee = bytecodeOffsetFoundMap.get(bytecodeOffsetKey);
+			String calleeHotSpotSignature = bytecodeOffsetCalleeMap.get(bytecodeOffsetKey);
+			if (!methodMap.containsKey(calleeHotSpotSignature)) {
+				continue;
+			}
+			SootMethod sootCallee = methodMap.get(calleeHotSpotSignature);
+			if (!foundSootCallee.getName().equals(sootCallee.getName())) {
+				match = false;
+				break;
+			}
+		}
+		if (!match) {
+			return;
+		}
+
 		Iterator unitsIter = body.getUnits().snapshotIterator();
 		while (unitsIter.hasNext()) {
 			Stmt stmt = (Stmt) unitsIter.next();
