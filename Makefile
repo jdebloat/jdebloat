@@ -18,7 +18,7 @@ $(testoutputs): output/tests/%.txt: output/extracted/%/extract.json ./scripts/ru
 	./scripts/runtest.sh \
            output/extracted/$*/jars/test.jar \
            output/extracted/$*/test.classes.txt \
- 	   output/extracted/$*/jars/app+lib.jar 2>&1 | tee $@
+	   output/extracted/$*/jars/app+lib.jar 2>&1 | tee $@
 ## STATS
 
 output/benchmarks.csv: $(extractions)
@@ -41,7 +41,7 @@ $(jreduce-outs): output/jreduce/%/output: output/extracted/%/extract.json ./scri
 	./scripts/runjreduce.sh \
            output/extracted/$*/jars/test.jar \
            output/extracted/$*/test.classes.txt \
- 	   output/extracted/$*/jars/app+lib.jar \
+	   output/extracted/$*/jars/app+lib.jar \
 	   output/jreduce/$* -o $@ -v \
 
 $(jreduce-inliner-outs): output/inliner+jreduce/%/output: output/inliner/%/app+lib.jar output/extracted/%/extract.json ./scripts/runjreduce.sh ./scripts/runtest.sh
@@ -49,7 +49,7 @@ $(jreduce-inliner-outs): output/inliner+jreduce/%/output: output/inliner/%/app+l
 	./scripts/runjreduce.sh \
            output/extracted/$*/jars/test.jar \
            output/extracted/$*/test.classes.txt \
- 	   $< \
+	   $< \
 	   output/inliner+jreduce/$* -o $@ -v \
 
 ## Debloat
@@ -72,12 +72,26 @@ $(debloat-outs): output/debloat/%/TIMESTAMP: benchmarks/% output/extracted/%/ext
 ## Inliner
 
 .PHONY: inliner
-inliner: $(inliner-outs)
+inliner: inliner-build output/inliner inliner-setup $(inliner-outs)
+
+.PHONY: inliner-build
+inliner-build:
+	cd tools/inliner; make
+
+.PHONY: inliner-setup
+inliner-setup:
+	cp data/inliner/settings.py tools/inliner/src/python/settings.py
+	cd tools/inliner; DJANGO_SETTINGS_MODULE=settings make setup
+
+output/inliner:
+	mkdir -p $@
 
 $(inliner-outs): output/inliner/%/app+lib.jar: benchmarks/% output/extracted/%/extract.json ./scripts/run-inliner.py
-	mkdir -p output/inliner/
-	./scripts/run-inliner.py $*
-
+	./scripts/run-inliner.py \
+           output/extracted/$*/jars/test.jar \
+           output/extracted/$*/test.classes.txt \
+	   output/extracted/$*/jars/app+lib.jar \
+	   output/inliner/$* -o $@
 
 .PHONY: clean
 clean:

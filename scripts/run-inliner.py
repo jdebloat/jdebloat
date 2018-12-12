@@ -18,24 +18,19 @@ def update_modified_files_in_place(original_dir, modified_dir):
                 shutil.copyfile(modified_path, original_path)
 
 def main(args):
-
-    extracted_dir = os.path.join(BASE_DIR, 'output', 'extracted',
-                                 args.benchmark)
-    extracted_jar_path = os.path.join(extracted_dir, "app+lib")
-    test_jar = os.path.join(extracted_dir, 'jars', 'test.jar')
-    app_lib_jar = os.path.join(extracted_dir, 'jars', 'app+lib.jar')
+    test_jar = args.test_jar
+    app_lib_jar = args.app_lib_jar
+    test_classes = args.test_classes
 
     tool_dir = os.path.join(BASE_DIR, 'tools', 'inliner')
     build_dir = os.path.join(tool_dir, 'build')
     script_path = os.path.join(tool_dir, 'scripts', 'create-inline-targets.sh') 
 
-    output_dir = os.path.join(BASE_DIR, 'output', 'inliner', args.benchmark)
+    output_dir = args.output_dir
     inline_targets_path = os.path.join(output_dir, 'inline-targets.txt')
     output_files_path = os.path.join(output_dir, 'files')
     output_soot_path = os.path.join(output_dir, 'sootOutput')
-    output_jar = os.path.join(output_dir, 'app+lib.jar')
-    # new_jar_classfiles_path = os.path.join(output_soot_path, 'app+lib')
-    # new_app_lib_jar_path = os.path.join(BASE_DIR, output_dir, "app+lib.jar")
+    output_jar = args.output_jar
     
     classpath = '{}:{}'.format(test_jar, app_lib_jar)
 
@@ -51,7 +46,7 @@ def main(args):
     assert test_runner is not None
 
     test_args = []
-    with open(os.path.join(extracted_dir, 'test.classes.txt'), 'r') as f:
+    with open(test_classes, 'r') as f:
         test_args.append(test_runner)
         for line in f:
             test_args.append(line.strip())
@@ -80,23 +75,26 @@ def main(args):
             if path.endswith('.log'):
                 print('\033[36mGenerating inline targets...\033[m')
                 subprocess.run([script_path, args.benchmark,
-                                os.path.join(output_dir, path), inline_targets_path])
+                                os.path.join(output_dir, path), inline_targets_path],
+                               env=dict(os.environ, DJANGO_SETTINGS_MODULE='settings'))
+
+    print('\033[36mExtracting original JAR files...\033[m')
+    subprocess.run(['unzip', '-q', '-o', app_lib_jar, '-d', output_files_path])
 
     print('\033[36mTransforming class files...\033[m')
     subprocess.run(['java', '-Xmx2g',
                     '-cp', "{}:{}".format(os.path.join(build_dir, 'soot.jar'),
                                           os.path.join(build_dir, 'inliner.jar')),
                     'InlinerTool.Main',
-                    '-process-dir', extracted_jar_path,
+                    '-process-dir', output_files_path,
                     '-d', output_soot_path,
                     inline_targets_path])
 
     if not os.path.exists(output_soot_path):
+        shutil.rmtree(output_files_path)
+        subprocess.run(['cp', app_lib_jar, output_jar])
         print('\033[31mNo Soot output, exiting...\033[m')
-        exit(1)
-
-    print('\033[36mCopying extracted JAR files...\033[m')
-    shutil.copytree(extracted_jar_path, output_files_path)
+        exit(0)
 
     print('\033[36mOverwriting modified files...\033[m')
     update_modified_files_in_place(output_files_path, output_soot_path)
@@ -118,6 +116,10 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run inliner tool.')
-    parser.add_argument('benchmark', help='benchmark to run, e.g. 01')
+    parser.add_argument('test_jar', help='JAR containing the test suite')
+    parser.add_argument('test_classes', help='Text file of test classes')
+    parser.add_argument('app_lib_jar', help='JAR containing application and libraries')
+    parser.add_argument('output_dir', help='Output directory')
+    parser.add_argument('-o', dest='output_jar', help='Modified JAR file path')
     args = parser.parse_args()
     main(args)
