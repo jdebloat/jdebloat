@@ -72,14 +72,14 @@ $(debloat-outs): output/debloat/%/TIMESTAMP: benchmarks/% output/extracted/%/ext
 ## Inliner
 
 .PHONY: inliner
-inliner: inliner-build output/inliner inliner-setup $(inliner-outs)
+inliner: inliner-build inliner-setup $(inliner-outs)
 
 .PHONY: inliner-build
 inliner-build:
 	cd tools/inliner; make
 
 .PHONY: inliner-setup
-inliner-setup:
+inliner-setup: output/inliner
 	cp data/inliner/settings.py tools/inliner/src/python/settings.py
 	cd tools/inliner; DJANGO_SETTINGS_MODULE=settings make setup
 

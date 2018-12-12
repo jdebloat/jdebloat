@@ -18,19 +18,19 @@ def update_modified_files_in_place(original_dir, modified_dir):
                 shutil.copyfile(modified_path, original_path)
 
 def main(args):
-    test_jar = args.test_jar
-    app_lib_jar = args.app_lib_jar
-    test_classes = args.test_classes
+    test_jar = os.path.join(BASE_DIR, args.test_jar)
+    app_lib_jar = os.path.join(BASE_DIR, args.app_lib_jar)
+    test_classes = os.path.join(BASE_DIR, args.test_classes)
 
     tool_dir = os.path.join(BASE_DIR, 'tools', 'inliner')
     build_dir = os.path.join(tool_dir, 'build')
     script_path = os.path.join(tool_dir, 'scripts', 'create-inline-targets.sh') 
 
-    output_dir = args.output_dir
+    output_dir = os.path.join(BASE_DIR, args.output_dir)
     inline_targets_path = os.path.join(output_dir, 'inline-targets.txt')
     output_files_path = os.path.join(output_dir, 'files')
     output_soot_path = os.path.join(output_dir, 'sootOutput')
-    output_jar = args.output_jar
+    output_jar = os.path.join(BASE_DIR, args.output_jar)
     
     classpath = '{}:{}'.format(test_jar, app_lib_jar)
 
@@ -74,7 +74,7 @@ def main(args):
         for path in os.listdir(output_dir):
             if path.endswith('.log'):
                 print('\033[36mGenerating inline targets...\033[m')
-                subprocess.run([script_path, args.benchmark,
+                subprocess.run([script_path, output_dir,
                                 os.path.join(output_dir, path), inline_targets_path],
                                env=dict(os.environ, DJANGO_SETTINGS_MODULE='settings'))
 
