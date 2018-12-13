@@ -77,13 +77,14 @@ usage: jdebloat.jar [-a <arg>] [-c <arg>] [-d] [-e <Exception Message>]
        [-o] [-p] [-r] [-s] [-t <arg>] [-u] [-v]
 An application to get the call-graph analysis of an application and to
 wipe unused methods
- -a,--app-classpath <arg>                     The application classpath
+ -a,--app-classpath <arg>                     Specify the application
+                                              classpath
  -c,--custom-entry <arg>                      Specify custom entry points
                                               in syntax of
                                               '<[classname]:[public?]
                                               [static?] [returnType]
                                               [methodName]([args...?])>'
- -d,--debug                                   Run the program in 'debug'
+ -d,--debug                                   Run JDebloat in 'debug'
                                               mode. Used for testing
  -e,--include-exception <Exception Message>   Specify if an exception
                                               message should be included
@@ -91,14 +92,15 @@ wipe unused methods
                                               argument: the message)
  -f,--tamiflex <TamiFlex Jar>                 Enable TamiFlex
  -h,--help                                    Help
- -i,--ignore-classes <arg>                    Specify class/classes that
-                                              should not be delete or
-                                              modified
- -k,--use-spark                               Use Spark (Uses CHA by
+ -i,--ignore-classes <arg>                    Specify classes that should
+                                              not be delete or modified
+ -k,--use-spark                               Use Spark call graph
+                                              analysis (Uses CHA by
                                               default)
- -l,--lib-classpath <arg>                     The library classpath
+ -l,--lib-classpath <arg>                     Specify the classpath for
+                                              libraries
  -m,--main-entry                              Include the main method as
-                                              the entry point
+                                              an entry point
  -n,--maven-project <arg>                     Instead of targeting using
                                               lib/app/test classpaths, a
                                               Maven project directory may
@@ -106,18 +108,17 @@ wipe unused methods
  -o,--remove-classes                          Remove unused classes
  -p,--prune-app                               Prune the application
                                               classes as well
- -r,--remove-methods                          Run remove methods (by
-                                              default, the bodies are
-                                              wiped and replaced by
-                                              RuntimeExceptions)
+ -r,--remove-methods                          Remove methods header and
+                                              body (by default, the bodies
+                                              are wiped)
  -s,--test-entry                              Include the test methods as
                                               entry points
- -t,--test-classpath <arg>                    The test classpath
+ -t,--test-classpath <arg>                    Specify the test classpath
  -u,--public-entry                            Include public methods as
                                               entry points
- -v,--verbose                                 Run the program in 'verbose'
-                                              mode. Outputs methods
-                                              analysed and methods touched
+ -v,--verbose                                 Run JDebloat in 'verbose'
+                                              mode. Outputs analysed
+                                              methods and touched methods
 ``` 
 
 ## Example usage case 1: Maven project, all entry points, with Tamiflex
