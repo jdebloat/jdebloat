@@ -42,6 +42,25 @@ cases as input. We then extract all method invocations that were made
 via reflection. We set these as additional entry points for the static
 call graph analysis. This thereby results in safer debloating.
 
+## Current Restrictions and Limitations
+
+1. JDbloat works only with Java 1.8.
+2. It requires a user to specify an entry point.
+3. Handling reflective calls using Tamiflex is enabled for Maven projects
+only. In other words, the `--tamiflex` option works only works when
+targeting a Maven Project.
+4. If the `--tamiflex` option is specified, the `--test-entry` option is
+automatically set, since Tamiflex uses tests as entry points to analyze
+reflective calls.
+5. `--use-spark` will use the  [Spark Call Graph
+analysis](https://doi.org/10.1007/3-540-36579-6_12). Spark is not as
+conservative as the default call graph analysis (
+[CHA](https://doi.org/10.1007/3-540-49538-X_5)) and may cause errors
+(we know of instance where Spark does not produce a complete call graph).
+6. We do not take into account methods accessed via Lambda Expressions.
+Therefore, it is possible we may unsafely remove methods that are invoked
+via lambda expressions.
+
 ## Usage
 
 To execute the JDebloat tool with the benchmarks, simply run
@@ -100,23 +119,6 @@ wipe unused methods
                                               mode. Outputs methods
                                               analysed and methods touched
 ``` 
-
-Some restrictions:
-
-* There must be an entry point specified.
-* At present, the `--tamiflex` option only works when targeting Maven Projects.
-* If the `--tamiflex` option is specified, the `--test-entry` option is
-   automatically set (tamiflex uses tests as entry points to analyze
-   reflective calls).
-* `jdebloat.jar` only works with Java 1.8.
-* `--use-spark` will use [Spark Call Graph
-analysis](https://doi.org/10.1007/3-540-36579-6_12). Spark is not as
-conservative an analysis as our default call graph analysis (CHA)  and 
-may cause errors (we know of instances where Spark does not produce a 
-complete call graph).
-* We do not take into account methods accessed via Java Lambda
-  Expressions. Therefore, it is possible we remove methods that are used
-by the tool.
 
 ## Example usage case 1: Maven project, all entry points, with Tamiflex
 
