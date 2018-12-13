@@ -163,3 +163,17 @@ removed, and contain no accessible static methods, are to be removed
 completely.
 
 `--use-spark` specifies that Spark Call Graph analysis should be used.
+
+## Results
+
+Running our tool on the benchmarks yields the following result.
+
+Benchmark | Size Before Debloat (Bytes) | Size After Debloat (Bytes) | Reduction
+--- | --- | ---
+JavaPoet | 234746 | 230375 | 1.86%
+DiskLruCache | 39107 | 39107 | 0.00%
+JavaVerbalExpressions | 14746 | 14746 | 0.00%
+Curator | 10427613 | 8071252 | 22.60%
+JUnit4 | 811614 | 792052 | 2.41%
+Qart4j | 3681396 | 1878091 | 48.98%
+RxRelay | 5108491 | 4574410 | 10.45%
