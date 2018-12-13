@@ -22,3 +22,7 @@
 [submodule "benchmarks/01"]
 	path = benchmarks/01
 	url = https://github.com/square/javapoet
+[submodule "tools/inliner/external/soot"]
+	path = tools/inliner/external/soot
+	url = https://github.com/eyolfson/soot.git
+	branch = asmbytecodeoffset
