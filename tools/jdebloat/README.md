@@ -1,26 +1,29 @@
-# Debloat tool
+# JDebloat
 
-The `debloat.jar` takes a java project and attempts to remove unused
-methods and classes based on Call Graph analysis and, if specified,
-[TamiFlex](https://doi.org/10.1145/1985793.1985827) reflection call 
-analysis.
+JDebloat takes a java project as input and removes uninvoked methods 
+and classes based on static and dynamic call graph analysis. In order 
+to identify call targets invoked using Java reflection, JDebloat uses 
+[TamiFlex reflection call
+analysis](https://doi.org/10.1145/1985793.1985827).
+
 
 **Warning :** This tool is still under development. We present this tool
 with no guarantees of correctness or stability.
 
 ## Technical Details
 
-The Debloat tool works by generating a call graph of the input program.
-It then proceeds to remove methods that are not utilized within it. The 
-user is required to specify entry points to this call graph. We provide
- three pre-programmed options : all main methods, all public methods 
-(excluding tests), and/or all JUnit Tests. The user may also specify custom 
-entry point/points if desired.
+JDebloat works by generating a static call graph of an input program. It
+proceeds to remove methods that are not used based on static call graph
+analysis. When using JDebloat, the user is required to specify entry
+points for constructing the call graph. JDebloat provides three
+pre-programmed options: (1) all main methods, (2) all public methods
+(excluding tests), and/or (3) all JUnit Tests. The user may also specify
+custom entry points if required.
 
 Using the 
 [Soot Bytecode optimization framework
-](https://doi.org/10.1145/1925805.1925818) 
-we wipe unused methods. The user has the option of either 
+](https://doi.org/10.1145/1925805.1925818), we remove unused Java 
+bytecode methods. The user has the option of either 
 completely removing the method, removing the method's body, or 
 replacing the method's body with a RuntimeException.
 
@@ -30,24 +33,24 @@ Due to
 we are incapable of creating a complete call graph with standard call
 graph analysis libraries alone. To overcome this
 we use [TamiFlex](https://doi.org/10.1145/1985793.1985827). TamiFlex
-observes the execution of a Java program and notes the reflective
-method invocations (their locations within the Java application, and
-what they invoke).
+observes the execution of a Java program under the given test suite
+and notes the reflective method invocations --- where these reflective
+calls are made within a Java application, and what the call targets are.
 
-Our Debloat tool runs TamiFlex with the target Java project's tests as
-input. We then extract all the method invocations achieved via
-reflection. We set these as additional entry points for the call graph
-analysis. This thereby results in a safer debloating. 
+JDebloat runs TamiFlex with the target Java project's existing test
+cases as input. We then extract all method invocations that were made
+via reflection. We set these as additional entry points for the static
+call graph analysis. This thereby results in safer debloating.
 
 ## Usage
 
 To execute our debloat tool with the benchmarks, simply run
 `make debloat` in the VM provided. The debloated programs, can be found in
-`output/debloat`, along with a a summary of the size redution achieved
+`output/debloat`, along with a a summary of the size reduction achieved
 in `output/debloat/size_info.dat`.
 
 If running the tool independently is required, please read the 
-follwing usage notes:
+following usage notes:
 
 ```
 usage: jdebloat.jar [-a <arg>] [-c <arg>] [-d] [-e <Exception Message>]
