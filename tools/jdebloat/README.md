@@ -44,10 +44,10 @@ call graph analysis. This thereby results in safer debloating.
 
 ## Usage
 
-To execute our debloat tool with the benchmarks, simply run
-`make debloat` in the VM provided. The debloated programs, can be found in
-`output/debloat`, along with a a summary of the size reduction achieved
-in `output/debloat/size_info.dat`.
+To execute the JDebloat tool with the benchmarks, simply run
+`make jdebloat` in the VM provided. The debloated programs, can be found in
+`output/jdebloat`, along with a a summary of the size reduction achieved
+in `output/jdebloat/<BENCHMARK>/size_info.dat`.
 
 If running the tool independently is required, please read the 
 following usage notes:
@@ -108,7 +108,7 @@ Some restrictions:
 * If the `--tamiflex` option is specified, the `--test-entry` option is
    automatically set (tamiflex uses tests as entry points to analyze
    reflective calls).
-* `debloat.jar` only works with Java 1.8.
+* `jdebloat.jar` only works with Java 1.8.
 * `--use-spark` will use [Spark Call Graph
 analysis](https://doi.org/10.1007/3-540-36579-6_12). Spark is not as
 conservative an analysis as our default call graph analysis (CHA)  and 
@@ -120,7 +120,7 @@ by the tool.
 
 ## Example usage case 1: Maven project, all entry points, with Tamiflex
 
-`java -jar debloat.jar --maven-project <PROJECT_DIR> --public-entry 
+`java -jar jdebloat.jar --maven-project <PROJECT_DIR> --public-entry 
 --main-entry --test-entry --prune-app --remove-methods --tamiflex
 <TAMFLEX_JAR>`
 
@@ -141,7 +141,7 @@ reflective calls. The argument is the location of the TamiFlex Jar.
 
 ## Example usage case 2: Non-Maven Project, main entry point, without Tamiflex
 
-`java -jar debloat.jar --app-classpath <APP_CLASSPATH> --lib-classpath
+`java -jar jdebloat.jar --app-classpath <APP_CLASSPATH> --lib-classpath
 <LIBRARY_CLASSPATH> --test-classpath <TEST_CLASSPATH>
 --include-exception "ERROR, METHOD REMOVED"`
 
@@ -155,7 +155,7 @@ with the message "ERROR, METHOD REMOVE".
 
 ## Example usage case 4:  Maven project, with Spark, remove unused class
 
-`java -jar debloat.jar --maven-project <PROJECT_DIR> --main-entry
+`java -jar jdebloat.jar --maven-project <PROJECT_DIR> --main-entry
 --remove-classes --use-spark`
 
 `--remove-classes` specifies that classes in which all methods are
