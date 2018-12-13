@@ -1,9 +1,9 @@
 #!/bin/bash
 
 PWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
-DEBLOAT_TOOL_DIR="${PWD}/../tools/debloat"
+DEBLOAT_TOOL_DIR="${PWD}/../tools/jdebloat"
 TAMIFLEX="${DEBLOAT_TOOL_DIR}/poa-2.0.3.jar"
-DEBLOAT="${DEBLOAT_TOOL_DIR}/debloat.jar"
+DEBLOAT="${DEBLOAT_TOOL_DIR}/jdebloat.jar"
 BENCHMARK="$1"
 SIZE_INFO_OUTPUT="$BENCHMARK/size_info.dat"
 
