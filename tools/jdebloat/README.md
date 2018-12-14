@@ -121,7 +121,7 @@ wipe unused methods
                                               methods and touched methods
 ``` 
 
-## Example usage case 1: Maven project, all entry points, with Tamiflex
+## Example usage case 1: Use a Maven project as an application, specify entry points as all main methods, all public methods, and all existing testcases, and consider Java reflective calls using Tamiflex
 
 `java -jar jdebloat.jar --maven-project <PROJECT_DIR> --public-entry 
 --main-entry --test-entry --prune-app --remove-methods --tamiflex
@@ -134,7 +134,7 @@ wipe unused methods
 points to generate the call graph.
 
 `--prune-app` specifies that that the application code should be
-debloated as well as the library code.
+debloated as well as the dependency code.
 
 `--remove-methods` specifies that methods should be removed in their
 entirety. By default, only their bodies are removed.
@@ -142,7 +142,7 @@ entirety. By default, only their bodies are removed.
 `--tamiflex <TAMIFLEX_JAR>` specifies that TamiFlex should be used to find 
 reflective calls. The argument is the location of the TamiFlex Jar.
 
-## Example usage case 2: Non-Maven Project, main entry point, without Tamiflex
+## Example usage case 2: Use a non-Maven project as an application, specify main methods as an entry point, and do not consider reflective calls using Tamiflex
 
 `java -jar jdebloat.jar --app-classpath <APP_CLASSPATH> --lib-classpath
 <LIBRARY_CLASSPATH> --test-classpath <TEST_CLASSPATH>
@@ -156,12 +156,12 @@ and test classpaths of the target.
 method's body is wiped it should be replaced with a Runtime exception
 with the message "ERROR, METHOD REMOVE".
 
-## Example usage case 4:  Maven project, with Spark, remove unused class
+## Example usage case 3: Use a Maven project as an application, perform call graph analysis with Spark, and remove unused classes
 
 `java -jar jdebloat.jar --maven-project <PROJECT_DIR> --main-entry
 --remove-classes --use-spark`
 
-`--remove-classes` specifies that classes in which all methods are
+`--remove-classes` specifies that classes whose methods are all
 removed, and contain no accessible static methods, are to be removed
 completely.
 
