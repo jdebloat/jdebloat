@@ -26,11 +26,10 @@ $(testoutputs): output/tests/%.txt: output/extracted/%/extract.json ./scripts/ru
 output/benchmarks.csv: $(extractions)
 	jq -rs '["id","url","rev"],(sort_by(.id) | .[] | [.id,.url,.rev])| @csv' $^ > $@
 
-output/reductions.csv: $(extractions) $(jreduce-outs) $(inliner-outs) $(jreduce-inliner-outs)
+output/reductions.csv: $(extractions) $(jreduce-outs) $(inliner-outs) 
 	./scripts/metric.py output/extracted \
 		inliner:output/inliner/%/app+lib.jar \
 		jreduce:output/jreduce/%/app+lib.jar \
-		inliner+jreduce:output/inliner+jreduce/%/app+lib.jar \
 		>$@
 
 output/jreduce.csv: $(extractions) $(jreduce-outs) ./scripts/metric.py
@@ -100,11 +99,11 @@ inliner-setup: output/inliner
 output/inliner:
 	mkdir -p $@
 
-$(inliner-outs): output/inliner/%/app+lib.jar: output/jreduce/%/app+lib.jar ./scripts/run-inliner.py
+$(inliner-outs): output/inliner/%/app+lib.jar: output/extracted/%/jars/app+lib.jar ./scripts/run-inliner.py
 	./scripts/run-inliner.py \
            output/extracted/$*/jars/test.jar \
            output/extracted/$*/test.classes.txt \
-	   output/jreduce/$*/app+lib.jar \
+	   output/extracted/$*/jars/app+lib.jar \
 	   output/inliner/$* -o $@
 
 
