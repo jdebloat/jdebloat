@@ -33,6 +33,11 @@ output/reductions.csv: $(extractions) $(jreduce-outs) $(inliner-outs) $(jreduce-
 		inliner+jreduce:output/inliner+jreduce/%/app+lib.jar \
 		>$@
 
+output/jreduce.csv: $(extractions) $(jreduce-outs) ./scripts/metric.py
+	./scripts/metric.py output/extracted \
+		jreduce:output/jreduce/%/app+lib.jar \
+		>$@
+
 ## JREDUCE
 
 .PHONY: jreduce jreduce-install

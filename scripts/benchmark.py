@@ -55,10 +55,18 @@ def extract_classpath(benchmark, scope):
                 "-DincludeScope={}".format(scope),
                 "--batch-mode")
 
-    classpath = []
-    for line in lines:
-        if line.startswith("[INFO]"): continue
-        classpath.extend(filter(lambda x:x, line.strip().split(":")))
+        classpath = []
+        for line in lines:
+            if line.startswith("[INFO]"): continue
+            for x in line.strip().split(":"):
+                if not x: continue
+                print(x, file=sys.stderr)
+                l = [str(Path.cwd()), x]
+                print(l, file=sys.stderr)
+                prefix = os.path.commonprefix(l)
+                print(prefix, file=sys.stderr)
+                if str(prefix) != str(Path.cwd()): continue
+                classpath.append(x)
     return classpath
 
 def extract_jar(jar, tofolder):

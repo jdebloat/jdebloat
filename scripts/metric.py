@@ -71,7 +71,7 @@ def main(args):
     
     categories = ["size", "methods", "classes", "fields", "instructions", "tests"]
     columns = list(itertools.product(categories, dct))
-    headers = ["id"] + categories + [cat + ":" + v  for (cat,v ) in columns ]
+    headers = ["id", "name", "libs"] + categories + [cat + ":" + v  for (cat,v ) in columns ]
 
     writer = csv.DictWriter(sys.stdout, fieldnames = headers)
     writer.writeheader()
@@ -82,8 +82,14 @@ def main(args):
         line["id"] = id
 
         basecp = p / "jars" / "app+lib.jar"
+
         base = get_metric(categories, basecp)
         base["tests"] = run_test(p, basecp)
+
+        with open(str(p / "extract.json")) as x: 
+            data = json.load(x)
+            base["name"] = data["url"].split("/")[-1]
+            base["libs"] = len(data["classpath"]["app+lib"])
 
         line.update(**base)
         print(id, "base", base, file=sys.stderr)
