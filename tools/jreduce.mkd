@@ -5,37 +5,38 @@ classes of a project given a property. The tool was originally build to
 reduce the bytecode that caused bugs in decompilers. We categorized a
 bug as any set of classes with no external dependencies, was not able to
 decompile and then compile again. The goal was therefore to find the
-smallest set of classes, that still had all their dependencies. This
-work has been submitted to ICSE'19.
+smallest set of classes, that still had all their dependencies. 
 
 In this case, we use the test suite as the property that we want to 
-preserve and then reduce to the smallest set of classes we need.
+preserve. Then we reduce the number of classes to the smallest possible 
+where the tests still succeed.
 
 ## Technical Details
 
 JReduce works by calculating a dependency graph from classes to other
 classes. We create the graph by creating an edge from a class to another
-if the second class is mentioned in the first.
+if the first class mentions the second class.
 
-We then calculate all the strongly connected components (SCC) in the
-project. If we include one of the classes in an SCC, all classes in the
-SCC needs to be included. This means that we can reduce the program, by
-reducing this list of SCCs. 
+Using the graph, we calculate all the strongly connected components
+(SCC). If we include one of the classes in an SCC, all
+classes in the SCC needs to be included. This means that we can reduce
+the program, by reducing this list of SCCs. 
 
-It is rare that a program runs outside the SCC that contains the main
-class but can happens when the program uses reflection. We have
+It is rare that a program runs classes outside the SCC that contains the
+main class, but can happens if the program uses reflection. We have
 therefore developed a new reduction technique called *Binary Reduction*,
-which can quickly search the list for a few SCC needed to satisfy the
+which can quickly search the list for the few SCC needed to satisfy the
 predicate.
 
-Our tool is also able to set a core. The core is code that should not be
-removed. SCC that contains a class from the core will not be removed. In
-our case, we set the test-cases as a core.
+In our tool, it is also possible to provide a set of core classes. The
+core classes should not be removed. If a SCC contains a class from
+the core, it will not be removed. In our case, we set the test-cases as
+a core.
 
 ## Usage
 
 To run JReduce on the benchmarks of this project, first install the
-tool by running `stack install` in the `tools/jvmhs` folder. 
+tool by running `make jreduce-install`. 
 
 Then run `make jreduce` and the output can be found in the
 `output/jreduce` folder.
