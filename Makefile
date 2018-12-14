@@ -1,13 +1,15 @@
 benchmarks = $(sort $(wildcard benchmarks/*))
 extractions = $(patsubst benchmarks/%, output/extracted/%/extract.json, $(benchmarks))
 testoutputs = $(patsubst benchmarks/%, output/tests/%.txt, $(benchmarks))
-jreduce-outs = $(patsubst benchmarks/%, output/jreduce/%/output, $(benchmarks))
+jreduce-outs = $(patsubst benchmarks/%, output/jreduce/%/app+lib.jar, $(benchmarks))
 jdebloat-outs = $(patsubst benchmarks/%, output/jdebloat/%/TIMESTAMP, $(benchmarks))
 inliner-outs = $(patsubst benchmarks/%, output/inliner/%/app+lib.jar, $(benchmarks))
-jreduce-inliner-outs = $(patsubst benchmarks/%, output/inliner+jreduce/%/output, $(benchmarks))
+jreduce-inliner-outs = $(patsubst benchmarks/%, output/inliner+jreduce/%/app+lib.jar, $(benchmarks))
 
-.PHONY: all
+.PHONY: all setup
 all: output/benchmarks.csv $(testoutputs)
+
+setup: jreduce-install inliner-build inliner-setup
 
 $(extractions): output/extracted/%/extract.json: benchmarks/%
 	-(cd $<; git apply ../../data/$*.patch)
@@ -27,30 +29,35 @@ output/benchmarks.csv: $(extractions)
 output/reductions.csv: $(extractions) $(jreduce-outs) $(inliner-outs) $(jreduce-inliner-outs)
 	./scripts/metric.py output/extracted \
 		inliner:output/inliner/%/app+lib.jar \
-		jreduce:output/jreduce/%/output \
-		inliner+jreduce:output/inliner+jreduce/%/output \
+		jreduce:output/jreduce/%/app+lib.jar \
+		inliner+jreduce:output/inliner+jreduce/%/app+lib.jar \
 		>$@
 
 ## JREDUCE
 
-.PHONY: jreduce
+.PHONY: jreduce jreduce-install
 jreduce: $(jreduce-outs)
 
-$(jreduce-outs): output/jreduce/%/output: output/extracted/%/extract.json ./scripts/runjreduce.sh ./scripts/runtest.sh
+jreduce-install:
+	cd tools/jvmhs; stack install 
+
+$(jreduce-outs): output/jreduce/%/app+lib.jar: output/extracted/%/extract.json ./scripts/runjreduce.sh ./scripts/runtest.sh
 	mkdir -p output/jreduce
 	./scripts/runjreduce.sh \
            output/extracted/$*/jars/test.jar \
            output/extracted/$*/test.classes.txt \
 	   output/extracted/$*/jars/app+lib.jar \
-	   output/jreduce/$* -o $@ -v \
+	   output/jreduce/$* -o output/jreduce/$*/output -v
+	(cd output/jreduce/$*/output; jar cf ../app+lib.jar *)
 
-$(jreduce-inliner-outs): output/inliner+jreduce/%/output: output/inliner/%/app+lib.jar output/extracted/%/extract.json ./scripts/runjreduce.sh ./scripts/runtest.sh
+$(jreduce-inliner-outs): output/inliner+jreduce/%/app+lib.jar: output/inliner/%/app+lib.jar output/extracted/%/extract.json ./scripts/runjreduce.sh ./scripts/runtest.sh
 	mkdir -p output/inliner+jreduce
 	./scripts/runjreduce.sh \
            output/extracted/$*/jars/test.jar \
            output/extracted/$*/test.classes.txt \
 	   $< \
-	   output/inliner+jreduce/$* -o $@ -v \
+	   output/inliner+jreduce/$* -o output/inliner+jreduce/$*/output -v 
+	(cd output/inliner+jreduce/$*/output; jar cf ../app+lib.jar *)
 
 ## Debloat
 
@@ -88,13 +95,17 @@ inliner-setup: output/inliner
 output/inliner:
 	mkdir -p $@
 
-$(inliner-outs): output/inliner/%/app+lib.jar: benchmarks/% output/extracted/%/extract.json ./scripts/run-inliner.py
+$(inliner-outs): output/inliner/%/app+lib.jar: output/jreduce/%/app+lib.jar ./scripts/run-inliner.py
 	./scripts/run-inliner.py \
            output/extracted/$*/jars/test.jar \
            output/extracted/$*/test.classes.txt \
-	   output/extracted/$*/jars/app+lib.jar \
+	   output/jreduce/$*/app+lib.jar \
 	   output/inliner/$* -o $@
 
-.PHONY: clean
+
+.PHONY: clean clean-all
 clean:
 	rm -rf output
+
+clean-all: clean
+	git submodule foreach git clean -fdx
