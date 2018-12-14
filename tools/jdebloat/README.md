@@ -34,8 +34,8 @@ we are incapable of creating a complete call graph with standard call
 graph analysis libraries alone. To overcome this
 we use [TamiFlex](https://doi.org/10.1145/1985793.1985827). TamiFlex
 observes the execution of a Java program under the given test suite
-and notes the reflective method invocations --- where these reflective
-calls are made within a Java application, and what the call targets are.
+and notes the reflective method invocations --- where these reflective calls are made within a
+Java application, and what are the call targets.
 
 JDebloat runs TamiFlex with the target Java project's existing test
 cases as input. We then extract all method invocations that were made
