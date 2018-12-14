@@ -1,11 +1,13 @@
 # ONR TPCP Synergistic Customization Project for Java Bytecode Debloating and Delayering 
 
-## Requirements
+You can find both tools and subject programs in the VM image. You are required to install the following software, described below.
+
+## Requirements for running the VM
 
 - VirtualBox 5.2.22
 - vagrant 2.2.2
 
-## Running on a Linux machine
+## Running on a Linux Machine
 
 The tools can be run in a Virtual Machine. To setup and enter the VM, please
 tun the following:
@@ -25,22 +27,47 @@ that by going to the jvmhs folder and run stack install:
 cd tools/jvmhs
 stack install
 ```
+
 ## Running the tools
 
-Finally running all targets can be done by running:
+To run the JReduce tool, run:
 
 ```
-make -j 4
+make jreduce-install
+make jreduce
 ```
 
-## Tools
-
-Adding new tools is as easy as:
+To run the JDebloat tool, run:
 
 ```
-cd tools/
-git submodule add <git-repo> <name>
+make jdebloat
 ```
+
+To run the JInline tool, run:
+
+```
+make setup
+make
+```
+
+## Directory Structure
+
+* benchmarks [Directory containing the subject programs]
+* data [Contains misc. data used by the tools]
+* Makefile [The makefile through which the tools are run]
+* output [The output directory]
+    * jdebloat [The JDebloat tool's output directory]
+    * jreduce [The JReduce tool's output directory]
+    * inliner [The JIline tool's output directory]
+* README.mkd [The setup README]
+* scripts [Contains cripts used by Makefile to run the tools]
+* tools [Contains the JDebloat, JReduce, and JInline tools]
+    * inline [Contains the JInline tool]
+        * README.md [The JInline tool README file]
+    * jdebloat [Contains the JDebloat tool]
+        * README.md [The JDebloat README file]
+    * jreduce.mkd [The JReduce README file]
+    * jvmhs [Contains the JReduce tool]
 
 ## Benchmarks
 
