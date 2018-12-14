@@ -183,7 +183,7 @@ JUnit4 | 811614 | 792052 | 2.41%
 Qart4j | 3681396 | 1878091 | 48.98%
 RxRelay | 5108491 | 4574410 | 10.45%
 
-### Descriptions of benchmark applications: 
+### Descriptions of benchmark applications 
 
 * [JavaPoet](https://github.com/square/javapoet) is a Java API for
   generating `.java` source files.
