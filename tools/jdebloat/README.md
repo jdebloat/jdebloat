@@ -180,3 +180,38 @@ Curator | 10427613 | 8071252 | 22.60%
 JUnit4 | 811614 | 792052 | 2.41%
 Qart4j | 3681396 | 1878091 | 48.98%
 RxRelay | 5108491 | 4574410 | 10.45%
+
+## Method wiping
+
+In our tool, the default behaviour is to wipe the method body. We show
+below an example of a Java method in the [Jimple
+](https://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.58.7708)
+format
+
+```
+.method public static staticShortMethodNoParams()Ljava/lang/Short;
+    .limit stack 2
+    .limit locals 1
+    getstatic java/lang/System/out Ljava/io/PrintStream;
+    astore_0
+    aload_0
+    ldc "staticShortMethodNoParams touched"
+    invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V
+    iconst_3
+    invokestatic java/lang/Short/valueOf(S)Ljava/lang/Short;
+    astore_0
+    aload_0
+    areturn
+.end method
+```
+
+After this method's body is wiped, the Jimple looks like:
+
+```
+.method public static staticShortMethodNoParams()Ljava/lang/Short;
+    .limit stack 1
+    .limit locals 0
+    aconst_null
+    areturn
+.end method
+```
