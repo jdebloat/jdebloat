@@ -1,15 +1,20 @@
 # JDebloat
 
-JDebloat takes a java project as input and removes uninvoked methods 
-and classes based on static and dynamic call graph analysis. In order 
-to identify call targets invoked using Java reflection, JDebloat uses 
-[TamiFlex reflection call
-analysis](https://doi.org/10.1145/1985793.1985827).
+JDebloat takes a java project as input and removed uninvoked methods and
+classes based on static and dynamic call graph analysis. While this
+functionality is similar to
+[JRed](https://doi.org/10.1109/COMPSAC.2016.146), it differs in three
+major ways. First, in order to identify call targets invoked using Java
+reflection, JDebloat uses [TamiFlex reflection call
+analysis](https://doi.org/10.1145/1985793.1985827), thus improving the
+safety of method removal. Secondly, we remove the body of each uninvoked
+method and enable the inserting of a custom warning message to indicate
+where debloating has been applied. Third, we allow various options for
+entry points such as all main methods, all public methods (excluding
+tests), and/or all JUnit tests.
 
-
-**Warning :** This tool is still under development. We present this tool
-with no guarantees of correctness or stability.
-
+**Warning :** The current version being released is a first prototype and still in active development. During the duration of the ONR-TPCP project, we will be making continuous improvements and releasing the upgraded version in a timely manner.
+ 
 ## Technical Details
 
 JDebloat works by generating a static call graph of an input program. It
@@ -21,17 +26,15 @@ pre-programmed options: (1) all main methods, (2) all public methods
 custom entry points if required.
 
 Using the 
-[Soot Bytecode optimization framework
-](https://doi.org/10.1145/1925805.1925818), we remove unused Java 
+[Soot Bytecode optimization framework](https://doi.org/10.1145/1925805.1925818), we remove unused Java 
 bytecode methods. The user has the option of either 
 completely removing the method, removing the method's body, or 
 replacing the method's body with a RuntimeException.
 
 Due to 
-[Java's Reflection functionality
-](https://en.wikipedia.org/wiki/Reflection_(computer_programming)#Java)
+[Java's Reflection functionality](https://en.wikipedia.org/wiki/Reflection_(computer_programming)#Java),
 we are incapable of creating a complete call graph with standard call
-graph analysis libraries alone. To overcome this
+graph analysis libraries alone. To overcome this,
 we use [TamiFlex](https://doi.org/10.1145/1985793.1985827). TamiFlex
 observes the execution of a Java program under the given test suite
 and notes the reflective method invocations --- where these reflective calls are made within a
@@ -44,7 +47,7 @@ call graph analysis. This thereby results in safer debloating.
 
 ## Current Restrictions and Limitations
 
-1. JDbloat works only with Java 1.8.
+1. JDebloat works only with Java 1.8.
 2. It requires a user to specify an entry point.
 3. Handling reflective calls using Tamiflex is enabled for Maven projects
 only. In other words, the `--tamiflex` option works only works when
@@ -54,8 +57,7 @@ automatically set, since Tamiflex uses tests as entry points to analyze
 reflective calls.
 5. `--use-spark` will use the  [Spark Call Graph
 analysis](https://doi.org/10.1007/3-540-36579-6_12). Spark is not as
-conservative as the default call graph analysis (
-[CHA](https://doi.org/10.1007/3-540-49538-X_5)) and may cause errors
+conservative as the default call graph analysis ([CHA](https://doi.org/10.1007/3-540-49538-X_5)) and may cause errors
 (we know of instance where Spark does not produce a complete call graph).
 6. We do not take into account methods accessed via Lambda Expressions.
 Therefore, it is possible we may unsafely remove methods that are invoked
@@ -65,7 +67,7 @@ via lambda expressions.
 
 To execute the JDebloat tool with the benchmarks, simply run
 `make jdebloat` in the VM provided. The debloated programs, can be found in
-`output/jdebloat`, along with a a summary of the size reduction achieved
+`output/jdebloat`, along with a summary of the size reduction achieved
 in `output/jdebloat/<BENCHMARK>/size_info.dat`.
 
 If running the tool independently is required, please read the 
@@ -181,9 +183,29 @@ JUnit4 | 811614 | 792052 | 2.41%
 Qart4j | 3681396 | 1878091 | 48.98%
 RxRelay | 5108491 | 4574410 | 10.45%
 
+### Descriptions of benchmark applications: 
+
+* [JavaPoet](https://github.com/square/javapoet) is a Java API for
+  generating `.java` source files.
+* [DiskLruCache](https://github.com/JakeWharton/DiskLruCache) is a
+  library that provides a cache bounded by an amount of space on a
+file-system.
+* [JavaVerbalExpression](https://github.com/VerbalExpressions/JavaVerbalExpressions)
+  is a Java library that helps in the construction of difficult regular
+expressions.
+* [Curator](https://github.com/Netflix/curator) is a set of Java
+  libraries to improve Apache ZooKeeper.
+* [JUnit4](https://github.com/junit-team/junit4) is a framework to write
+  repeatable tests for Java.
+* [Qart4j](https://github.com/dieforfree/qart4j/) is a QR code
+  generator.
+* [RxRelay](https://github.com/JakeWharton/RxRelay) is a Relay library
+  for RxJava.
+
 ## Method wiping
 
-In our tool, the default behaviour is to wipe the method body. We show
+In our tool, the default behavior is to wipe the method body of each
+uninvoked method. We show
 below an example of a Java method in the [Jimple
 ](https://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.58.7708)
 format
@@ -205,7 +227,9 @@ format
 .end method
 ```
 
-After this method's body is wiped, the Jimple looks like:
+After this method's body is wiped, it leaves the method header,
+while removing the body to the maximum possible extent permissible by
+the JVM. This is shown below:
 
 ```
 .method public static staticShortMethodNoParams()Ljava/lang/Short;
