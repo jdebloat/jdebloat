@@ -337,7 +337,42 @@ Available options:
     <hr class="sectionTitleRule">
     <hr class="sectionTitleRule2">
     <div class="section2Content">
-	To include here
+    <p>The <code>inliner.jar</code> takes a Java program and statically inlines methods
+    read from a database.</p>
+    <h2 id="technicaldetails">Technical Details</h2>
+    <p>We first provide aggressive inline parameters to the JVM. While these parameters
+    are not suitable for running programs, they provide better inlining information. We
+    extract the inlining decisions from the JVM into a database for later use.</p>
+
+    <p>We use to our customized database to inform our static inliner. First, we filter out
+    aggressive inlinings which would cause the Java program to miscompile. Using this information,
+    our Inliner tool uses the Soot Bytecode optimization framework to statically inline method calls
+    without affecting the semantics of the program.</p>
+
+    <p>Our technique finds inline targets that might not otherwise be detectable by purely
+    static approaches. Our tool produces a new JAR with our modified class files containing inlined
+    methods. We successfully ran our modified JAR on the original tests cases without errors.</p>
+    <h2 id="usage">Usage</h2>
+    <p>To run the Inliner tool, simply run <code>make inliner</code>.</p>
+
+    <p>The output programs will be found in output/inliner as jars. If running
+    the tool independently is required, please read the following usage notes:</p>
+
+    <pre><code>usage: run-inliner.py [-h] [-o OUTPUT_JAR]
+                      test_jar test_classes app_lib_jar output_dir
+
+Run inliner tool.
+
+positional arguments:
+  test_jar       JAR containing the test suite
+  test_classes   Text file of test classes
+  app_lib_jar    JAR containing application and libraries
+  output_dir     Output directory
+
+optional arguments:
+  -h, --help     show this help message and exit
+  -o OUTPUT_JAR  Modified JAR file path
+    </code></pre>
     </div>
 </section>
   

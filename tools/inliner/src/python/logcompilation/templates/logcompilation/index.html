@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <p class="subtitle">{{ logs.count }} Logs</p>
+
+  <div class="content">
+
+    <p>maxInlineSize35: 7m 10s</p>
+    <p>codeCacheSize=100m: 7m 6s</p>
+    <p>maxInlineSize70: 6m 37s (failed with default stack size)</p>
+    <p>maxInlineSize77: 6m 33s (failed with default stack size)</p>
+    <p>maxInlineSize78: ? (again, stack overflow error) </p>
+    <p>maxInlineSize105: ? (again, stack overflow error) </p>
+    <p>maxInlineSize140: ?</p>
+
+    <table class="table">
+      <thead>
+	<tr>
+	  <th>Run</th>
+	  <th>MaxInlineSize=35</th>
+	  <th>MaxInlineSize=99</th>
+	  <th>MaxInlineSize=999</th>
+	</tr>
+      </thead>
+      <tbody>
+	<tr>
+	  <td>1</td>
+	  <td>350.95</td>
+	  <td>337.43</td>
+	  <td>357.60</td>
+	</tr>
+	<tr>
+	  <td>2</td>
+	  <td>324.95</td>
+	  <td>356.55</td>
+	  <td>357.32</td>
+	</tr>
+	<tr>
+	  <td>3</td>
+	  <td>342.50</td>
+	  <td>331.01</td>
+	  <td>347.17</td>
+	</tr>
+	<tr>
+	  <td>4</td>
+	  <td>329.49</td>
+	  <td>332.52</td>
+	  <td>359.37</td>
+	</tr>
+	<tr>
+	  <td>5</td>
+	  <td>346.65</td>
+	  <td>329.48</td>
+	  <td>359.20</td>
+	</tr>
+	<tr>
+	  <td>Avg.</td>
+	  <td>338.91</td>
+	  <td>337.40</td>
+	  <td>356.13</td>
+	</tr>
+      </tbody>
+    </table>
+
+    <ul>
+  {% for log in logs %}
+      <li><a href="{% url 'detail' log.id %}">{{ log.name }} ({{ log.date }})</a></li>
+  {% endfor %}
+    </ul>
+
+  </div>
+{% endblock %}
