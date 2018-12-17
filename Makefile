@@ -97,6 +97,7 @@ inliner-setup: output/inliner
 	cd tools/inliner; DJANGO_SETTINGS_MODULE=settings make setup
 
 .PHONY: inliner-clean
+inliner-clean:
 	rm -rf output/inliner
 
 output/inliner:
