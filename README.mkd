@@ -46,8 +46,7 @@ make jdebloat
 To run the JInline tool, run:
 
 ```
-make setup
-make
+make inliner
 ```
 
 ## Directory Structure

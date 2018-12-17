@@ -96,6 +96,9 @@ inliner-setup: output/inliner
 	cp data/inliner/settings.py tools/inliner/src/python/settings.py
 	cd tools/inliner; DJANGO_SETTINGS_MODULE=settings make setup
 
+.PHONY: inliner-clean
+	rm -rf output/inliner
+
 output/inliner:
 	mkdir -p $@
 
@@ -105,7 +108,6 @@ $(inliner-outs): output/inliner/%/app+lib.jar: output/extracted/%/jars/app+lib.j
            output/extracted/$*/test.classes.txt \
 	   output/extracted/$*/jars/app+lib.jar \
 	   output/inliner/$* -o $@
-
 
 .PHONY: clean clean-all
 clean:
