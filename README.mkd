@@ -20,12 +20,11 @@ git submodule init
 git submodule update
 ```
 
-Some of the methods requires `javaq` to be installed. You can install
-that by going to the jvmhs folder and run stack install:
+Some of the tools require setup. You can run the setup for all the projects with
+the following command:
 
 ```
-cd tools/jvmhs
-stack install
+make setup
 ```
 
 ## Running the tools
