@@ -1,0 +1,643 @@
+<!doctype html>
+<html>
+<head>
+
+<meta charset="UTF-8">
+<title>Debloat Project</title>
+<link href="aboutPageStyle.css" rel="stylesheet" type="text/css">
+
+<!--The following script tag downloads a font from the Adobe Edge Web Fonts server for use within the web page. We recommend that you do not modify it.-->
+<script>var __adobewebfontsappname__="dreamweaver"</script><script src="http://use.edgefonts.net/montserrat:n4:default;source-sans-pro:n2:default.js" type="text/javascript"></script>
+</head>
+
+<body>
+<!-- Header content -->
+<header>
+  <div class="profileLogo"> 
+    <!-- Profile logo. Add a img tag in place of <span>. -->
+    </div>
+  <div class="profilePhoto"> 
+	  <!-- Profile photo -->
+	  <img src="onr.png" alt="sample" width="100%">
+  </div>
+  <!-- Identity details -->
+  <div class="profileHeader">
+    <h1>ONR TPCP Project</h1>
+    <h3>University of California, Los Angeles</h3>
+    <hr>
+    <p>
+
+    Welcome to our ONR TPCP project webpage for downloading tool deliverables.
+    <br>
+    <br>
+    This page is an access controlled website for sharing tool deliverables with the CMU SEI team for validation. We will be updating the tools resulting from our research periodically, and will be happy to answer any questions that the CMU SEI team has. The contact person for JDebloat is Bobby R. Bruce (<a href="mailto:b.bruce@cs.ucla.edu">b.bruce@cs.ucla.edu</a>), JReduce is Christian Kalhauge (<a href="mailto:kalhauge@cs.ucla.edu">kalhauge@cs.ucla.edu</a>), and JInline for Jonathan Eyolfson (<a href="mailto:eyolfson@ucla.edu">eyolfson@ucla.edu</a>).
+
+<br>
+<br>
+<br>
+Download the VM image including our three tools (JDebloat, JInline, and JReduce) and correponding test subject programs <a href="./onr_debloat.tar.gz" download>here</a>.
+<br>
+
+
+    </p>
+  </div>
+</header>
+<!-- content -->
+<div class="mainContent"> 
+
+	<section class="section2">
+		<h2 class="sectionTitle">Setup</h2>
+		<hr class="sectionTitleRule">
+		<hr class="sectionTitleRule2">
+		<div class="section2Content">
+
+			
+			<p>You can find both tools and subject programs in the VM image. You are required to install the following software, described below.</p>
+
+<h2 id="requirementsforrunningthevm">Requirements for running the VM</h2>
+
+<ul>
+<li>VirtualBox 5.2.22</li>
+
+<li>vagrant 2.2.2</li>
+</ul>
+
+<h2 id="runningonalinuxmachine">Running on a Linux Machine</h2>
+
+<p>The tools can be run in a Virtual Machine. To setup and enter the VM, please
+tun the following:</p>
+
+<pre><code>vagrant up
+vagrant ssh
+cd /vagrant
+git submodule init
+git submodule update
+</code></pre>
+
+<p>Some of the methods requires <code>javaq</code> to be installed. You can install
+that by going to the jvmhs folder and run stack install:</p>
+
+<pre><code>cd tools/jvmhs
+stack install
+</code></pre>
+
+<h2 id="runningthetools">Running the tools</h2>
+
+<p>To run the JReduce tool, run:</p>
+
+<pre><code>make jreduce-install
+make jreduce
+</code></pre>
+
+<p>To run the JDebloat tool, run:</p>
+
+<pre><code>make jdebloat
+</code></pre>
+
+<p>To run the JInline tool, run:</p>
+
+<pre><code>make setup
+make
+</code></pre>
+
+<h2 id="directorystructure">Directory Structure</h2>
+
+<ul>
+<li>benchmarks [Directory containing the subject programs]</li>
+
+<li>data [Contains misc. data used by the tools]</li>
+
+<li>Makefile [The makefile through which the tools are run]</li>
+
+<li>output [The output directory]
+
+
+<ul>
+<li>jdebloat [The JDebloat tool's output directory]</li>
+
+<li>jreduce [The JReduce tool's output directory]</li>
+
+<li>inliner [The JIline tool's output directory]</li></ul>
+</li>
+
+<li>README.mkd [The setup README]</li>
+
+<li>scripts [Contains cripts used by Makefile to run the tools]</li>
+
+<li>tools [Contains the JDebloat, JReduce, and JInline tools]
+
+
+<ul>
+<li>inline [Contains the JInline tool]
+
+
+<ul>
+<li>README.md [The JInline tool README file]</li></ul>
+</li>
+
+<li>jdebloat [Contains the JDebloat tool]
+
+
+<ul>
+<li>README.md [The JDebloat README file]</li></ul>
+</li>
+
+<li>jreduce.mkd [The JReduce README file]</li>
+
+<li>jvmhs [Contains the JReduce tool]</li></ul>
+</li>
+</ul>	
+
+<h2 id="benchmarks">Benchmarks</h2>
+
+<table>
+	<tr>
+		<th>id</th><th>url</th><th>rev</th>
+	</tr>
+	<tr>
+		<th>01</th><th>https://github.com/square/javapoet</th><th>791cb9631ab76fc07bf8825f23464ecd616acccc</th>
+	</tr>
+	<tr>
+                <th>02</th><th>https://github.com/JakeWharton/DiskLruCache</th><th>3e016356cfc7e5f9644a7a732fe0223e9742e024</th>
+        </tr>
+
+	<tr>
+                <th>03</th><th>https://github.com/VerbalExpressions/JavaVerbalExpressions</th><th>4ee34e6c96ea2cf8335e3b425afa44c535229347</th>
+        </tr>
+
+	<tr>
+                <th>04</th><th>https://github.com/Netflix/curator</th><th>7fa8c085f45977be1db980731f4faf580925db08</th>
+        </tr>
+	<tr>
+                <th>05</th><th>https://github.com/junit-team/junit4</th><th>67d424b26f061c57a0a625a8be2b0c68f7a413b4</th>
+        </tr>
+
+
+	<tr>
+                <th>06</th><th>https://github.com/JakeWharton/RxRelay</th><th>82db28c4126f4cec6d762804c38adb1b95475b3c</th>
+        </tr>
+
+</table>
+
+
+<p>After extraction we get these metrics:</p>
+
+<table>
+	<tr>
+		<th>id</th><th>size (kB)</th><th>method</th><th>classes</th><th>fields</th><th>instructions</th><th>test</th>
+	</tr>
+
+	<tr>
+                <th>01</th><th align='right'>16,287</th><th align='right'>37,250</th><th align='right'>4,736</th><th align='right'>16,470</th><th align='right'>992,335</th><th align='right'>338</th>
+        </tr>
+	<tr>
+                <th>02</th><th align='right'>39</th><th align='right'>98</th><th align='right'>10</th><th align='right'>55</th><th align='right'>2,312</th><th align='right'>61</th>
+        </tr>
+	<tr>
+                <th>03</th><th align='right'>14</th><th align='right'>70</th><th align='right'>4</th><th align='right'>6</th><th align='right'>841</th><th align='right'>83</th>
+        </tr>
+	<tr>
+                <th>04</th><th align='right'>10,153</th><th align='right'>26,339</th><th align='right'>3,532</th><th align='right'>8,915</th><th align='right'>437,854</th><th align='right'>37</th>
+        </tr>
+	<tr>
+                <th>05</th><th align='right'>796</th><th align='right'>2,139</th><th align='right'>391</th><th align='right'>494</th><th align='right'>24,405</th><th align='right'>1,076</th>
+        </tr>
+	<tr>
+                <th>06</th><th align='right'>5,101</th><th align='right'>9,793</th><th align='right'>1,658</th><th align='right'>5,332</th><th align='right'>154,397</th><th align='right'>55</th>
+        </tr>
+
+</table>
+		
+		</div>
+	</section>
+
+  <section class="section2">
+    <h2 class="sectionTitle">JDebloat</h2>
+    <hr class="sectionTitleRule">
+    <hr class="sectionTitleRule2">
+    <div class="section2Content">
+
+
+<p>JDebloat takes a java project as input and removed uninvoked methods and
+classes based on static and dynamic call graph analysis. While this
+functionality is similar to
+<a href="https://doi.org/10.1109/COMPSAC.2016.146">JRed</a>, it differs in three
+major ways. First, in order to identify call targets invoked using Java
+reflection, JDebloat uses <a href="https://doi.org/10.1145/1985793.1985827">TamiFlex reflection call
+analysis</a>, thus improving the
+safety of method removal. Secondly, we remove the body of each uninvoked
+method and enable the inserting of a custom warning message to indicate
+where debloating has been applied. Third, we allow various options for
+entry points such as all main methods, all public methods (excluding
+tests), and/or all JUnit tests.</p>
+
+<p><strong>Warning :</strong> The current version being released is a first prototype and still in active development. During the duration of the ONR-TPCP project, we will be making continuous improvements and releasing the upgraded version in a timely manner.</p>
+
+<h2 id="technicaldetails">Technical Details</h2>
+
+<p>JDebloat works by generating a static call graph of an input program. It
+proceeds to remove methods that are not used based on static call graph
+analysis. When using JDebloat, the user is required to specify entry
+points for constructing the call graph. JDebloat provides three
+pre-programmed options: (1) all main methods, (2) all public methods
+(excluding tests), and/or (3) all JUnit Tests. The user may also specify
+custom entry points if required.</p>
+
+<p>Using the
+<a href="https://doi.org/10.1145/1925805.1925818">Soot Bytecode optimization framework</a>, we remove unused Java
+bytecode methods. The user has the option of either
+completely removing the method, removing the method's body, or
+replacing the method's body with a RuntimeException.</p>
+
+<p>Due to
+<a href="https://en.wikipedia.org/wiki/Reflection_(computer_programming)#Java">Java's Reflection functionality</a>,
+we are incapable of creating a complete call graph with standard call
+graph analysis libraries alone. To overcome this,
+we use <a href="https://doi.org/10.1145/1985793.1985827">TamiFlex</a>. TamiFlex
+observes the execution of a Java program under the given test suite
+and notes the reflective method invocations --- where these reflective calls are made within a
+Java application, and what are the call targets.</p>
+
+<p>JDebloat runs TamiFlex with the target Java project's existing test
+cases as input. We then extract all method invocations that were made
+via reflection. We set these as additional entry points for the static
+call graph analysis. This thereby results in safer debloating.</p>
+
+<h2 id="currentrestrictionsandlimitations">Current Restrictions and Limitations</h2>
+
+<ol>
+<li>JDebloat works only with Java 1.8.</li>
+
+<li>It requires a user to specify an entry point.</li>
+
+<li>Handling reflective calls using Tamiflex is enabled for Maven projects
+only. In other words, the <code>--tamiflex</code> option works only works when
+targeting a Maven Project.</li>
+
+<li>If the <code>--tamiflex</code> option is specified, the <code>--test-entry</code> option is
+automatically set, since Tamiflex uses tests as entry points to analyze
+reflective calls.</li>
+
+<li><code>--use-spark</code> will use the  <a href="https://doi.org/10.1007/3-540-36579-6_12">Spark Call Graph
+analysis</a>. Spark is not as
+conservative as the default call graph analysis (<a href="https://doi.org/10.1007/3-540-49538-X_5">CHA</a>) and may cause errors
+(we know of instance where Spark does not produce a complete call graph).</li>
+
+<li>We do not take into account methods accessed via Lambda Expressions.
+Therefore, it is possible we may unsafely remove methods that are invoked
+via lambda expressions.</li>
+</ol>
+
+<h2 id="usage">Usage</h2>
+
+<p>To execute the JDebloat tool with the benchmarks, simply run
+<code>make jdebloat</code> in the VM provided. The debloated programs, can be found in
+<code>output/jdebloat</code>, along with a summary of the size reduction achieved
+in <code>output/jdebloat/&lt;BENCHMARK&gt;/size_info.dat</code>.</p>
+
+<p>If running the tool independently is required, please read the
+following usage notes:</p>
+
+<pre><code>usage: jdebloat.jar [-a &lt;arg&gt;] [-c &lt;arg&gt;] [-d] [-e &lt;Exception Message&gt;]
+       [-f &lt;TamiFlex Jar&gt;] [-h] [-i &lt;arg&gt;] [-k] [-l &lt;arg&gt;] [-m] [-n &lt;arg&gt;]
+       [-o] [-p] [-r] [-s] [-t &lt;arg&gt;] [-u] [-v]
+An application to get the call-graph analysis of an application and to
+wipe unused methods
+ -a,--app-classpath &lt;arg&gt;                     Specify the application
+                                              classpath
+ -c,--custom-entry &lt;arg&gt;                      Specify custom entry points
+                                              in syntax of
+                                              '&lt;[classname]:[public?]
+                                              [static?] [returnType]
+                                              [methodName]([args...?])&gt;'
+ -d,--debug                                   Run JDebloat in 'debug'
+                                              mode. Used for testing
+ -e,--include-exception &lt;Exception Message&gt;   Specify if an exception
+                                              message should be included
+                                              in a wiped method (Optional
+                                              argument: the message)
+ -f,--tamiflex &lt;TamiFlex Jar&gt;                 Enable TamiFlex
+ -h,--help                                    Help
+ -i,--ignore-classes &lt;arg&gt;                    Specify classes that should
+                                              not be delete or modified
+ -k,--use-spark                               Use Spark call graph
+                                              analysis (Uses CHA by
+                                              default)
+ -l,--lib-classpath &lt;arg&gt;                     Specify the classpath for
+                                              libraries
+ -m,--main-entry                              Include the main method as
+                                              an entry point
+ -n,--maven-project &lt;arg&gt;                     Instead of targeting using
+                                              lib/app/test classpaths, a
+                                              Maven project directory may
+                                              be specified
+ -o,--remove-classes                          Remove unused classes
+ -p,--prune-app                               Prune the application
+                                              classes as well
+ -r,--remove-methods                          Remove methods header and
+                                              body (by default, the bodies
+                                              are wiped)
+ -s,--test-entry                              Include the test methods as
+                                              entry points
+ -t,--test-classpath &lt;arg&gt;                    Specify the test classpath
+ -u,--public-entry                            Include public methods as
+                                              entry points
+ -v,--verbose                                 Run JDebloat in 'verbose'
+                                              mode. Outputs analysed
+                                              methods and touched methods
+</code></pre>
+
+<p></p>
+
+<h2 id="exampleusagecase1useamavenprojectasanapplicationspecifyentrypointsasallmainmethodsallpublicmethodsandallexistingtestcasesandconsiderjavareflectivecallsusingtamiflex">Example usage case 1: Use a Maven project as an application, specify entry points as all main methods, all public methods, and all existing testcases, and consider Java reflective calls using Tamiflex</h2>
+
+<p><code>java -jar jdebloat.jar --maven-project &lt;PROJECT_DIR&gt; --public-entry
+--main-entry --test-entry --prune-app --remove-methods --tamiflex
+&lt;TAMFLEX_JAR&gt;</code></p>
+
+<p><code>--maven-project &lt;PROJECT_DIR&gt;</code> specifies the Maven project to be debloated.</p>
+
+<p><code>--public-entry --main-entry --test-entry</code> states that all entry points
+(all public, the main methods, and test methods) should be used as entry
+points to generate the call graph.</p>
+
+<p><code>--prune-app</code> specifies that that the application code should be
+debloated as well as the dependency code.</p>
+
+<p><code>--remove-methods</code> specifies that methods should be removed in their
+entirety. By default, only their bodies are removed.</p>
+
+<p><code>--tamiflex &lt;TAMIFLEX_JAR&gt;</code> specifies that TamiFlex should be used to find
+reflective calls. The argument is the location of the TamiFlex Jar.</p>
+
+<h2 id="exampleusagecase2useanonmavenprojectasanapplicationspecifymainmethodsasanentrypointanddonotconsiderreflectivecallsusingtamiflex">Example usage case 2: Use a non-Maven project as an application, specify main methods as an entry point, and do not consider reflective calls using Tamiflex</h2>
+
+<p><code>java -jar jdebloat.jar --app-classpath &lt;APP_CLASSPATH&gt; --lib-classpath
+&lt;LIBRARY_CLASSPATH&gt; --test-classpath &lt;TEST_CLASSPATH&gt;
+--include-exception "ERROR, METHOD REMOVED"</code></p>
+
+<p><code>--app-classpath &lt;APP_CLASSPATH&gt; --lib-classpath&lt;LIBRARY_CLASSPATH&gt;
+--test-classpath &lt;TEST_CLASSPATH&gt;</code> specifies the application, library,
+and test classpaths of the target.</p>
+
+<p><code>--include-exception "ERROR, METHOD REMOVE"</code> specifies that when a
+method's body is wiped it should be replaced with a Runtime exception
+with the message "ERROR, METHOD REMOVE".</p>
+
+<h2 id="exampleusagecase3useamavenprojectasanapplicationperformcallgraphanalysiswithsparkandremoveunusedclasses">Example usage case 3: Use a Maven project as an application, perform call graph analysis with Spark, and remove unused classes</h2>
+
+<p><code>java -jar jdebloat.jar --maven-project &lt;PROJECT_DIR&gt; --main-entry
+--remove-classes --use-spark</code></p>
+
+<p><code>--remove-classes</code> specifies that classes whose methods are all
+removed, and contain no accessible static methods, are to be removed
+completely.</p>
+
+<p><code>--use-spark</code> specifies that Spark Call Graph analysis should be used.</p>	
+
+<h2 id="results">Results</h2>
+
+<p>Running our tool on the benchmarks yields the following result.</p>
+
+
+<table>
+	<tr>
+		<th>Benchmark</th><th>Size Before Debloat (Bytes)</th><th>Size after Debloat (Bytes)</th><th>Reduction</th>
+	</tr>
+
+	<tr>
+                <th>JavaPoet</th><th align='right'>234746</th><th align='right'>230375</th><th align='right'>1.86%</th>
+        </tr>
+	<tr>
+                <th>DiskLruCache</th><th align='right'>39107</th><th align='right'>39107</th><th align='right'>0.00%</th>
+        </tr>
+	<tr>
+                <th>JavaVerbalExpressions</th><th align='right'>14746</th><th align='right'>14746</th><th align='right'>0.00%</th>
+        </tr>
+	<tr>
+                <th>Curator</th><th align='right'>10427613</th><th align='right'>8071252</th><th align='right'>22.60%</th>
+        </tr>
+	<tr>
+                <th>JUnit4</th><th align='right'>811614</th><th align='right'>792052</th><th align='right'>2.41%</th>
+        </tr>
+	<tr>
+                <th>RxRelay</th><th align='right'>5108491</th><th align='right'>4574410</th><th align='right'>10.45%</th>
+        </tr>
+</table>
+
+<h3 id="descriptionsofbenchmarkapplications">Descriptions of benchmark applications</h3>
+
+<ul>
+<li><a href="https://github.com/square/javapoet">JavaPoet</a> is a Java API for
+generating <code>.java</code> source files.</li>
+
+<li><a href="https://github.com/JakeWharton/DiskLruCache">DiskLruCache</a> is a
+library that provides a cache bounded by an amount of space on a
+file-system.</li>
+
+<li><a href="https://github.com/VerbalExpressions/JavaVerbalExpressions">JavaVerbalExpression</a>
+is a Java library that helps in the construction of difficult regular
+expressions.</li>
+
+<li><a href="https://github.com/Netflix/curator">Curator</a> is a set of Java
+libraries to improve Apache ZooKeeper.</li>
+
+<li><a href="https://github.com/junit-team/junit4">JUnit4</a> is a framework to write
+repeatable tests for Java.</li>
+
+<li><a href="https://github.com/JakeWharton/RxRelay">RxRelay</a> is a Relay library
+for RxJava.</li>
+</ul>
+
+
+<h2 id="methodwiping">Method wiping</h2>
+
+<p>In our tool, the default behavior is to wipe the method body of each
+uninvoked method. We show
+below an example of a Java method in the <a href="https://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.58.7708">Jimple
+</a>
+format</p>
+
+<pre><code>.method public static staticShortMethodNoParams()Ljava/lang/Short;
+    .limit stack 2
+    .limit locals 1
+    getstatic java/lang/System/out Ljava/io/PrintStream;
+    astore_0
+    aload_0
+    ldc "staticShortMethodNoParams touched"
+    invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V
+    iconst_3
+    invokestatic java/lang/Short/valueOf(S)Ljava/lang/Short;
+    astore_0
+    aload_0
+    areturn
+.end method
+</code></pre>
+
+<p>After this method's body is wiped, it leaves the method header,
+while removing the body to the maximum possible extent permissible by
+the JVM. This is shown below:</p>
+
+<pre><code>.method public static staticShortMethodNoParams()Ljava/lang/Short;
+    .limit stack 1
+    .limit locals 0
+    aconst_null
+    areturn
+.end method
+</code></pre>
+
+   </div>
+
+</section>
+
+<section class="section2">
+    <h2 class="sectionTitle">JReduce</h2>
+    <hr class="sectionTitleRule">
+    <hr class="sectionTitleRule2">
+    <div class="section2Content">
+<p>JReduce is a tool that uses a variant of delta-debugging to reduce the
+classes of a project given a property. The tool was originally build to
+reduce the bytecode that caused bugs in decompilers. We categorized a
+bug as any set of classes with no external dependencies, was not able to
+decompile and then compile again. The goal was therefore to find the
+smallest set of classes, that still had all their dependencies.</p>
+
+<p>In this case, we use the test suite as the property that we want to
+preserve. Then we reduce the number of classes to the smallest possible
+where the tests still succeed.</p>
+
+<h2 id="technicaldetails">Technical Details</h2>
+
+<p>JReduce works by calculating a dependency graph from classes to other
+classes. We create the graph by creating an edge from a class to another
+if the first class mentions the second class.</p>
+
+<p>Using the graph, we calculate all the strongly connected components
+(SCC). If we include one of the classes in an SCC, all
+classes in the SCC needs to be included. This means that we can reduce
+the program, by reducing this list of SCCs.</p>
+
+<p>It is rare that a program runs classes outside the SCC that contains the
+main class, but can happens if the program uses reflection. We have
+therefore developed a new reduction technique called <em>Binary Reduction</em>,
+which can quickly search the list for the few SCC needed to satisfy the
+predicate.</p>
+
+<p>In our tool, it is also possible to provide a set of core classes. The
+core classes should not be removed. If a SCC contains a class from
+the core, it will not be removed. In our case, we set the test-cases as
+a core.</p>
+
+<h2 id="usage">Usage</h2>
+
+<p>To run JReduce on the benchmarks of this project, first install the
+tool by running <code>make jreduce-install</code>.</p>
+
+<p>Then run <code>make jreduce</code> and the output can be found in the
+<code>output/jreduce</code> folder.</p>
+
+<p>You can also run the tool on your own benchmarks. Either use
+the <code>script/runjreduce.sh</code> script or you can run JReduce directly:</p>
+
+<pre><code>jreduce -v -o output --cp test.jar -t app.jar -c @classes-in-core.txt \
+  &lt;runpredicate&gt; &lt;args..&gt;
+</code></pre>
+
+<p>Where <code>runpredicate.sh</code> is a script that takes a reduced <code>app.jar</code> and
+has exit code 0 if the predicate succeeded. In the <code>runjreduce.sh</code>
+script we use <code>runtest.sh</code> with the <code>test.jar</code> and <code>test.classes.txt</code>.</p>
+
+<p>In the case you want to be adventures; consult the help notes:</p>
+
+<pre><code>Usage: jreduce [-v] [-q] [-D|--log-depth ARG] [-c|--core CORE] [--cp CLASSPATH]
+               [--stdlib] [--jre JRE] (-t|--target FILE) (-o|--output FILE)
+               [-R|--reducer ARG] [-W|--work-folder ARG] [-K|--keep-folders]
+               [-E|--exit-code CODE] [--stdout] [--stderr] [-T|--timelimit SECS]
+               CMD [ARG..]
+  A command line tool for reducing java programs.
+
+Available options:
+  -v                       make it more verbose.
+  -q                       make it more quiet.
+  -D,--log-depth ARG       set the log depth. (default: -1)
+  -c,--core CORE           the core classes to not reduce.
+  --cp CLASSPATH           the library classpath, of things not reduced.
+  --stdlib                 load the standard library.
+  --jre JRE                the location of the stdlib.
+  -t,--target FILE         the path to the jar or folder to reduce.
+  -o,--output FILE         the path output folder.
+  -R,--reducer ARG         the reducing algorithm to use. (default: Binary)
+  -W,--work-folder ARG     the work folder.
+  -K,--keep-folders        keep the work folders after use?
+  -E,--exit-code CODE      preserve exit-code (default: 0)
+  --stdout                 preserve stdout.
+  --stderr                 preserve stderr.
+  -T,--timelimit SECS      the maximum number of seconds to run the process,
+                           negative means no timelimit. (default: -1.0)
+  CMD                      the command to run
+  ARG..                    arguments to the command.
+  -h,--help                Show this help text
+</code></pre>
+	</div>
+</section>
+
+<section class="section2">
+    <h2 class="sectionTitle">JInline</h2>
+    <hr class="sectionTitleRule">
+    <hr class="sectionTitleRule2">
+    <div class="section2Content">
+    <p>The <code>inliner.jar</code> takes a Java program and statically inlines methods
+    read from a database.</p>
+    <h2 id="technicaldetails">Technical Details</h2>
+    <p>We first provide aggressive inline parameters to the JVM. While these parameters
+    are not suitable for running programs, they provide better inlining information. We
+    extract the inlining decisions from the JVM into a database for later use.</p>
+
+    <p>We use to our customized database to inform our static inliner. First, we filter out
+    aggressive inlinings which would cause the Java program to miscompile. Using this information,
+    our Inliner tool uses the Soot Bytecode optimization framework to statically inline method calls
+    without affecting the semantics of the program.</p>
+
+    <p>Our technique finds inline targets that might not otherwise be detectable by purely
+    static approaches. Our tool produces a new JAR with our modified class files containing inlined
+    methods. We successfully ran our modified JAR on the original tests cases without errors.</p>
+    <h2 id="usage">Usage</h2>
+    <p>To run the Inliner tool, simply run <code>make inliner</code>.</p>
+
+    <p>The output programs will be found in output/inliner as jars. If running
+    the tool independently is required, please read the following usage notes:</p>
+
+    <pre><code>usage: run-inliner.py [-h] [-o OUTPUT_JAR]
+                      test_jar test_classes app_lib_jar output_dir
+
+Run inliner tool.
+
+positional arguments:
+  test_jar       JAR containing the test suite
+  test_classes   Text file of test classes
+  app_lib_jar    JAR containing application and libraries
+  output_dir     Output directory
+
+optional arguments:
+  -h, --help     show this help message and exit
+  -o OUTPUT_JAR  Modified JAR file path
+    </code></pre>
+    </div>
+</section>
+  
+<!-- Contact details -->
+  <section class="section1">
+    <h2 class="sectionTitle">Contact Details</h2>
+    <hr class="sectionTitleRule">
+    <hr class="sectionTitleRule2">
+    <div class="section1Content">
+	    <p><span>Address :</span> <a href="https://www.openstreetmap.org/?mlat=34.069364&mlon=-118.444489&zoom=20">Engineering VI, 404 Westwood Plaza, Los Angeles, CA 90095</a></p>
+    </div>
+  </section>
+</div>
+<footer>
+  <hr>
+  <p class="footerNote">ONR TPCP Project</span></p>
+</footer>
+</body>
+</html>
