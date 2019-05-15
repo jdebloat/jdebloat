@@ -11,14 +11,14 @@ from subprocess import check_output, run, CalledProcessError
 from pathlib import Path
 from contextlib import contextmanager
 
-# https://stackoverflow.com/questions/431684/how-do-i-change-directory-cd-in-python 
+# https://stackoverflow.com/questions/431684/how-do-i-change-directory-cd-in-python
 @contextmanager
-def changedir(dir): 
+def changedir(dir):
     prevdir = os.getcwd()
-    try: 
+    try:
         os.chdir(os.path.expanduser(str(dir)))
         yield
-    finally: 
+    finally:
         os.chdir(prevdir)
 
 def read(*args, **kwargs):
@@ -42,16 +42,16 @@ def extract_gitinfo(benchmark):
 
 def build(benchmark):
     with changedir(benchmark):
-        run([ "mvn", 
-            "-Dmaven.repo.local=libs", 
-            "install", 
-            "--batch-mode", 
+        run([ "mvn",
+            "-Dmaven.repo.local=libs",
+            "install",
+            "--batch-mode",
             "-fn"])
 
 def extract_classpath(benchmark, scope):
     with changedir(benchmark):
-        lines = read("mvn", "dependency:build-classpath", 
-                "-Dmaven.repo.local=libs", 
+        lines = read("mvn", "dependency:build-classpath",
+                "-Dmaven.repo.local=libs",
                 "-DincludeScope={}".format(scope),
                 "--batch-mode")
 
@@ -91,7 +91,7 @@ def copy_classes(src, dst):
         shutil.copyfile(str(file), str(dst_file))
 
 def make_jar(src, libs, jar, stage_folder=None):
-    if not stage_folder: 
+    if not stage_folder:
         stage_folder = jar.parent.parent / jar.stem
     for lib in libs:
         extract_jar(lib, stage_folder)
@@ -100,7 +100,8 @@ def make_jar(src, libs, jar, stage_folder=None):
     absjar = jar.parent.resolve() / jar.name
     with changedir(stage_folder):
         run(["jar", "cf", str(absjar), "."])
-   
+    shutil.rmtree(str(stage_folder))
+
 def extract_testclasses(target):
     expr = re.compile(r'.*/surefire-reports/TEST-(.*)\.xml$')
     test_classes = []
@@ -110,7 +111,7 @@ def extract_testclasses(target):
 
 def main(argv):
     excludedtest, benchmark, output = [Path(a) for a in argv[1:]]
-  
+
     excluded = set(excludedtest.read_text().splitlines())
 
     extract = output / "extracted" / benchmark.name
@@ -119,8 +120,8 @@ def main(argv):
     extract.mkdir(parents=True, exist_ok=True)
 
     dct = extract_gitinfo(benchmark)
-    
-    target = benchmark / "target" 
+
+    target = benchmark / "target"
 
     print("Looking at: " + str(target))
     if not target.exists() or not (benchmark / "libs").exists():
@@ -129,13 +130,19 @@ def main(argv):
 
     test_classes = set(extract_testclasses(target)) - excluded
     (extract / "test.classes.txt").write_text('\n'.join(test_classes) + '\n')
-    
+
+    app_classes = {
+        str(s.relative_to(target / "classes"))[:-6].replace("/", ".") 
+        for s in (target / "classes").rglob("**/*.class")
+        }
+    (extract / "app.classes.txt").write_text('\n'.join(app_classes) + '\n')
+
     compile_cp = set(extract_classpath(benchmark, "compile"))
-    make_jar(target / "classes", compile_cp, extract / "jars" / "app+lib.jar") 
-    
+    make_jar(target / "classes", compile_cp, extract / "jars" / "app+lib.jar")
+
     test_cp = set(extract_classpath(benchmark, "test"))
     make_jar(target / "test-classes", test_cp - compile_cp, extract / "jars" / "test.jar")
-    
+
 
     dct["classpath"] = {
         "app+lib": sorted(compile_cp),
@@ -143,8 +150,9 @@ def main(argv):
         }
 
     dct["test"] = sorted(test_classes)
+    dct["app"] = sorted(app_classes)
 
-    with open(str(extract / "extract.json"), "w") as w: 
+    with open(str(extract / "extract.json"), "w") as w:
         json.dump(dct, w)
 
 

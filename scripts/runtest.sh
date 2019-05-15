@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -x
 
 TESTCP=$1
 TEST_CLASSES=$2
@@ -10,6 +11,9 @@ then
 elif javap -cp "$APPCP:$TESTCP" junit.textui.TestRunner &> /dev/null
 then
     TESTCLASS=junit.textui.TestRunner
+elif javap -cp "$APPCP:$TESTCP" org.junit.jupiter.engine.JupiterTestEngine &> /dev/null
+then
+    TESTCLASS=org.junit.jupiter.engine.JupiterTestEngine
 fi
 
 java -cp "$APPCP:$TESTCP" $TESTCLASS $(cat $TEST_CLASSES)

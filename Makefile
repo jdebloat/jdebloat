@@ -1,18 +1,23 @@
-benchmarks = $(sort $(wildcard benchmarks/*))
-extractions = $(patsubst benchmarks/%, output/extracted/%/extract.json, $(benchmarks))
-testoutputs = $(patsubst benchmarks/%, output/tests/%.txt, $(benchmarks))
-jreduce-outs = $(patsubst benchmarks/%, output/jreduce/%/app+lib.jar, $(benchmarks))
-jdebloat-outs = $(patsubst benchmarks/%, output/jdebloat/%/TIMESTAMP, $(benchmarks))
-inliner-outs = $(patsubst benchmarks/%, output/inliner/%/app+lib.jar, $(benchmarks))
-jreduce-inliner-outs = $(patsubst benchmarks/%, output/inliner+jreduce/%/app+lib.jar, $(benchmarks))
+benchmarks = $(shell sed -n 's/^\([^,]*\),.*/\1/p' data/benchmarks.csv | sed 1d)
+downloads = $(patsubst %, output/benchmarks/%/TIMESTAMP, $(benchmarks))
+extractions = $(patsubst %, output/extracted/%/extract.json, $(benchmarks))
+testoutputs = $(patsubst %, output/tests/%.txt, $(benchmarks))
+jreduce-outs = $(patsubst %, output/jreduce/%/app+lib.jar, $(benchmarks))
+jdebloat-outs = $(patsubst %, output/jdebloat/%/TIMESTAMP, $(benchmarks))
+inliner-outs = $(patsubst %, output/inliner/%/app+lib.jar, $(benchmarks))
+jreduce-inliner-outs = $(patsubst %, output/inliner+jreduce/%/app+lib.jar, $(benchmarks))
 
 .PHONY: all setup
 all: output/benchmarks.csv $(testoutputs)
 
 setup: jreduce-install inliner-build inliner-setup
 
-$(extractions): output/extracted/%/extract.json: benchmarks/%
-	-(cd $<; git apply ../../data/$*.patch)
+$(downloads): output/benchmarks/%/TIMESTAMP: data/benchmarks.csv
+	-git clone $(shell sed -n "s/$*,\([^,]*\),.*/\1/p" data/benchmarks.csv) output/benchmarks/$*;
+	-(cd output/benchmarks/$*; git checkout -b onr $(shell sed -n "s/^$*,[^,]*,\([^,]*\)$$/\1/p" data/benchmarks.csv); git apply ../data/patches/$*.patch);
+	touch $@;
+
+$(extractions): output/extracted/%/extract.json: output/benchmarks/%
 	./scripts/benchmark.py data/excluded-tests.txt $< output
 
 $(testoutputs): output/tests/%.txt: output/extracted/%/extract.json ./scripts/runtest.sh
@@ -70,10 +75,11 @@ jdebloat: output/jdebloat
 
 output/jdebloat: $(jdebloat-outs)
 
-$(jdebloat-outs): output/jdebloat/%/TIMESTAMP: benchmarks/% output/extracted/%/extract.json ./scripts/runjdebloat.sh
+$(jdebloat-outs): output/jdebloat/%/TIMESTAMP: output/benchmarks/% output/extracted/%/extract.json ./scripts/runjdebloat.sh
 	mkdir -p output/jdebloat/
-	cp -r benchmarks/$* output/jdebloat/$*
+	cp -r output/benchmarks/$* output/jdebloat/$*
 	./scripts/runjdebloat.sh output/jdebloat/$*
+
 	touch $@
 
 ~/.tamiflex/poa.properties: ~/.tamiflex
