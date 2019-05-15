@@ -2,6 +2,7 @@
 
 import sys
 import json
+import tempfile
 import re
 import shutil
 import csv
@@ -70,17 +71,8 @@ def extract_classpath(benchmark, scope):
     return classpath
 
 def extract_jar(jar, tofolder):
-    tofolder.mkdir(parents=True, exist_ok=True)
+    Path(tofolder).mkdir(parents=True, exist_ok=True)
     run(["unzip", "-o", str(jar), "-d", str(tofolder)])
-#    with zipfile.ZipFile(jar) as zfile:
-#        only = []
-#        for f in zfile.namelist():
-#            current = tofolder / Path(f)
-#            if current.is_file():
-#                shutil.rmtree(str(current), ignore_errors=True)
-#            if not f.endswith("/"):
-#                only.append(f)
-#        zfile.extractall(path=str(tofolder), members=only)
 
 def copy_classes(src, dst):
     for file in src.rglob("*"):
@@ -90,17 +82,16 @@ def copy_classes(src, dst):
         shutil.rmtree(str(dst_file), ignore_errors=True)
         shutil.copyfile(str(file), str(dst_file))
 
-def make_jar(src, libs, jar, stage_folder=None):
-    if not stage_folder:
-        stage_folder = jar.parent.parent / jar.stem
-    for lib in libs:
-        extract_jar(lib, stage_folder)
-    copy_classes(src, stage_folder)
-    jar.parent.mkdir(parents=True, exist_ok=True)
-    absjar = jar.parent.resolve() / jar.name
-    with changedir(stage_folder):
-        run(["jar", "cf", str(absjar), "."])
-    shutil.rmtree(str(stage_folder))
+def make_jar(srcs, libs, jar):
+    with tempfile.TemporaryDirectory() as stage_folder: 
+        for lib in libs:
+            extract_jar(lib, stage_folder)
+        for src in srcs:
+            copy_classes(src, stage_folder)
+        jar.parent.mkdir(parents=True, exist_ok=True)
+        absjar = jar.parent.resolve() / jar.name
+        with changedir(stage_folder):
+            run(["jar", "cf", str(absjar), "."])
 
 def extract_testclasses(target):
     expr = re.compile(r'.*/surefire-reports/TEST-(.*)\.xml$')
@@ -121,40 +112,41 @@ def main(argv):
 
     dct = extract_gitinfo(benchmark)
 
-    target = benchmark / "target"
 
-    print("Looking at: " + str(target))
-    if not target.exists() or not (benchmark / "libs").exists():
-        print("Building: " + str(target))
+    print("Looking at: " + str(benchmark))
+    if not (benchmark / "libs").exists():
+        print("Building: " + str(targets))
         build(benchmark)
+    
+    targets = list(benchmark.glob("*/target/classes"))
+    test_targets = list(benchmark.glob("*/target/test-classes"))
+    if (benchmark / "target").exists(): 
+        targets.append(benchmark / "target" / "classes")
+        test_targets.append(benchmark / "target" / "test-classes")
 
-    test_classes = set(extract_testclasses(target)) - excluded
+    test_classes = set.union(*[set(extract_testclasses(t.parent)) for t in test_targets]) - excluded
     (extract / "test.classes.txt").write_text('\n'.join(test_classes) + '\n')
 
-    app_classes = {
-        str(s.relative_to(target / "classes"))[:-6].replace("/", ".") 
-        for s in (target / "classes").rglob("**/*.class")
-        }
-    (extract / "app.classes.txt").write_text('\n'.join(app_classes) + '\n')
-
+    make_jar(targets, set(), extract / "jars" / "app.jar")
+    
     compile_cp = set(extract_classpath(benchmark, "compile"))
-    make_jar(target / "classes", compile_cp, extract / "jars" / "app+lib.jar")
+    make_jar([], compile_cp, extract / "jars" / "lib.jar")
 
     test_cp = set(extract_classpath(benchmark, "test"))
-    make_jar(target / "test-classes", test_cp - compile_cp, extract / "jars" / "test.jar")
+    make_jar(test_targets, test_cp - compile_cp, extract / "jars" / "test.jar")
 
 
     dct["classpath"] = {
-        "app+lib": sorted(compile_cp),
+        "lib": sorted(compile_cp),
         "test": sorted(test_cp - compile_cp)
         }
 
     dct["test"] = sorted(test_classes)
-    dct["app"] = sorted(app_classes)
 
     with open(str(extract / "extract.json"), "w") as w:
         json.dump(dct, w)
 
 
 if __name__ == "__main__":
+    
     main(sys.argv)

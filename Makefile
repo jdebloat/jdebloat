@@ -17,8 +17,8 @@ $(downloads): output/benchmarks/%/TIMESTAMP: data/benchmarks.csv
 	-(cd output/benchmarks/$*; git checkout -b onr $(shell sed -n "s/^$*,[^,]*,\([^,]*\)$$/\1/p" data/benchmarks.csv); git apply ../data/patches/$*.patch);
 	touch $@;
 
-$(extractions): output/extracted/%/extract.json: output/benchmarks/%
-	./scripts/benchmark.py data/excluded-tests.txt $< output
+$(extractions): output/extracted/%/extract.json: output/benchmarks/%/TIMESTAMP
+	./scripts/benchmark.py data/excluded-tests.txt output/benchmarks/$* output
 
 $(testoutputs): output/tests/%.txt: output/extracted/%/extract.json ./scripts/runtest.sh
 	mkdir -p output/tests
@@ -75,7 +75,7 @@ jdebloat: output/jdebloat
 
 output/jdebloat: $(jdebloat-outs)
 
-$(jdebloat-outs): output/jdebloat/%/TIMESTAMP: output/benchmarks/% output/extracted/%/extract.json ./scripts/runjdebloat.sh
+$(jdebloat-outs): output/jdebloat/%/TIMESTAMP: output/benchmarks/%/TIMESTAMP output/extracted/%/extract.json ./scripts/runjdebloat.sh
 	mkdir -p output/jdebloat/
 	cp -r output/benchmarks/$* output/jdebloat/$*
 	./scripts/runjdebloat.sh output/jdebloat/$*
