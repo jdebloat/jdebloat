@@ -6,6 +6,8 @@ import tempfile
 from pathlib import Path 
 from subprocess import check_output, run, CalledProcessError
 from contextlib import contextmanager
+from collections import defaultdict
+from itertools import zip_longest
 
 # https://stackoverflow.com/questions/431684/how-do-i-change-directory-cd-in-python
 @contextmanager
@@ -18,12 +20,18 @@ def changedir(dir):
         os.chdir(prevdir)
 
 
-def extract_jar(jar, tofolder):
-    run(["unzip", "-nq", str(jar), "-d", str(tofolder)])
+def extract_jar(jar, tofolder, files=[]):
+    run(["unzip", "-nqq", str(jar), "-d", str(tofolder)] + [f for f in files if f])
 
 def make_jar(absjar, fromfolder):
     with changedir(fromfolder):
         run(["jar", "cf", str(absjar), "."])
+
+def grouper(iterable, n, fillvalue=None):
+    "Collect data into fixed-length chunks or blocks"
+    # grouper('ABCDEFG', 3, 'x') --> ABC DEF Gxx"
+    args = [iter(iterable)] * n
+    return zip_longest(*args, fillvalue=fillvalue)
 
 def main():
     """Given a list of jars print a list of files join the files in one jar
@@ -42,13 +50,21 @@ def main():
             files = set() 
             for jar in args:
                 extract_jar(jar, stage_folder)
-                added = set(a.relative_to(stage_folder) for a in Path(stage_folder).rglob("**")) - files
+                added = set(a.relative_to(stage_folder) for a in Path(stage_folder).rglob("**/*")) - files
                 for a in added:
                     print(jar, a)
                 files |= added
             make_jar(os.path.realpath(target), stage_folder)
     elif cmd == "split":
-        pass
+        dist = defaultdict(set)
+        for line in sys.stdin.readlines():
+            jarname, filename  = line.split()
+            dist[jarname].add(filename)
+        for n,s in dist.items():
+            with tempfile.TemporaryDirectory() as stage_folder: 
+                for x in grouper(sorted(s), 10, ""):
+                    extract_jar(target, stage_folder, files=x) 
+                make_jar(os.path.realpath(n), stage_folder)
     else:
         sys.stderr.write("Expected 'join' or 'split' as initial command.\n")
 
