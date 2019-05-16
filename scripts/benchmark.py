@@ -115,7 +115,7 @@ def main(argv):
 
     print("Looking at: " + str(benchmark))
     if not (benchmark / "libs").exists():
-        print("Building: " + str(targets))
+        print("Building")
         build(benchmark)
     
     targets = list(benchmark.glob("*/target/classes"))
