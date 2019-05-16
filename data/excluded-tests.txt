@@ -1,3 +1,6 @@
 org.junit.tests.running.core.SystemExitTest
 org.junit.tests.running.methods.TimeoutTest
 org.I0Itec.zkclient.ContentWatcherTest
+org.gridkit.jvmtool.hflame.FlameTemplateProcessorTest
+org.gridkit.jvmtool.stacktrace.StackFrameTest
+org.gridkit.jvmtool.JStackDumpParserTest

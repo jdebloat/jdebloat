@@ -4,7 +4,7 @@ import sys
 import os
 import tempfile
 from pathlib import Path 
-from subprocess import check_output, run, CalledProcessError
+from subprocess import check_output, run, CalledProcessError, DEVNULL
 from contextlib import contextmanager
 from collections import defaultdict
 from itertools import zip_longest
@@ -19,9 +19,8 @@ def changedir(dir):
     finally:
         os.chdir(prevdir)
 
-
 def extract_jar(jar, tofolder, files=[]):
-    run(["unzip", "-nqq", str(jar), "-d", str(tofolder)] + [f for f in files if f])
+    run(["unzip", "-nqqq", str(jar), "-d", str(tofolder)] + [f for f in files if f], stderr=DEVNULL)
 
 def make_jar(absjar, fromfolder):
     with changedir(fromfolder):
@@ -60,9 +59,9 @@ def main():
         for line in sys.stdin.readlines():
             jarname, filename  = line.split()
             dist[jarname].add(filename)
-        for n,s in dist.items():
+        for n in args:
             with tempfile.TemporaryDirectory() as stage_folder: 
-                for x in grouper(sorted(s), 10, ""):
+                for x in grouper(sorted(dist[n]), 10, ""):
                     extract_jar(target, stage_folder, files=x) 
                 make_jar(os.path.realpath(n), stage_folder)
     else:

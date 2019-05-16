@@ -1,4 +1,4 @@
-benchmarks = $(shell sed -n 's/^\([^,]*\),.*/\1/p' data/benchmarks.csv | sed 1d)
+benchmarks = $(shell sed -n 's/^\([^\#,]*\),.*/\1/p' data/benchmarks.csv | sed 1d)
 downloads = $(patsubst %, output/benchmarks/%/TIMESTAMP, $(benchmarks))
 extractions = $(patsubst %, output/extracted/%/extract.json, $(benchmarks))
 testoutputs = $(patsubst %, output/tests/%.txt, $(benchmarks))
@@ -20,12 +20,9 @@ $(downloads): output/benchmarks/%/TIMESTAMP: data/benchmarks.csv
 $(extractions): output/extracted/%/extract.json: output/benchmarks/%/TIMESTAMP
 	./scripts/benchmark.py data/excluded-tests.txt output/benchmarks/$* output
 
-$(testoutputs): output/tests/%.txt: output/extracted/%/extract.json ./scripts/runtest.sh
+$(testoutputs): output/tests/%.txt: output/extracted/%/extract.json ./scripts/run-test.sh
 	mkdir -p output/tests
-	./scripts/runtest.sh \
-           output/extracted/$*/jars/test.jar \
-           output/extracted/$*/test.classes.txt \
-	   output/extracted/$*/jars/app+lib.jar 2>&1 | tee $@
+	./scripts/run-test.sh output/extracted/$* 2>&1 | tee $@
 ## STATS
 
 output/benchmarks.csv: $(extractions)
@@ -50,9 +47,9 @@ jreduce: $(jreduce-outs)
 jreduce-install:
 	cd tools/jvmhs; stack install 
 
-$(jreduce-outs): output/jreduce/%/app+lib.jar: output/extracted/%/extract.json ./scripts/runjreduce.sh ./scripts/runtest.sh
+$(jreduce-outs): output/jreduce/%/app+lib.jar: output/extracted/%/extract.json ./scripts/run-jreduce.sh ./scripts/run-test.sh
 	mkdir -p output/jreduce
-	./scripts/runjreduce.sh \
+	./scripts/run-jreduce.sh \
            output/extracted/$*/jars/test.jar \
            output/extracted/$*/test.classes.txt \
 	   output/extracted/$*/jars/app+lib.jar \
