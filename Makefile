@@ -77,8 +77,8 @@ output/jdebloat: $(jdebloat-outs)
 
 $(jdebloat-outs): output/jdebloat/%/TIMESTAMP: output/benchmarks/%/TIMESTAMP output/extracted/%/extract.json ./scripts/runjdebloat.sh
 	mkdir -p output/jdebloat/
-	cp -r output/benchmarks/$* output/jdebloat/$*
-	./scripts/runjdebloat.sh output/jdebloat/$*
+	cp -r output/extracted/$* output/jdebloat/$*
+	./scripts/run_jshrink.sh output/jdebloat/$*/jars/app.jar output/jdebloat/$*/jars/lib.jar output/jdebloat/$*/jars/test.jar output/jdebloat/$*/maven
 
 	touch $@
 

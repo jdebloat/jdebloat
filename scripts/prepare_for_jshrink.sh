@@ -27,7 +27,7 @@ echo "                        <groupId>edu.ucla.cs</groupId>" >>"${new_maven_dir
 echo "                        <artifactId>libraries</artifactId>" >>"${new_maven_dir}/pom.xml"             
 echo "                        <version>1.0-SNAPSHOT</version>" >>"${new_maven_dir}/pom.xml"                
 echo "                        <scope>system</scope>" >>"${new_maven_dir}/pom.xml"                          
-echo "                        <systemPath>${lib_jar}</systemPath>" >>"${new_maven_dir}/pom.xml"
+echo "                        <systemPath>\${project.basedir}/$(basename ${lib_jar})</systemPath>" >>"${new_maven_dir}/pom.xml"
 echo "                </dependency>" >>"${new_maven_dir}/pom.xml"                                          
 echo "        </dependencies>" >>"${new_maven_dir}/pom.xml"                                                
 echo "        <properties>" >>"${new_maven_dir}/pom.xml"                                                   
@@ -46,4 +46,5 @@ mkdir "${new_maven_dir}/src"
 	unzip "${lib_jar}" -d"${new_maven_dir}/target/test-classes/"
 } &>/dev/null
 
+cp "${lib_jar}" "${new_maven_dir}"
 rm -rf "${new_maven_dir}/target/test-classes/junit"
