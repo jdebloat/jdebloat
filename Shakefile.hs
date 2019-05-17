@@ -1,5 +1,5 @@
 #!/usr/bin/env stack
--- stack --resolver lts-13.21 script
+-- stack --resolver lts-13.19 script
 
 {-# LANGUAGE RecordWildCards #-}
 import Development.Shake
