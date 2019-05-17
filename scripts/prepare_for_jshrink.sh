@@ -4,7 +4,8 @@
 app_jar=$1
 lib_jar=$2
 test_jar=$3
-new_maven_dir=$4
+src_dir=$4
+new_maven_dir=$5
 
 mkdir "${new_maven_dir}"
 
@@ -23,7 +24,13 @@ echo "                        <version>1.0-SNAPSHOT</version>" >>"${new_maven_di
 echo "                        <scope>system</scope>" >>"${new_maven_dir}/pom.xml"                          
 echo "                        <systemPath>\${project.basedir}/$(basename ${lib_jar})</systemPath>" >>"${new_maven_dir}/pom.xml"
 echo "                </dependency>" >>"${new_maven_dir}/pom.xml"                                          
-echo "        </dependencies>" >>"${new_maven_dir}/pom.xml"                                                
+echo "			<dependency>" >>"${new_maven_dir}/pom.xml"
+echo "				<groupId>junit</groupId>" >>"${new_maven_dir}/pom.xml"
+echo "				<artifactId>junit</artifactId>" >>"${new_maven_dir}/pom.xml"
+echo "				<version>4.12</version>" >>"${new_maven_dir}/pom.xml"
+echo "				<scope>test</scope>" >>"${new_maven_dir}/pom.xml"
+echo "				</dependency>" >>"${new_maven_dir}/pom.xml"
+echo "        </dependencies>" >>"${new_maven_dir}/pom.xml" 
 echo "        <properties>" >>"${new_maven_dir}/pom.xml"                                                   
 echo "                <maven.compiler.source>1.8</maven.compiler.source>" >>"${new_maven_dir}/pom.xml"      
 echo "                <maven.compiler.target>1.8</maven.compiler.target>" >>"${new_maven_dir}/pom.xml"     
@@ -37,7 +44,9 @@ mkdir "${new_maven_dir}/src"
 
 {
 	unzip "${app_jar}" -d"${new_maven_dir}/target/classes/"
-	unzip "${lib_jar}" -d"${new_maven_dir}/target/test-classes/"
+	unzip "${test_jar}" -d"${new_maven_dir}/target/test-classes/"
 } &>/dev/null
 
-cp "${lib_jar}" "${new_maven_dir}"
+rm -rf "${new_maven_dir}/target/test-classes/junit"
+cp -r "${src_dir}" "${new_maven_dir}/"
+cp "${lib_jar}" "${new_maven_dir}/"

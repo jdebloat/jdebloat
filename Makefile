@@ -68,19 +68,12 @@ $(jreduce-inliner-outs): output/inliner+jreduce/%/app+lib.jar: output/inliner/%/
 ## Debloat
 
 .PHONY: jshrink
-jshrink: output/shrink
+jshrink: output/jshrink
 
 output/jshrink: $(jshrink-outs)
 
-$(jshrink-outs): output/jshrink/%/TIMESTAMP: output/benchmarks/%/TIMESTAMP output/extracted/%/extract.json ./scripts/run_jshrink.sh
-	mkdir -p output/jshrink/
-	cp -r output/extracted/$* output/jshrink/$*
-	./scripts/run_jshrink.sh \
-	$(CURDIR)/output/jshrink/$*/jars/app.jar \
-	$(CURDIR)/output/jshrink/$*/jars/lib.jar \
-	$(CURDIR)/output/jshrink/$*/jars/test.jar \
-	$(CURDIR)/output/jshrink/$*/maven
-
+$(jshrink-outs): output/%/initial ./scripts/jshrink_script.sh ~/.tamiflex/poa.properties
+	./scripts/jshrink_script.sh $(CURDIR)/output/$*/initial $(CURDIR)/output/$*/initial+jshrink
 	touch $@
 
 ~/.tamiflex/poa.properties: ~/.tamiflex
