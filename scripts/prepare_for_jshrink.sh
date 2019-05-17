@@ -16,12 +16,6 @@ echo "        <artifactId>maven-package</artifactId>" >>"${new_maven_dir}/pom.xm
 echo "        <version>1.0-SNAPSHOT</version>" >>"${new_maven_dir}/pom.xml"                                
 echo "        <packaging>jar</packaging>" >>"${new_maven_dir}/pom.xml"                                     
 echo "        <dependencies>" >>"${new_maven_dir}/pom.xml"                                                 
-echo "                <dependency>" >>"${new_maven_dir}/pom.xml"                                            
-echo "                        <groupId>junit</groupId>" >>"${new_maven_dir}/pom.xml"                       
-echo "                        <artifactId>junit</artifactId>" >>"${new_maven_dir}/pom.xml"                  
-echo "                        <version>4.12</version>" >>"${new_maven_dir}/pom.xml"                        
-echo "                        <scope>test</scope>" >>"${new_maven_dir}/pom.xml"                            
-echo "                </dependency>" >>"${new_maven_dir}/pom.xml"                                          
 echo "                <dependency>" >>"${new_maven_dir}/pom.xml"                                           
 echo "                        <groupId>edu.ucla.cs</groupId>" >>"${new_maven_dir}/pom.xml"                 
 echo "                        <artifactId>libraries</artifactId>" >>"${new_maven_dir}/pom.xml"             
@@ -47,4 +41,3 @@ mkdir "${new_maven_dir}/src"
 } &>/dev/null
 
 cp "${lib_jar}" "${new_maven_dir}"
-rm -rf "${new_maven_dir}/target/test-classes/junit"
