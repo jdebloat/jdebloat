@@ -104,7 +104,7 @@ main = do
 
     "output//*+jreduce/app.jar" %> runScriptAction "scripts/run-jreduce.sh"
     "output//*+inliner/app.jar"  %> runScriptAction "scripts/run-inliner.sh"
-    "output//*+jshrink/app.jar" %> runScriptAction "scripts/run-jshrink.sh"
+    "output//*+jshrink/app.jar" %> runScriptAction "scripts/jshrink_script.sh"
 
 runScriptAction :: FilePath -> FilePath -> Action ()
 runScriptAction script out = do

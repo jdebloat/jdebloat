@@ -1,23 +1,24 @@
 #!/bin/bash
 
 # Note: Expect input directory in the following format:
-# ${input_dir}:
+# ${FROM}:
 # --- app.jar
 # --- test.jar
 # --- lib.jar
+# --- src
 # --- ...
 #
-# The ${input_dir} will be created and of the same format as the
-# ${output_dir}
+# The ${FROM} will be created and of the same format as the ${TO}.
 
-input_dir=$1
-output_dir=$2
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 
-cp -r "${input_dir}" "${output_dir}"
+FROM=$(realpath $1); shift
+TO=$(realpath $1); shift
+
+cp -r "${FROM}" "${TO}"
 temp_maven_dir=$(mktemp /tmp/XXXX)
 rm ${temp_maven_dir}
 
-${DIR}/run-jshrink.sh "${output_dir}/app.jar" \
-	"${output_dir}/lib.jar" "${output_dir}/test.jar" \
-	"${output_dir}/src" "${temp_maven_dir}"
+${DIR}/run-jshrink.sh "${TO}/app.jar" \
+	"${TO}/lib.jar" "${TO}/test.jar" \
+	"${TO}/src" "${temp_maven_dir}"
