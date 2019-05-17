@@ -1,2 +1,4 @@
 output/
+_shake
 .vagrant
+.DS_Store

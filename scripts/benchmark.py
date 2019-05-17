@@ -8,7 +8,7 @@ import shutil
 import csv
 import os
 import zipfile
-from subprocess import check_output, run, CalledProcessError
+from subprocess import check_output, run, CalledProcessError, DEVNULL
 from pathlib import Path
 from contextlib import contextmanager
 
@@ -61,20 +61,17 @@ def extract_classpath(benchmark, scope):
             if line.startswith("[INFO]"): continue
             for x in line.strip().split(":"):
                 if not x: continue
-                print(x, file=sys.stderr)
                 l = [str(Path.cwd()), x]
-                print(l, file=sys.stderr)
                 prefix = os.path.commonprefix(l)
-                print(prefix, file=sys.stderr)
                 if str(prefix) != str(Path.cwd()): continue
                 classpath.append(x)
     return classpath
 
 def extract_jar(jar, tofolder):
     Path(tofolder).mkdir(parents=True, exist_ok=True)
-    run(["unzip", "-o", str(jar), "-d", str(tofolder)])
+    run(["unzip", "-qo", str(jar), "-d", str(tofolder)])
 
-def copy_classes(src, dst):
+def copy_files(src, dst):
     for file in src.rglob("*"):
         if not file.is_file(): continue
         dst_file = dst / file.relative_to(src)
@@ -87,10 +84,16 @@ def make_jar(srcs, libs, jar):
         for lib in libs:
             extract_jar(lib, stage_folder)
         for src in srcs:
-            copy_classes(src, stage_folder)
+            copy_files(src, stage_folder)
         jar.parent.mkdir(parents=True, exist_ok=True)
         absjar = jar.parent.resolve() / jar.name
         with changedir(stage_folder):
+            for a in Path(stage_folder).glob("**/*.SF"): 
+                a.unlink()
+            for a in Path(stage_folder).glob("**/*.RSA"): 
+                a.unlink()
+            for a in Path(stage_folder).glob("**/*.DES"): 
+                a.unlink()
             run(["jar", "cf", str(absjar), "."])
 
 def extract_testclasses(target):
@@ -101,11 +104,9 @@ def extract_testclasses(target):
     return test_classes
 
 def main(argv):
-    excludedtest, benchmark, output = [Path(a) for a in argv[1:]]
+    excludedtest, benchmark, extract = [Path(a) for a in argv[1:]]
 
     excluded = set(excludedtest.read_text().splitlines())
-
-    extract = output / "extracted" / benchmark.name
 
     shutil.rmtree(str(extract), ignore_errors=True)
     extract.mkdir(parents=True, exist_ok=True)
@@ -120,6 +121,7 @@ def main(argv):
     
     targets = list(benchmark.glob("*/target/classes"))
     test_targets = list(benchmark.glob("*/target/test-classes"))
+    resources = list(benchmark.glob("*/src/test/resources"))
     if (benchmark / "target").exists(): 
         targets.append(benchmark / "target" / "classes")
         test_targets.append(benchmark / "target" / "test-classes")
@@ -127,14 +129,17 @@ def main(argv):
     test_classes = set.union(*[set(extract_testclasses(t.parent)) for t in test_targets]) - excluded
     (extract / "test.classes.txt").write_text('\n'.join(test_classes) + '\n')
 
-    make_jar(targets, set(), extract / "jars" / "app.jar")
+    make_jar(targets, set(), extract / "app.jar")
     
     compile_cp = set(extract_classpath(benchmark, "compile"))
-    make_jar([], compile_cp, extract / "jars" / "lib.jar")
+    make_jar([], compile_cp, extract / "lib.jar")
 
     test_cp = set(extract_classpath(benchmark, "test"))
-    make_jar(test_targets, test_cp - compile_cp, extract / "jars" / "test.jar")
+    make_jar(test_targets, test_cp - compile_cp, extract / "test.jar")
 
+    for t in resources:
+        x = t.parent.parent
+        copy_files(t, extract / "src" / t.relative_to(x))
 
     dct["classpath"] = {
         "lib": sorted(compile_cp),
