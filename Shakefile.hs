@@ -31,13 +31,13 @@ main = do
   let targets = ["initial", "initial+jreduce", "initial+inliner", "initial+jshrink"]
   let all = [
         "initial",
-        "initial+jreduce", "initial+inliner", "initial+jshrink"
+        "initial+jreduce", "initial+inliner", "initial+jshrink",
         "initial+inliner+jreduce+jshrink",
         "initial+inliner+jshrink+jreduce",
         "initial+jreduce+inliner+jshrink",
         "initial+jreduce+jshrink+inliner",
         "initial+jshrink+inliner+jreduce",
-        "initial+jshrink+jreduce+inliner",
+        "initial+jshrink+jreduce+inliner"
         ]
   shakeArgs shakeOptions
     { shakeFiles="output"
