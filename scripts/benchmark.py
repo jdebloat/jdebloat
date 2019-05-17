@@ -8,7 +8,7 @@ import shutil
 import csv
 import os
 import zipfile
-from subprocess import check_output, run, CalledProcessError
+from subprocess import check_output, run, CalledProcessError, DEVNULL
 from pathlib import Path
 from contextlib import contextmanager
 
@@ -88,6 +88,12 @@ def make_jar(srcs, libs, jar):
         jar.parent.mkdir(parents=True, exist_ok=True)
         absjar = jar.parent.resolve() / jar.name
         with changedir(stage_folder):
+            for a in Path(stage_folder).glob("**/*.SF"): 
+                a.unlink()
+            for a in Path(stage_folder).glob("**/*.RSA"): 
+                a.unlink()
+            for a in Path(stage_folder).glob("**/*.DES"): 
+                a.unlink()
             run(["jar", "cf", str(absjar), "."])
 
 def extract_testclasses(target):
