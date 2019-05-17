@@ -26,8 +26,8 @@ import Data.Foldable
 main :: IO ()
 main = do
   Right vector <- Csv.decode HasHeader <$> BL.readFile "data/benchmarks.csv"
-  let benchmarks = take 8 $ V.toList vector
-  let targets = ["initial", "initial+jreduce]
+  let benchmarks = V.toList vector
+  let targets = ["initial", "initial+jreduce"]
   shakeArgs shakeOptions
     { shakeFiles="output"
     , shakeLint=Just LintBasic
