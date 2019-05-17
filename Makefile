@@ -3,7 +3,7 @@ downloads = $(patsubst %, output/benchmarks/%/TIMESTAMP, $(benchmarks))
 extractions = $(patsubst %, output/extracted/%/extract.json, $(benchmarks))
 testoutputs = $(patsubst %, output/tests/%.txt, $(benchmarks))
 jreduce-outs = $(patsubst %, output/jreduce/%/app+lib.jar, $(benchmarks))
-jdebloat-outs = $(patsubst %, output/jdebloat/%/TIMESTAMP, $(benchmarks))
+jshrink-outs = $(patsubst %, output/jshrink/%/TIMESTAMP, $(benchmarks))
 inliner-outs = $(patsubst %, output/inliner/%/app+lib.jar, $(benchmarks))
 jreduce-inliner-outs = $(patsubst %, output/inliner+jreduce/%/app+lib.jar, $(benchmarks))
 
@@ -70,24 +70,24 @@ $(jreduce-inliner-outs): output/inliner+jreduce/%/app+lib.jar: output/inliner/%/
 
 ## Debloat
 
-.PHONY: jdebloat
-jdebloat: output/jdebloat
+.PHONY: jshrink
+jshrink: output/shrink
 
-output/jdebloat: $(jdebloat-outs)
+output/jshrink: $(jshrink-outs)
 
-$(jdebloat-outs): output/jdebloat/%/TIMESTAMP: output/benchmarks/%/TIMESTAMP output/extracted/%/extract.json ./scripts/runjdebloat.sh
-	mkdir -p output/jdebloat/
-	cp -r output/extracted/$* output/jdebloat/$*
+$(jshrink-outs): output/jshrink/%/TIMESTAMP: output/benchmarks/%/TIMESTAMP output/extracted/%/extract.json ./scripts/run_jshrink.sh
+	mkdir -p output/jshrink/
+	cp -r output/extracted/$* output/jshrink/$*
 	./scripts/run_jshrink.sh \
-	$(CURDIR)/output/jdebloat/$*/jars/app.jar \
-	$(CURDIR)/output/jdebloat/$*/jars/lib.jar \
-	$(CURDIR)/output/jdebloat/$*/jars/test.jar \
-	$(CURDIR)/output/jdebloat/$*/maven
+	$(CURDIR)/output/jshrink/$*/jars/app.jar \
+	$(CURDIR)/output/jshrink/$*/jars/lib.jar \
+	$(CURDIR)/output/jshrink/$*/jars/test.jar \
+	$(CURDIR)/output/jshrink/$*/maven
 
 	touch $@
 
 ~/.tamiflex/poa.properties: ~/.tamiflex
-	cp tools/jdebloat/poa.properties ~/.tamiflex/poa.properties
+	cp tools/jshrink/poa.properties ~/.tamiflex/poa.properties
 
 ~/.tamiflex:
 	mkdir ~/.tamiflex
