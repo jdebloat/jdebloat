@@ -29,6 +29,16 @@ main = do
   Right (vector :: V.Vector BenchmarkDesc) <- Csv.decode HasHeader <$> BL.readFile "data/benchmarks.csv"
   let benchmarks = V.toList vector
   let targets = ["initial", "initial+jreduce", "initial+inliner", "initial+jshrink"]
+  let all = [
+        "initial",
+        "initial+jreduce", "initial+inliner", "initial+jshrink"
+        "initial+inliner+jreduce+jshrink",
+        "initial+inliner+jshrink+jreduce",
+        "initial+jreduce+inliner+jshrink",
+        "initial+jreduce+jshrink+inliner",
+        "initial+jshrink+inliner+jreduce",
+        "initial+jshrink+jreduce+inliner",
+        ]
   shakeArgs shakeOptions
     { shakeFiles="output"
     , shakeLint=Just LintBasic
@@ -47,7 +57,19 @@ main = do
       benchmarkDownloadRules benchmark
 
     "output/report.csv" %> \out -> do
-      let stats = [ "output" </> benchmarkId b </> t </> "stats.csv" | b <- benchmarks, t <- targets ]
+      let stats = [ "output" </> benchmarkId b </> t </> "stats.csv"
+                  | b <- benchmarks, t <- targets ]
+      need stats
+      case stats of
+        s:rest -> do
+          copyFile' s out
+          forM_ rest $ \r -> do
+            x:lines <- readFileLines r
+            liftIO $ appendFile out (unlines lines)
+        [] -> error "What"
+    "output/all.csv" %> \out -> do
+      let stats = [ "output" </> benchmarkId b </> t </> "stats.csv"
+                  | b <- benchmarks, t <- all ]
       need stats
       case stats of
         s:rest -> do

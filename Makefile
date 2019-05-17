@@ -92,7 +92,7 @@ $(jshrink-outs): output/jshrink/%/TIMESTAMP: output/benchmarks/%/TIMESTAMP outpu
 ## Inliner
 
 .PHONY: inliner
-inliner: inliner-build inliner-setup $(inliner-outs)
+inliner: inliner-build inliner-setup
 
 .PHONY: inliner-build
 inliner-build:
