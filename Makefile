@@ -85,7 +85,7 @@ $(jshrink-outs): output/%/initial ./scripts/jshrink_script.sh ~/.tamiflex/poa.pr
 ## Inliner
 
 .PHONY: inliner
-inliner: inliner-build inliner-setup $(inliner-outs)
+inliner: inliner-build inliner-setup
 
 .PHONY: inliner-build
 inliner-build:

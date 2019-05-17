@@ -1,7 +1,8 @@
 #!/usr/bin/env stack
--- stack --resolver lts-13.19 script
+-- stack --resolver lts-12.24 script
 
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 import Development.Shake
 import Development.Shake.Command
 import Development.Shake.FilePath
@@ -25,9 +26,19 @@ import Data.Foldable
 
 main :: IO ()
 main = do
-  Right vector <- Csv.decode HasHeader <$> BL.readFile "data/benchmarks.csv"
+  Right (vector :: V.Vector BenchmarkDesc) <- Csv.decode HasHeader <$> BL.readFile "data/benchmarks.csv"
   let benchmarks = V.toList vector
-  let targets = ["initial", "initial+jreduce"]
+  let targets = ["initial", "initial+jreduce", "initial+inliner", "initial+jshrink"]
+  let all = [
+        "initial",
+        "initial+jreduce", "initial+inliner", "initial+jshrink"
+        "initial+inliner+jreduce+jshrink",
+        "initial+inliner+jshrink+jreduce",
+        "initial+jreduce+inliner+jshrink",
+        "initial+jreduce+jshrink+inliner",
+        "initial+jshrink+inliner+jreduce",
+        "initial+jshrink+jreduce+inliner",
+        ]
   shakeArgs shakeOptions
     { shakeFiles="output"
     , shakeLint=Just LintBasic
@@ -46,7 +57,19 @@ main = do
       benchmarkDownloadRules benchmark
 
     "output/report.csv" %> \out -> do
-      let stats = [ "output" </> benchmarkId b </> t </> "stats.csv" | b <- benchmarks, t <- targets ]
+      let stats = [ "output" </> benchmarkId b </> t </> "stats.csv"
+                  | b <- benchmarks, t <- targets ]
+      need stats
+      case stats of
+        s:rest -> do
+          copyFile' s out
+          forM_ rest $ \r -> do
+            x:lines <- readFileLines r
+            liftIO $ appendFile out (unlines lines)
+        [] -> error "What"
+    "output/all.csv" %> \out -> do
+      let stats = [ "output" </> benchmarkId b </> t </> "stats.csv"
+                  | b <- benchmarks, t <- all ]
       need stats
       case stats of
         s:rest -> do
@@ -79,16 +102,20 @@ main = do
       need [ from </> "test.txt", "scripts/metric.py"]
       cmd_ (FileStdout out) "scripts/metric.py" [from]
 
-    "output//*+jreduce/app.jar" %> \out -> do
-      let
-        outfolder = takeDirectory out
-        from = List.init $ List.dropWhileEnd (/= '+') outfolder
-      liftIO $ removeFiles outfolder ["//"]
-      need [ from </> "app.jar"
-           , "scripts/unjar.py"
-           , "scripts/run-jreduce.sh"]
-      cmd_ "scripts/run-jreduce.sh" [from, outfolder]
+    "output//*+jreduce/app.jar" %> runScriptAction "scripts/run-jreduce.sh"
+    "output//*+inliner/app.jar"  %> runScriptAction "scripts/run-inliner.sh"
+    "output//*+jshrink/app.jar" %> runScriptAction "scripts/run-jshrink.sh"
 
+runScriptAction :: FilePath -> FilePath -> Action ()
+runScriptAction script out = do
+  let
+    outfolder = takeDirectory out
+    from = List.init $ List.dropWhileEnd (/= '+') outfolder
+  liftIO $ removeFiles outfolder ["//"]
+  need [ from </> "app.jar"
+        , "scripts/unjar.py"
+        , script ]
+  cmd_ script [from, outfolder]
 
 benchmarkDownloadRules :: BenchmarkDesc -> Rules ()
 benchmarkDownloadRules BenchmarkDesc {..} = do
