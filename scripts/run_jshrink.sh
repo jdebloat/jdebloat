@@ -13,7 +13,9 @@ ${DIR}/prepare_for_jshrink.sh "${app_jar}" "${lib_jar}" "${test_jar}" "${new_mav
 TIMEOUT=18000 #Five hours
 DEBLOAT_APP="${DIR}/../tools/jdebloat/jdebloat.jar"
 TAMIFLEX="${DIR}/../tools/jdebloat/poa-2.0.3.jar"
+LOG_DIR=$(mkdir /tmp/project_log_XXXXX)
+rm "${LOG_DIR}"
 
-timeout ${TIMEOUT} java -Xmx20g -jar ${DEBLOAT_APP} --tamiflex ${TAMIFLEX} --maven-project ${new_maven_dir} --public-entry --main-entry --test-entry --prune-app --class-collapser --inline --remove-fields --remove-methods --verbose
+timeout ${TIMEOUT} java -Xmx20g -jar ${DEBLOAT_APP} --tamiflex ${TAMIFLEX} --maven-project ${new_maven_dir} --public-entry --main-entry --test-entry --prune-app --class-collapser --inline --remove-fields --remove-methods --verbose --log-directory "${LOG_DIR}"
 
 ${DIR}/jshrink_cleanup.sh "${app_jar}" "${lib_jar}" "${test_jar}" "${new_maven_dir}"
