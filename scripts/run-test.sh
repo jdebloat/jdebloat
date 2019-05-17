@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 
 FOLDER=$(realpath $1);shift
-SRC=${1:-$FOLDER/src};shift
-MYCLASSPATH=${1:-$FOLDER/app.jar:$FOLDER/lib.jar}
-
-ln -s $SRC src
+MYCLASSPATH=${1:-$FOLDER/app.jar:$FOLDER/lib.jar};shift
+ln -s $FOLDER/src src
 
 TESTPATH=$FOLDER/test.jar:$MYCLASSPATH
 

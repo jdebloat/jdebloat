@@ -26,7 +26,7 @@ jreduce $@\
   $(realpath "$SCRIPT_DIR/run-test.sh") \
   $(realpath "$TO")
 
-(cd _jreduce/output && jar cf ../../app+lib.jar *)
+(cd _jreduce/output && jar cf ../../app+lib.after.jar *)
 
 if [ ! -e app+lib.after.jar ]
 then

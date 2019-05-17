@@ -1,3 +1,6 @@
+#!/usr/bin/env stack
+-- stack --resolver lts-13.21 script
+
 {-# LANGUAGE RecordWildCards #-}
 import Development.Shake
 import Development.Shake.Command
@@ -8,46 +11,68 @@ import qualified Data.List as List
 
 import System.Directory (makeAbsolute)
 
+-- cassava
+import Data.Csv as Csv
+
+-- bytestring
+import qualified Data.ByteString.Lazy as BL
+
+-- vector
+import qualified Data.Vector as V
+
+-- prelude
+import Data.Foldable
+
 main :: IO ()
-main = shakeArgs shakeOptions{shakeFiles="output"} $ do
-    want ["output/01/report.txt", "output/00/report.txt"]
+main = do
+  Right vector <- Csv.decode HasHeader <$> BL.readFile "data/benchmarks.csv"
+  let benchmarks = take 8 $ V.toList vector
+  let targets = ["initial", "initial+jreduce]
+  shakeArgs shakeOptions
+    { shakeFiles="output"
+    , shakeLint=Just LintBasic
+    , shakeThreads=0
+    , shakeReport=["output/build.json", "output/build.html", "output/build.trace"]
+    , shakeTimings=True
+    , shakeProgress=progressSimple
+    } $ do
+    want ["output/report.csv"]
 
     phony "clean" $ do
-        putNormal "Cleaning files in _build"
+        putNormal "Cleaning files in output"
         removeFilesAfter "output" ["//*"]
 
-    benchmarkDownloadRules
-      (BenchmarkDesc
-       "00"
-       "https://github.com/apache/commons-lang"
-       "3609993fb588017c77fc1781d697dcf1717cd73a")
+    forM_ benchmarks $ \benchmark -> do
+      benchmarkDownloadRules benchmark
 
-    benchmarkDownloadRules
-      (BenchmarkDesc
-       "01"
-       "https://github.com/aragozin/jvm-tools"
-       "65ab61f56694426247ab62bb27e13c17de8c5953")
+    "output/report.csv" %> \out -> do
+      let stats = [ "output" </> benchmarkId b </> t </> "stats.csv" | b <- benchmarks, t <- targets ]
+      need stats
+      case stats of
+        s:rest -> do
+          copyFile' s out
+          forM_ rest $ \r -> do
+            x:lines <- readFileLines r
+            liftIO $ appendFile out (unlines lines)
+        [] -> error "What"
 
-    "output/*/report.txt" %> \out -> do
-      need [takeDirectory out </> "benchmark/TIMESTAMP"]
-      writeFile' out ""
-
-    "output/*/extracted/app.jar" %> \out -> do
+    "output/*/initial/app.jar" %> \out -> do
       let
         extracted = takeDirectory out
         benchmark = takeDirectory extracted </> "benchmark"
       need [ benchmark </> "TIMESTAMP"
            , "scripts/benchmark.py"
            , "data/excluded-tests.txt"]
-      cmd_ "scripts/benchmark.py" ["data/excluded-tests.txt", benchmark, extracted]
+      cmd "scripts/benchmark.py" ["data/excluded-tests.txt", benchmark, extracted]
 
     "output//*/test.txt" %> \out -> do
       let from = takeDirectory out
       need [ from </> "app.jar", "scripts/run-test.sh"]
       x <- liftIO $ makeAbsolute from
       s <- liftIO $ makeAbsolute "scripts/run-test.sh"
-      withTempDir $ \folder ->
-        cmd_ (Cwd folder) (FileStdout out) (FileStderr out) [s] [ x ]
+      withTempDir $ \folder -> do
+        Exit _ <- cmd (Cwd folder) (FileStdout out) (FileStderr out) [s] [ x ]
+        return ()
 
     "output//*/stats.csv" %> \out -> do
       let from = takeDirectory out
@@ -64,11 +89,6 @@ main = shakeArgs shakeOptions{shakeFiles="output"} $ do
            , "scripts/run-jreduce.sh"]
       cmd_ "scripts/run-jreduce.sh" [from, outfolder]
 
-data BenchmarkDesc = BenchmarkDesc
-  { benchmarkId :: String
-  , benchmarkUrl :: String
-  , benchmarkCommit :: String
-  }
 
 benchmarkDownloadRules :: BenchmarkDesc -> Rules ()
 benchmarkDownloadRules BenchmarkDesc {..} = do
@@ -89,3 +109,13 @@ benchmarkDownloadRules BenchmarkDesc {..} = do
       cmd_ (Cwd benchmark) "git apply" ["../../.." </> patchfile]
       else return ()
     writeFile' out ""
+
+data BenchmarkDesc = BenchmarkDesc
+  { benchmarkId :: String
+  , benchmarkUrl :: String
+  , benchmarkCommit :: String
+  }
+
+instance  FromRecord BenchmarkDesc where
+  parseRecord v =
+    BenchmarkDesc <$> v .! 0 <*> v .! 1 <*> v .! 2
