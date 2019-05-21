@@ -19,6 +19,6 @@ cp -r "${FROM}" "${TO}"
 temp_maven_dir=$(mktemp /tmp/XXXX)
 rm ${temp_maven_dir}
 
-${DIR}/run-jshrink.sh "${TO}/app.jar" \
+${SCRIPT_DIR}/run-jshrink.sh "${TO}/app.jar" \
 	"${TO}/lib.jar" "${TO}/test.jar" \
 	"${TO}/src" "${temp_maven_dir}"
