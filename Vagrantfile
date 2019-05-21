@@ -7,13 +7,15 @@ Vagrant.configure("2") do |config|
   # the path on the host to the actual folder. The second argument is
   # the path on the guest to mount the folder. And the optional third
   # argument is a set of non-required options.
-  # config.vm.synced_folder "../data", "/vagrant_data"
+   config.vm.synced_folder ".", "/vagrant2"
 
   #
   config.vm.provider "virtualbox" do |vb|
     # Customize the amount of memory on the VM:
-    vb.memory = "4096"
+    vb.memory = "16000"
+    #vb.disksize.size='70GB'
   end
+  config.disksize.size='70GB'
   #
   # View the documentation for the provider you are using for more
   # information on available options.
