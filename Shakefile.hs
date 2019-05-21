@@ -52,6 +52,10 @@ main = do
     phony "clean" $ do
         putNormal "Cleaning files in output"
         removeFilesAfter "output" ["//*"]
+    
+    phony "setup" $ do
+        putNormal "Setting up database"
+        cmd_ (Cwd "tools/inliner") "make setup"
 
     forM_ benchmarks $ \benchmark -> do
       benchmarkDownloadRules benchmark
