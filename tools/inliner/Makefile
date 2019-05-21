@@ -5,6 +5,7 @@ all: build soot build/inliner.jar
 
 .PHONY: soot
 soot:
+	cp ../../data/PackManager.java external/soot/src/main/java/soot/PackManager.java 
 	cd external/soot; mvn clean compile assembly:single
 	cp external/soot/target/sootclasses-trunk-jar-with-dependencies.jar build/soot.jar
 
