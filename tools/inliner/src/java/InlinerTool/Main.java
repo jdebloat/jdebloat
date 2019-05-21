@@ -19,7 +19,7 @@ public class Main {
 			new ArrayList<String>(Arrays.asList(args));
 		String removed = argsList.remove(argsList.size() - 1);
 		argsList.addAll(Arrays.asList(
-			new String[] {"-pp", "-keep-offset", "-w"}));
+			new String[] {"-pp", "-keep-offset", "-w", "-allow-phantom-refs"}));
 		args = argsList.toArray(new String[0]);
 
 		PackManager.v().getPack("wjtp").add(
