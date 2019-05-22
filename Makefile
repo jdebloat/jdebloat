@@ -14,8 +14,8 @@ jreduce-install:
 .PHONY: inliner-build
 inliner-build:
 	cp data/inliner/settings.py tools/inliner/src/python/settings.py
-	cd tools/inliner; DJANGO_SETTINGS_MODULE=settings make setup
 	cd tools/inliner; make
+	cd tools/inliner; DJANGO_SETTINGS_MODULE=settings make setup
 
 .PHONY: experiments
 experiments:
