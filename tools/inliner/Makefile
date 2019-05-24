@@ -20,4 +20,4 @@ build/inliner.jar: src/java/InlinerTool/InlinerTransformer.java src/java/Inliner
 
 .PHONY: setup
 setup:
-	cd src/python; python3 -m venv venv; source venv/bin/activate; pip install -r requirements.txt; python manage.py migrate
+	cd src/python; DJANGO_SETTINGS_MODULE=settings; python3 -m venv venv; source venv/bin/activate; pip install -r requirements.txt; python manage.py migrate

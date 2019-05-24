@@ -49,13 +49,13 @@ main = do
     } $ do
     want ["output/report.csv"]
 
-    phony "clean" $ do
-        putNormal "Cleaning files in output"
-        removeFilesAfter "output" ["//*"]
+    --phony "clean" $ do
+        --putNormal "Cleaning files in output"
+        --removeFilesAfter "output" ["//*"]
     
-    phony "setup" $ do
-        putNormal "Setting up database"
-        cmd_ (Cwd "tools/inliner") "make setup"
+    --phony "setup" $ do
+        --putNormal "Setting up database"
+        --cmd_ (Cwd "tools/inliner") "make setup"
 
     forM_ benchmarks $ \benchmark -> do
       benchmarkDownloadRules benchmark
