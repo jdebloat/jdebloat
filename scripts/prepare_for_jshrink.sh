@@ -40,13 +40,19 @@ echo "</project>" >>"${new_maven_dir}/pom.xml"
 mkdir "${new_maven_dir}/target"
 mkdir "${new_maven_dir}/target/classes"
 mkdir "${new_maven_dir}/target/test-classes"
-mkdir "${new_maven_dir}/src"
 
 {
 	unzip "${app_jar}" -d"${new_maven_dir}/target/classes/"
 	unzip "${test_jar}" -d"${new_maven_dir}/target/test-classes/"
+	rm -rf "${new_maven_dir}/target/test-classes/org/junit" "${new_maven_dir}/target/test-classes/org/hamcrest"
 } &>/dev/null
 
+
 rm -rf "${new_maven_dir}/target/test-classes/junit"
-cp -r "${src_dir}" "${new_maven_dir}/"
+if [ -d "${src_dir}" ]; then
+	cp -r "${src_dir}" "${new_maven_dir}/"
+else
+	mkdir "${new_maven_dir}/src"
+fi
 cp "${lib_jar}" "${new_maven_dir}/"
+

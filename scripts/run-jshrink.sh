@@ -17,6 +17,6 @@ TAMIFLEX="${DIR}/../tools/jdebloat/poa-2.0.3.jar"
 LOG_DIR=$(mktemp /tmp/project_log_XXXXX)
 rm "${LOG_DIR}"
 
-timeout ${TIMEOUT} java -Xmx20g -jar ${DEBLOAT_APP} --maven-project ${new_maven_dir} --public-entry --main-entry --test-entry --prune-app --class-collapser --inline --remove-fields --remove-methods --verbose --log-directory "${LOG_DIR}"
+timeout ${TIMEOUT} java -Xmx20g -jar ${DEBLOAT_APP} --maven-project ${new_maven_dir} --tamiflex "${TAMIFLEX}" --public-entry --main-entry --test-entry --prune-app --class-collapser --inline --remove-fields --remove-methods --verbose --log-directory "${LOG_DIR}"
 
 ${DIR}/jshrink_cleanup.sh "${app_jar}" "${lib_jar}" "${test_jar}" "${src_dir}" "${new_maven_dir}"
