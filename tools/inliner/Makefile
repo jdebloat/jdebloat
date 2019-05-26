@@ -5,6 +5,8 @@ all: build soot build/inliner.jar
 
 .PHONY: soot
 soot:
+	cp ../../data/Scene.java external/soot/src/main/java/soot/Scene.java 
+	cp ../../data/PathPart.java external/soot/src/main/generated/jastadd/soot/JastAddJ/PathPart.java
 	cp ../../data/PackManager.java external/soot/src/main/java/soot/PackManager.java 
 	cp ../../data/OnFlyCallGraphBuilder.java external/soot/src/main/java/soot/jimple/toolkits/callgraph/OnFlyCallGraphBuilder.java
 	cd external/soot; mvn clean compile assembly:single

@@ -150,6 +150,7 @@ public class InlinerTransformer extends SceneTransformer {
 	@Override
 	public void internalTransform(String phaseName, Map options) {
 		for (SootClass sootClass : Scene.v().getClasses()) {
+			try{
 			for (SootMethod sootMethod : sootClass.getMethods()) {
 				if (!sootMethod.isConcrete()) {
 					continue;
@@ -158,6 +159,7 @@ public class InlinerTransformer extends SceneTransformer {
 					getHotSpotSignature(sootMethod);
 				methodMap.put(hotSpotSignature, sootMethod);
 			}
+			}catch(Exception e){continue;}
 		}
 
 		int count = 0;
