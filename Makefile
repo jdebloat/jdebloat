@@ -1,5 +1,5 @@
 .PHONY: setup
-setup: jreduce-install inliner-build 
+setup: jreduce-install inliner-build output
 
 .PHONY: clean 
 clean: inliner-clean 
@@ -9,8 +9,11 @@ clean: inliner-clean
 jreduce-install:
 	cd tools/jvmhs; stack install 
 
+output:
+	mkdir output
+
 .PHONY: inliner-build
-inliner-build: inliner-clean
+inliner-build: output
 	cp data/inliner/settings.py tools/inliner/src/python/settings.py
 	cd tools/inliner; make setup
 	cd tools/inliner; make	
@@ -18,13 +21,14 @@ inliner-build: inliner-clean
 
 .PHONY: inliner-clean
 inliner-clean:
+	@-rm tools/inliner/build/inliner.jar
 	@-rm ./output/db.sqlite3
 	@-rm ./tools/inliner/src/python/db.sqlite3
 
 .PHONY: experiments
-experiments:
+experiments: output
 	./Shakefile.hs output/all.csv
 
 .PHONY: small-experiments
-small-experiments:
+small-experiments: output
 	./Shakefile.hs output/report.csv
