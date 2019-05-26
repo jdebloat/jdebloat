@@ -35,9 +35,7 @@ main = do
         "initial+inliner",
         "initial+jshrink",
         "initial+jreduce+inliner",
-        "initial+jreduce+jshrink",
-        "initial+jreduce+inliner+jshrink",
-        "initial+jreduce+jshrink+inliner"]
+        "initial+jreduce+inliner+jshrink"]
   shakeArgs shakeOptions
     { shakeFiles="output"
     , shakeLint=Just LintBasic
