@@ -5,3 +5,6 @@
 	path = tools/inliner/external/soot
 	url = https://github.com/eyolfson/soot.git
 	branch = asmbytecodeoffset
+[submodule "tools/jshrink"]
+	path = tools/jshrink
+	url = git@github.com:tianyi-zhang/call-graph-analysis.git
