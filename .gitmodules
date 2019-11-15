@@ -1,7 +1,3 @@
 [submodule "tools/jvmhs"]
 	path = tools/jvmhs
 	url = https://github.com/ucla-pls/jvmhs.git
-[submodule "tools/inliner/external/soot"]
-	path = tools/inliner/external/soot
-	url = https://github.com/eyolfson/soot.git
-	branch = asmbytecodeoffset
