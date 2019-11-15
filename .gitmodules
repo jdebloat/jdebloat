@@ -2,5 +2,5 @@
 	path = tools/jvmhs
 	url = https://github.com/ucla-pls/jvmhs.git
 [submodule "tools/inliner"]
-	path = tools/inliner
+	path = tools/jinline
 	url = git@laforge.cs.ucla.edu:jinline
