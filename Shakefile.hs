@@ -52,7 +52,7 @@ main = do
     
     --phony "setup" $ do
         --putNormal "Setting up database"
-        --cmd_ (Cwd "tools/inliner") "make setup"
+        --cmd_ (Cwd "tools/jinline") "make setup"
 
     forM_ benchmarks $ \benchmark -> do
       benchmarkDownloadRules benchmark
