@@ -24,6 +24,9 @@ def get_metric(categories, classpath):
         del dct["name"]
         del dct["sha256"]
         for key in dct:
+            if key not in final:
+                print(key)
+                final[key] = 0
             final[key] += dct[key]
         final['classes'] += 1
     return dict(**final)
