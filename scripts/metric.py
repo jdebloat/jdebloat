@@ -21,12 +21,13 @@ def get_metric(categories, classpath):
     final = { c: 0 for c in categories } 
     for line in out.splitlines():
         dct = json.loads(line)
-        del dct["name"]
-        del dct["sha256"]
+        # del dct["name"]
+        # del dct["sha256"]
+        # del dct["errors"]
+        # del dct["error_message"]
         for key in dct:
             if key not in final:
-                print(key)
-                final[key] = 0
+               continue
             final[key] += dct[key]
         final['classes'] += 1
     return dict(**final)
