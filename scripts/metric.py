@@ -17,7 +17,7 @@ from collections import OrderedDict, defaultdict
 
 
 def get_metric(categories, classpath): 
-    out = check_output(['javaq', '--format', 'json-metric', '--cp', str(classpath)], universal_newlines=True)
+    check_output(['javaq', 'class-metrics', '--cp', str(classpath)], universal_newlines=True)
     final = { c: 0 for c in categories } 
     for line in out.splitlines():
         dct = json.loads(line)
