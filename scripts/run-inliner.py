@@ -22,16 +22,16 @@ def main(args):
     app_lib_jar = os.path.join(BASE_DIR, args.app_lib_jar)
     test_classes = os.path.join(BASE_DIR, args.test_classes)
 
-    tool_dir = os.path.join(BASE_DIR, 'tools', 'inliner')
+    tool_dir = os.path.join(BASE_DIR, 'tools', 'jinline')
     build_dir = os.path.join(tool_dir, 'build')
-    script_path = os.path.join(tool_dir, 'scripts', 'create-inline-targets.sh') 
+    script_path = os.path.join(tool_dir, 'scripts', 'create-inline-targets.sh')
 
     output_dir = os.path.join(BASE_DIR, args.output_dir)
     inline_targets_path = os.path.join(output_dir, 'inline-targets.txt')
     output_files_path = os.path.join(output_dir, 'files')
     output_soot_path = os.path.join(output_dir, 'sootOutput')
     output_jar = os.path.join(BASE_DIR, args.output_jar)
-    
+
     classpath = '{}:{}'.format(test_jar, app_lib_jar)
 
     test_runner = None
