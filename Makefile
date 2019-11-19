@@ -17,13 +17,11 @@ inliner-build: output
 	cp data/inliner/settings.py tools/jinline/src/python/settings.py
 	cd tools/jinline; make setup
 	cd tools/jinline; make
-	cp tools/jinline/src/python/db.sqlite3 output/db.sqlite3
 
 .PHONY: inliner-clean
 inliner-clean:
 	@-rm tools/jinline/build/inliner.jar
 	@-rm ./output/db.sqlite3
-	@-rm ./tools/jinline/src/python/db.sqlite3
 
 .PHONY: experiments
 experiments: output
