@@ -11,14 +11,14 @@ import re
 import json
 import csv
 import itertools
-from pathlib import Path 
+from pathlib import Path
 from subprocess import check_output, DEVNULL, STDOUT, CalledProcessError
 from collections import OrderedDict, defaultdict
 
 
-def get_metric(categories, classpath): 
+def get_metric(categories, classpath):
     out = check_output(['javaq', 'class-metrics', '--cp', str(classpath)], universal_newlines=True)
-    final = { c: 0 for c in categories } 
+    final = { c: 0 for c in categories }
     for line in out.splitlines():
         dct = json.loads(line)
         # del dct["name"]
@@ -35,9 +35,9 @@ def get_metric(categories, classpath):
 
 def run_test(extracted, classpath):
 
-    try: 
-        cmd = [ 'bash', 
-                str(Path(sys.argv[0]).parent / "runtest.sh"), 
+    try:
+        cmd = [ 'bash',
+                str(Path(sys.argv[0]).parent / "runtest.sh"),
                 str(extracted / "jars" / "test.jar"),
                 str(extracted / "test.classes.txt"),
                 str(classpath),
@@ -46,13 +46,13 @@ def run_test(extracted, classpath):
             universal_newlines=True,
             stderr=STDOUT
             )
-   
+
         res = RE_SUCCESS.search(out)
         if res:
-            return int(res.group(1)) 
+            return int(res.group(1))
 
     except CalledProcessError as e:
-        try: 
+        try:
             tests = RE_TESTRUN.search(str(e.output))
             failures = RE_FAILURES.search(str(e.output))
             return int(tests.group(1)) - int(failures.group(1))
@@ -64,13 +64,13 @@ def parseArg(a):
     a, b = a.split(':')
     return (a,b)
 
-RE_TESTRUN = re.compile(r"Tests run: ([0-9]+)") 
+RE_TESTRUN = re.compile(r"Tests run: ([0-9]+)")
 RE_FAILURES = re.compile(r"Failures: ([0-9]+)")
 RE_SUCCESS = re.compile(r"OK \(([0-9]+) tests*\)")
-def parseTests(text): 
+def parseTests(text):
     res = RE_SUCCESS.search(text)
-    if res: 
-        return int(res.group(1)) 
+    if res:
+        return int(res.group(1))
     else:
         try:
             tests = RE_TESTRUN.search(text)
@@ -79,9 +79,9 @@ def parseTests(text):
         except AttributeError:
             return 0
 
-def main(args): 
+def main(args):
     p = Path(args[1])
-    
+
     categories = ["size", "methods", "classes", "fields", "instructions", "tests"]
     headers = ["id", "name"] + categories
 
@@ -103,6 +103,3 @@ def main(args):
 
 if __name__ == "__main__":
     main(sys.argv)
-
-
-
