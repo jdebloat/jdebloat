@@ -17,13 +17,17 @@ from collections import OrderedDict, defaultdict
 
 
 def get_metric(categories, classpath): 
-    out = check_output(['javaq', '--format', 'json-metric', '--cp', str(classpath)], universal_newlines=True)
+    out = check_output(['javaq', 'class-metrics', '--cp', str(classpath)], universal_newlines=True)
     final = { c: 0 for c in categories } 
     for line in out.splitlines():
         dct = json.loads(line)
-        del dct["name"]
-        del dct["sha256"]
+        # del dct["name"]
+        # del dct["sha256"]
+        # del dct["errors"]
+        # del dct["error_message"]
         for key in dct:
+            if key not in final:
+               continue
             final[key] += dct[key]
         final['classes'] += 1
     return dict(**final)
