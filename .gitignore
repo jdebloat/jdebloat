@@ -1,4 +1,6 @@
 output/
+target/
+ubuntu-xenial-16.04-cloudimg-console.log
 _shake
 .vagrant
 .DS_Store

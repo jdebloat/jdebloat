@@ -4,3 +4,6 @@
 [submodule "tools/jinline"]
 	path = tools/jinline
 	url = git@laforge.cs.ucla.edu:jinline
+[submodule "tools/jshrink"]
+	path = tools/jshrink
+	url = git@github.com:tianyi-zhang/call-graph-analysis.git
