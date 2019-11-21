@@ -20,12 +20,11 @@ mkdir -p _jreduce/output
 jreduce $@\
   --work-folder "_jreduce/workfolder" \
   --cp "test.jar" \
-  --target "app+lib.jar" \
   --core "@test.classes.txt" \
   -o "_jreduce/output" \
   --timelimit 1800 \
-  $(realpath "$SCRIPT_DIR/run-test.sh") \
-  $(realpath "$TO")
+  "app+lib.jar" \
+  $(realpath "$SCRIPT_DIR/run-test.sh") $(realpath "$TO")
 
 (cd _jreduce/output && jar cf ../../app+lib.after.jar *)
 

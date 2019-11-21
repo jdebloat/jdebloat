@@ -1,6 +1,6 @@
-[submodule "tools/jvmhs"]
-	path = tools/jvmhs
-	url = https://github.com/ucla-pls/jvmhs.git
+[submodule "tools/jreduce"]
+	path = tools/jreduce
+	url = https://github.com/ucla-pls/jreduce.git
 [submodule "tools/jinline"]
 	path = tools/jinline
 	url = git@laforge.cs.ucla.edu:jinline

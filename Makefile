@@ -7,7 +7,7 @@ clean: inliner-clean
 
 .PHONY: jreduce-install
 jreduce-install:
-	cd tools/jvmhs; stack install
+	cd tools/jreduce; stack install
 
 output:
 	mkdir output
