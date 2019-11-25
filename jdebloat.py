@@ -31,7 +31,7 @@ def main():
             run_target(benchmark, target)
 
     write_stats(benchmarks)
-            
+
 def write_stats(benchmarks):
     stats = []
     for benchmark in benchmarks:
@@ -49,7 +49,7 @@ def run_target(benchmark, target):
 
     for i in range(0, len(target)):
         t = target[i]
-        dest = OUTPUT / benchmark.id / "+".join(target[0:i + 1]) 
+        dest = OUTPUT / benchmark.id / "+".join(target[0:i + 1])
 
         if t == "initial":
             compile(benchmark, source, dest)
@@ -58,14 +58,14 @@ def run_target(benchmark, target):
         elif t == "jreduce":
             jreduce(source, dest)
         elif t == "jshrink":
-            jshrink(source, dest) 
+            jshrink(source, dest)
 
         test(dest)
         metric(dest)
-        
+
         source = dest
         #run tests
-    
+
 def read(*args, **kwargs):
     try:
         return check_output(args, universal_newlines=True, **kwargs).splitlines()
@@ -87,7 +87,7 @@ def compile(benchmark, src, dest):
 
 def jreduce(src, dest):
     if(os.path.exists(str(dest / "app.jar"))):
-        return 
+        return
     output = read(str(SCRIPTS / "run-jreduce.sh"), str(src), str(dest))
 
     with open(str(dest / "test.txt"), "w") as f:
@@ -95,7 +95,7 @@ def jreduce(src, dest):
 
 def inline(src, dest):
     if(os.path.exists(str(dest / "app.jar"))):
-        return 
+        return
 
     run([str(SCRIPTS / "run-inliner.sh"), str(src), str(dest)])
 
@@ -109,7 +109,7 @@ def test(dest):
     if(os.path.exists(str(dest / "test.txt"))):
         return
 
-    with tempfile.TemporaryDirectory() as dirpath: 
+    with tempfile.TemporaryDirectory() as dirpath:
         os.chdir(dirpath)
         run([str(SCRIPTS / "run-test.sh"), str(dest)])
         os.chdir(str(ROOT))
@@ -125,7 +125,7 @@ def metric(dest):
 def apply_patch(benchmark):
     path = OUTPUT / benchmark.id / SRC_FOLDER / "TIMESTAMP"
     patch_path = str(PATCHES / benchmark.id) + ".patch"
-    
+
     if(os.path.exists(str(path))):
         return
 
@@ -138,27 +138,27 @@ def download_benchmark(benchmark):
     path = OUTPUT / benchmark.id / SRC_FOLDER
     if(os.path.exists(str(path / ".git" / "HEAD"))):
         return
-    
+
     if(os.path.exists(str(path))):
         os.rmdir(path)
 
     git("clone", benchmark.url, path)
     git("checkout", "-b", "onr", benchmark.rev, work_folder=path)
-    
+
 def get_benchmarks():
     data = []
     with open(BENCHMARKS) as bench_file:
         reader = csv.reader(bench_file, delimiter=',')
         next(reader) #skip header
         for row in reader:
-            data.append(Benchmark(row[0], row[1], row[2])) 
+            data.append(Benchmark(row[0], row[1], row[2]))
     return data
 
 class Benchmark:
     def __init__(self, id, url, rev):
         self.id = id
         self.url = url
-        self.rev = rev 
+        self.rev = rev
 
 if __name__ == "__main__":
     main()
