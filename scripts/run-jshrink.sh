@@ -12,8 +12,8 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 ${DIR}/prepare_for_jshrink.sh "${app_jar}" "${lib_jar}" "${test_jar}" "${src_dir}" "${new_maven_dir}"
 
 TIMEOUT=18000 #Five hours
-DEBLOAT_APP="${DIR}/../tools/jdebloat/jdebloat.jar"
-TAMIFLEX="${DIR}/../tools/jdebloat/poa-2.0.3.jar"
+DEBLOAT_APP="${DIR}/../tools/jshrink/jshrink/jshrink-app/target/jshrink-app-1.0-SNAPSHOT-jar-with-dependencies.jar"
+TAMIFLEX="${DIR}/../tools/jshrink/experiment_resources/poa-2.0.3.jar"
 LOG_DIR=$(mktemp /tmp/project_log_XXXXX)
 rm "${LOG_DIR}"
 

@@ -1,5 +1,5 @@
 .PHONY: setup
-setup: jreduce-install inliner-build output
+setup: jreduce-install inliner-build jshrink-build output
 
 .PHONY: clean
 clean: inliner-clean
@@ -30,3 +30,8 @@ experiments: output
 .PHONY: small-experiments
 small-experiments: output
 	./Shakefile.hs output/report.csv
+
+.PHONY: jshrink-build
+jshrink-build:
+	cd tools/jshrink/jshrink && \
+  mvn --file pom_soot-3.2.xml compile -pl jshrink-app -am && \
