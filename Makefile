@@ -33,5 +33,8 @@ small-experiments: output
 
 .PHONY: jshrink-build
 jshrink-build:
-	cd tools/jshrink/jshrink && \
-  mvn --file pom_soot-3.2.xml compile -pl jshrink-app -am && \
+	cd tools/jshrink/experiment_resources/jshrink-mtrace/jmtrace; make JDK=/usr/lib/jvm/java-8-openjdk-amd64 OSNAME=linux
+	cd tools/jshrink/jshrink; mvn compile -pl jshrink-app -am
+	cd tools/jshrink; cp jshrink/jshrink-app/target/jshrink-app-1.0-SNAPSHOT-jar-with-dependencies.jar experiment_resources/
+	cp scripts/run_jshrink.sh tools/jshrink/experiment_resources/run_experiment_script_all_transformations_with_tamiflex_and_jmtrace.sh
+	
