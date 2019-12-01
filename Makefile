@@ -34,4 +34,4 @@ small-experiments: output
 .PHONY: jshrink-build
 jshrink-build:
 	cd tools/jshrink/jshrink && \
-  mvn --file pom_soot-3.2.xml compile -pl jshrink-app -am && \
+	mvn --file pom_soot-3.2.xml compile -pl jshrink-app -am

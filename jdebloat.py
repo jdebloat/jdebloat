@@ -12,10 +12,10 @@ DATA= ROOT / "data"
 PATCHES = DATA / "patches"
 SRC_FOLDER = "benchmark"
 SCRIPTS = ROOT / "scripts"
-TARGETS = ["initial", "initial+jshrink"]
+TARGETS = ["initial", "initial+jreduce"]
 ALL_TARGETS = [
     "initial",
-    "initial+jshrink"
+    "initial+jreduce"
 ]
 
 def main():
@@ -41,7 +41,7 @@ def write_stats(benchmarks):
 
     with open(str(OUTPUT / "all.csv"), "w") as f:
         f.write("id,name,size,methods,classes,fields,instructions,tests\n")
-        f.writelines(stats)
+        f.writelines('\n'.join(stats))
 
 def run_target(benchmark, target):
     target = target.split("+")
@@ -111,7 +111,10 @@ def test(dest):
 
     with tempfile.TemporaryDirectory() as dirpath:
         os.chdir(dirpath)
-        run([str(SCRIPTS / "run-test.sh"), str(dest)])
+        output = read(str(SCRIPTS / "run-test.sh"), str(dest))
+        with open(str(dest / "test.txt"), 'w') as f:
+            f.write('\n'.join(output))
+
         os.chdir(str(ROOT))
 
 def metric(dest):
@@ -120,7 +123,7 @@ def metric(dest):
 
     output = read(str(SCRIPTS / "metric.py"), str(dest))
     with open(str(dest / "stats.csv"), "w") as f:
-      f.write(str(output))
+        f.write('\n'.join(output))
 
 def apply_patch(benchmark):
     path = OUTPUT / benchmark.id / SRC_FOLDER / "TIMESTAMP"
@@ -155,8 +158,8 @@ def get_benchmarks():
     return data
 
 class Benchmark:
-    def __init__(self, id, url, rev):
-        self.id = id
+    def __init__(self, benchmark_id, url, rev):
+        self.id = benchmark_id
         self.url = url
         self.rev = rev
 
