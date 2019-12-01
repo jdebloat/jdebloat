@@ -37,4 +37,4 @@ jshrink-build:
 	cd tools/jshrink/jshrink; mvn compile -pl jshrink-app -am
 	cd tools/jshrink; cp jshrink/jshrink-app/target/jshrink-app-1.0-SNAPSHOT-jar-with-dependencies.jar experiment_resources/
 	cp scripts/run_jshrink.sh tools/jshrink/experiment_resources/run_experiment_script_all_transformations_with_tamiflex_and_jmtrace.sh
-	
+	chmod +x tools/jshrink/experiment_resources/run_experiment_script_all_transformations_with_tamiflex_and_jmtrace.sh
