@@ -4,6 +4,8 @@ from pathlib import Path
 from subprocess import check_output, run, CalledProcessError
 import sys
 import tempfile
+from contextlib import contextmanager
+import argparse
 
 BENCHMARKS = "data/benchmarks.csv"
 ROOT = Path(os.path.dirname(os.path.abspath(__file__)))
@@ -12,7 +14,12 @@ DATA= ROOT / "data"
 PATCHES = DATA / "patches"
 SRC_FOLDER = "benchmark"
 SCRIPTS = ROOT / "scripts"
-TARGETS = ["initial", "initial+jshrink", "initial+jreduce", "initial+inliner+jshrink"]
+TARGETS = [
+        "initial",
+        "initial+inliner",
+        "initial+jreduce",
+        "initial+jreduce+jshrink"
+]
 ALL_TARGETS = [
     "initial",
     "initial+jshrink", 
@@ -68,6 +75,15 @@ def run_target(benchmark, target):
         source = dest
         #run tests
 
+@contextmanager
+def changedir(dir):
+    prevdir = os.getcwd()
+    try:
+        os.chdir(os.path.expanduser(str(dir)))
+        yield
+    finally:
+        os.chdir(prevdir)
+
 def read(*args, **kwargs):
     try:
         return check_output(args, universal_newlines=True, **kwargs).splitlines()
@@ -106,6 +122,42 @@ def jshrink(src, dest):
         return
 
     run([str(SCRIPTS / "jshrink_script.sh"), str(src), str(dest)])
+
+def setup(tool):
+    if not tool:
+        setup_jinline()
+        setup_jreduce()
+        setup_jshrink()
+    elif tool == 'jinline':
+        setup_jinline()
+    elif tool == 'jreduce':
+        setup_jreduce()
+    elif tool == 'jshrink':
+        setup_jshrink()
+    else:
+        pass
+
+def setup_jinline():
+    if not os.path.exists('output/db.sqlite3'):
+        run(['cp', 'data/inliner/settings.py', 'tools/jinline/src/python/settings.py'])
+        with changedir('tools/jinline'):
+            run(['make', 'setup'])
+    with changedir('tools/jinline'):
+        run(['make'])
+
+def setup_jreduce():
+    with changedir('tools/jreduce'):
+        run(['stack', 'install'])
+
+def setup_jshrink():
+    with changedir('tools/jshrink/experiment_resources/jshrink-mtrace/jmtrace'):
+        run(['make', 'JDK=/usr/lib/jvm/java-8-openjdk-amd64', 'OSNAME=linux'])
+    with changedir('tools/jshrink/jshrink'):
+        run(['mvn', 'compile', '-pl', 'jshrink-app', '-am'])
+    with changedir('tools/jshrink'):
+        run(['cp', 'jshrink/jshrink-app/target/jshrink-app-1.0-SNAPSHOT-jar-with-dependencies.jar', 'experiment_resources/'])
+    run(['cp', 'scripts/run_jshrink.sh', 'tools/jshrink/experiment_resources/run_experiment_script_all_transformations_with_tamiflex_and_jmtrace.sh'])
+    run(['chmod', '+x', 'tools/jshrink/experiment_resources/run_experiment_script_all_transformations_with_tamiflex_and_jmtrace.sh'])
 
 def test(dest):
     if(os.path.exists(str(dest / "test.txt"))):
@@ -165,5 +217,17 @@ class Benchmark:
         self.url = url
         self.rev = rev
 
+def parse_args():
+    parser = argparse.ArgumentParser(description='Run all 3 debloat tools in sequence.')
+    parser.add_argument('opt', metavar='opt', type=str, nargs='?', help='[run, setup]')
+    parser.add_argument('tool', metavar='tool', type=str, nargs='?', help='[jinline, jreduce, jshrink]')
+
+    args = parser.parse_args()
+    return args.opt, args.tool
+
 if __name__ == "__main__":
-    main()
+    opt, tool = parse_args()
+    if not opt or opt == 'run':
+        main()
+    elif opt == 'setup':
+        setup(tool)
