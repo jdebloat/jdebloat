@@ -16,9 +16,8 @@ FROM=$(realpath $1); shift
 TO=$(realpath $1); shift
 
 cp -r "${FROM}" "${TO}"
+rm "${TO}/stats.csv"
 temp_maven_dir=$(mktemp /tmp/XXXX)
 rm ${temp_maven_dir}
 
-${SCRIPT_DIR}/run-jshrink.sh "${TO}/app.jar" \
-	"${TO}/lib.jar" "${TO}/test.jar" \
-	"${TO}/src" "${temp_maven_dir}"
+${SCRIPT_DIR}/../tools/jshrink/experiment_resources/run_experiment_script_all_transformations_with_tamiflex_and_jmtrace.sh "${FROM}" "${TO}" "${temp_maven_dir}"

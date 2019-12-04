@@ -12,10 +12,12 @@ DATA= ROOT / "data"
 PATCHES = DATA / "patches"
 SRC_FOLDER = "benchmark"
 SCRIPTS = ROOT / "scripts"
-TARGETS = ["initial", "initial+jreduce"]
+TARGETS = ["initial", "initial+jshrink", "initial+jreduce", "initial+inliner+jshrink"]
 ALL_TARGETS = [
     "initial",
-    "initial+jreduce"
+    "initial+jshrink", 
+    "initial+jreduce", 
+    "initial+inliner+jshrink"
 ]
 
 def main():
