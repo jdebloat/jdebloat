@@ -9,39 +9,82 @@ import argparse
 
 BENCHMARKS = "data/benchmarks.csv"
 ROOT = Path(os.path.dirname(os.path.abspath(__file__)))
-OUTPUT= ROOT / "output"
-DATA= ROOT / "data"
+OUTPUT = ROOT / "output"
+DATA = ROOT / "data"
 PATCHES = DATA / "patches"
 SRC_FOLDER = "benchmark"
 SCRIPTS = ROOT / "scripts"
 TARGETS = [
-        "initial",
-        "initial+inliner",
-        "initial+jreduce",
-        "initial+jreduce+jshrink"
+    "initial",
+    "initial+jinline",
+    "initial+jreduce",
+    "initial+jreduce+jshrink"
 ]
 ALL_TARGETS = [
     "initial",
-    "initial+jshrink", 
-    "initial+jreduce", 
-    "initial+inliner+jshrink"
+    "initial+jshrink",
+    "initial+jreduce",
+    "initial+jinline+jshrink"
 ]
 
-def main():
+
+def invoke(tools):
     if(os.path.exists(str(OUTPUT / "all.csv"))):
         return
 
     benchmarks = get_benchmarks()
 
+    if len(tools) == 0:  # run all 3 tools if `tools` is not specified
+        tools = ['jinline', 'jreduce', 'jshrink']
+    if tools[0] != 'initial':
+        tools.insert(0, 'initial')
+
     for benchmark in benchmarks:
         download_benchmark(benchmark)
         apply_patch(benchmark)
-        for target in TARGETS:
-            run_target(benchmark, target)
 
-    write_stats(benchmarks)
+        src_dir = OUTPUT / benchmark.id / SRC_FOLDER
+        for tool in tools:  # then run tools in sequence
+            src_dir = run_tool(benchmark, src_dir, tool)
 
-def write_stats(benchmarks):
+    write_stats(benchmarks, tools)
+
+
+def setup(tools):
+    if len(tools) == 0:
+        setup_jinline()
+        setup_jreduce()
+        setup_jshrink()
+
+    for tool in tools:
+        if tool == 'jinline':
+            setup_jinline()
+        elif tool == 'jreduce':
+            setup_jreduce()
+        elif tool == 'jshrink':
+            setup_jshrink()
+        else:
+            pass
+
+
+def write_stats(benchmarks, tools):
+    stats = []
+    for benchmark in benchmarks:
+        target = tools[0]
+        with open(str(OUTPUT / benchmark.id / target / 'stats.csv')) as f:
+            stats.append(f.readlines()[-1])
+        for tool in tools[1:]:
+            target = target + '+' + tool
+            with open(str(OUTPUT / benchmark.id / target / 'stats.csv')) as f:
+                stats.append(f.readlines()[-1])
+
+    with open(str(OUTPUT / 'all.csv'), 'w') as f:
+        f.write("id,name,size,methods,classes,fields,instructions,tests\n")
+        f.writelines('\n'.join(stats))
+
+
+def write_target_stats(benchmarks):
+    ''' WARNING: Deprecated '''
     stats = []
     for benchmark in benchmarks:
         for target in TARGETS:
@@ -52,7 +95,27 @@ def write_stats(benchmarks):
         f.write("id,name,size,methods,classes,fields,instructions,tests\n")
         f.writelines('\n'.join(stats))
 
+
+def run_tool(benchmark, src_dir, tool):
+    dst_dir = src_dir.parent / (src_dir.stem + '+' + tool)
+    if tool == 'initial':
+        dst_dir = src_dir.parent / tool
+        compile(benchmark, src_dir, dst_dir)
+    elif tool == 'jinline':
+        jinline(src_dir, dst_dir)
+    elif tool == 'jreduce':
+        jreduce(src_dir, dst_dir)
+    elif tool == 'jshrink':
+        jshrink(src_dir, dst_dir)
+
+    test(dst_dir)
+    metric(dst_dir)
+
+    return dst_dir
+
+
 def run_target(benchmark, target):
+    ''' WARNING: Deprecated '''
     target = target.split("+")
     source = OUTPUT / benchmark.id / SRC_FOLDER
 
@@ -62,8 +125,8 @@ def run_target(benchmark, target):
 
         if t == "initial":
             compile(benchmark, source, dest)
-        elif t == "inliner":
-            inline(source, dest)
+        elif t == "jinline":
+            jinline(source, dest)
         elif t == "jreduce":
             jreduce(source, dest)
         elif t == "jshrink":
@@ -73,7 +136,7 @@ def run_target(benchmark, target):
         metric(dest)
 
         source = dest
-        #run tests
+
 
 @contextmanager
 def changedir(dir):
@@ -84,12 +147,16 @@ def changedir(dir):
     finally:
         os.chdir(prevdir)
 
+
 def read(*args, **kwargs):
     try:
         return check_output(args, universal_newlines=True, **kwargs).splitlines()
     except CalledProcessError as e:
-        print('Failed, while running: ', ' '.join('{!r}'.format(c) for c in args), file=sys.stderr)
-        raise
+        print('Failed, while running: ', ' '.join(
+            '{!r}'.format(c) for c in args), file=sys.stderr)
+        # raise
+        return []
+
 
 def git(*cmd, work_folder="."):
     args = []
@@ -97,11 +164,14 @@ def git(*cmd, work_folder="."):
     args += [str(c) for c in cmd]
     return read("git", *args)
 
+
 def compile(benchmark, src, dest):
     if(os.path.exists(str(dest / "app.jar"))):
-      return
+        return
 
-    run([str(SCRIPTS / "benchmark.py"), str(DATA / "excluded-tests.txt"), str(src), str(dest)])
+    run([str(SCRIPTS / "benchmark.py"), str(DATA /
+                                            "excluded-tests.txt"), str(src), str(dest)])
+
 
 def jreduce(src, dest):
     if(os.path.exists(str(dest / "app.jar"))):
@@ -109,13 +179,15 @@ def jreduce(src, dest):
     output = read(str(SCRIPTS / "run-jreduce.sh"), str(src), str(dest))
 
     with open(str(dest / "test.txt"), "w") as f:
-      f.write(str(output))
+        f.write(str(output))
 
-def inline(src, dest):
+
+def jinline(src, dest):
     if(os.path.exists(str(dest / "app.jar"))):
         return
 
     run([str(SCRIPTS / "run-inliner.sh"), str(src), str(dest)])
+
 
 def jshrink(src, dest):
     if(os.path.exists(str(dest / "app.jar"))):
@@ -123,31 +195,21 @@ def jshrink(src, dest):
 
     run([str(SCRIPTS / "jshrink_script.sh"), str(src), str(dest)])
 
-def setup(tool):
-    if not tool:
-        setup_jinline()
-        setup_jreduce()
-        setup_jshrink()
-    elif tool == 'jinline':
-        setup_jinline()
-    elif tool == 'jreduce':
-        setup_jreduce()
-    elif tool == 'jshrink':
-        setup_jshrink()
-    else:
-        pass
 
 def setup_jinline():
     if not os.path.exists('output/db.sqlite3'):
-        run(['cp', 'data/inliner/settings.py', 'tools/jinline/src/python/settings.py'])
+        run(['cp', 'data/inliner/settings.py',
+             'tools/jinline/src/python/settings.py'])
         with changedir('tools/jinline'):
             run(['make', 'setup'])
     with changedir('tools/jinline'):
         run(['make'])
 
+
 def setup_jreduce():
     with changedir('tools/jreduce'):
         run(['stack', 'install'])
+
 
 def setup_jshrink():
     with changedir('tools/jshrink/experiment_resources/jshrink-mtrace/jmtrace'):
@@ -155,9 +217,12 @@ def setup_jshrink():
     with changedir('tools/jshrink/jshrink'):
         run(['mvn', 'compile', '-pl', 'jshrink-app', '-am'])
     with changedir('tools/jshrink'):
-        run(['cp', 'jshrink/jshrink-app/target/jshrink-app-1.0-SNAPSHOT-jar-with-dependencies.jar', 'experiment_resources/'])
-    run(['cp', 'scripts/run_jshrink.sh', 'tools/jshrink/experiment_resources/run_experiment_script_all_transformations_with_tamiflex_and_jmtrace.sh'])
+        run(['cp', 'jshrink/jshrink-app/target/jshrink-app-1.0-SNAPSHOT-jar-with-dependencies.jar',
+             'experiment_resources/'])
+    run(['cp', 'scripts/run_jshrink.sh',
+         'tools/jshrink/experiment_resources/run_experiment_script_all_transformations_with_tamiflex_and_jmtrace.sh'])
     run(['chmod', '+x', 'tools/jshrink/experiment_resources/run_experiment_script_all_transformations_with_tamiflex_and_jmtrace.sh'])
+
 
 def test(dest):
     if(os.path.exists(str(dest / "test.txt"))):
@@ -171,6 +236,7 @@ def test(dest):
 
         os.chdir(str(ROOT))
 
+
 def metric(dest):
     if(os.path.exists(str(dest / "stats.csv"))):
         return
@@ -178,6 +244,7 @@ def metric(dest):
     output = read(str(SCRIPTS / "metric.py"), str(dest))
     with open(str(dest / "stats.csv"), "w") as f:
         f.write('\n'.join(output))
+
 
 def apply_patch(benchmark):
     path = OUTPUT / benchmark.id / SRC_FOLDER / "TIMESTAMP"
@@ -189,7 +256,9 @@ def apply_patch(benchmark):
     if(os.path.exists(str(patch_path))):
         git("apply", patch_path, work_folder=path)
 
-    with open(str(path), 'w'): pass
+    with open(str(path), 'w'):
+        pass
+
 
 def download_benchmark(benchmark):
     path = OUTPUT / benchmark.id / SRC_FOLDER
@@ -202,14 +271,16 @@ def download_benchmark(benchmark):
     git("clone", benchmark.url, path)
     git("checkout", "-b", "onr", benchmark.rev, work_folder=path)
 
+
 def get_benchmarks():
     data = []
     with open(BENCHMARKS) as bench_file:
         reader = csv.reader(bench_file, delimiter=',')
-        next(reader) #skip header
+        next(reader)  # skip header
         for row in reader:
             data.append(Benchmark(row[0], row[1], row[2]))
     return data
+
 
 class Benchmark:
     def __init__(self, benchmark_id, url, rev):
@@ -217,17 +288,26 @@ class Benchmark:
         self.url = url
         self.rev = rev
 
+
 def parse_args():
-    parser = argparse.ArgumentParser(description='Run all 3 debloat tools in sequence.')
-    parser.add_argument('opt', metavar='opt', type=str, nargs='?', help='[run, setup]')
-    parser.add_argument('tool', metavar='tool', type=str, nargs='?', help='[jinline, jreduce, jshrink]')
+    parser = argparse.ArgumentParser(
+        description='Run all 3 debloat tools in sequence.')
+    parser.add_argument('opt', metavar='opt', type=str,
+                        nargs='?', help='[run, setup]')
+    parser.add_argument('tools', metavar='tools', type=str,
+                        nargs='*', help='[jinline, jreduce, jshrink]')
 
     args = parser.parse_args()
-    return args.opt, args.tool
+    return args.opt, args.tools
+
+
+def main():
+    opt, tools = parse_args()
+    if not opt or opt == 'run':
+        invoke(tools)
+    elif opt == 'setup':
+        setup(tools)
+
 
 if __name__ == "__main__":
-    opt, tool = parse_args()
-    if not opt or opt == 'run':
-        main()
-    elif opt == 'setup':
-        setup(tool)
+    main()
