@@ -80,7 +80,7 @@ def copy_files(src, dst):
         shutil.copyfile(str(file), str(dst_file))
 
 def make_jar(srcs, libs, jar):
-    with tempfile.TemporaryDirectory() as stage_folder: 
+    with tempfile.TemporaryDirectory() as stage_folder:
         for lib in libs:
             extract_jar(lib, stage_folder)
         for src in srcs:
@@ -88,11 +88,11 @@ def make_jar(srcs, libs, jar):
         jar.parent.mkdir(parents=True, exist_ok=True)
         absjar = jar.parent.resolve() / jar.name
         with changedir(stage_folder):
-            for a in Path(stage_folder).glob("**/*.SF"): 
+            for a in Path(stage_folder).glob("**/*.SF"):
                 a.unlink()
-            for a in Path(stage_folder).glob("**/*.RSA"): 
+            for a in Path(stage_folder).glob("**/*.RSA"):
                 a.unlink()
-            for a in Path(stage_folder).glob("**/*.DES"): 
+            for a in Path(stage_folder).glob("**/*.DES"):
                 a.unlink()
             run(["jar", "cf", str(absjar), "."])
 
@@ -118,11 +118,11 @@ def main(argv):
     if not (benchmark / "libs").exists():
         print("Building")
         build(benchmark)
-    
+
     targets = list(benchmark.glob("*/target/classes"))
     test_targets = list(benchmark.glob("*/target/test-classes"))
     resources = list(benchmark.glob("*/src/test/resources"))
-    if (benchmark / "target").exists(): 
+    if (benchmark / "target").exists():
         targets.append(benchmark / "target" / "classes")
         test_targets.append(benchmark / "target" / "test-classes")
 
@@ -130,7 +130,7 @@ def main(argv):
     (extract / "test.classes.txt").write_text('\n'.join(test_classes) + '\n')
 
     make_jar(targets, set(), extract / "app.jar")
-    
+
     compile_cp = set(extract_classpath(benchmark, "compile"))
     make_jar([], compile_cp, extract / "lib.jar")
 
@@ -153,5 +153,5 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    
+
     main(sys.argv)

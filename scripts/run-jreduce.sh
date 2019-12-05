@@ -7,7 +7,7 @@ TO=$(realpath $1); shift
 
 mkdir -p $TO/jars
 
-cp "$FROM/extract.json" "$FROM/test.classes.txt" "$TO" 
+cp "$FROM/extract.json" "$FROM/test.classes.txt" "$TO"
 ln -s "$FROM/test.jar" "$TO/test.jar"
 ln -s "$FROM/src" "$TO"
 

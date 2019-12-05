@@ -3,7 +3,7 @@
 import sys
 import os
 import tempfile
-from pathlib import Path 
+from pathlib import Path
 from subprocess import check_output, run, CalledProcessError, DEVNULL
 from contextlib import contextmanager
 from collections import defaultdict
@@ -34,19 +34,19 @@ def grouper(iterable, n, fillvalue=None):
 
 def main():
     """Given a list of jars print a list of files join the files in one jar
- 
+
     These two commands are adjoint.
 
     $ unjar.py join app+lib.jar app.jar lib.jar > files.txt
-    
+
     $ unjar.py split app+lib.jar < files.text
-    
+
     """
-    _, cmd, target, *args = sys.argv 
+    _, cmd, target, *args = sys.argv
 
     if cmd == "join":
-        with tempfile.TemporaryDirectory() as stage_folder: 
-            files = set() 
+        with tempfile.TemporaryDirectory() as stage_folder:
+            files = set()
             for jar in args:
                 extract_jar(jar, stage_folder)
                 added = set(a.relative_to(stage_folder) for a in Path(stage_folder).rglob("**/*")) - files
@@ -60,9 +60,9 @@ def main():
             jarname, filename  = line.split()
             dist[jarname].add(filename)
         for n in args:
-            with tempfile.TemporaryDirectory() as stage_folder: 
+            with tempfile.TemporaryDirectory() as stage_folder:
                 for x in grouper(sorted(dist[n]), 10, ""):
-                    extract_jar(target, stage_folder, files=x) 
+                    extract_jar(target, stage_folder, files=x)
                 make_jar(os.path.realpath(n), stage_folder)
     else:
         sys.stderr.write("Expected 'join' or 'split' as initial command.\n")
