@@ -1,6 +1,15 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+$set_environment_variables = <<SCRIPT
+tee "/etc/profile.d/javavars.sh" > "/dev/null" <<EOF
+export OSNAME=linux
+# JAVA home path.
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+export JDK=/usr/lib/jvm/java-8-openjdk-amd64
+EOF
+SCRIPT
+
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/xenial64"
   # Share an additional folder to the guest VM. The first argument is
@@ -28,5 +37,8 @@ Vagrant.configure("2") do |config|
     apt-get install -y git python3 make openjdk-8-jdk maven jq unzip bc python3-venv gcc libgmp3-dev zlib1g-dev
 
     curl -sSL https://get.haskellstack.org/ | sh
+    stack upgrade --binary-version 1.9.3
   SHELL
+
+  config.vm.provision "shell", inline: $set_environment_variables, run: "always"
 end

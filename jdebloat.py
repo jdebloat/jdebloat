@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import csv
 import os
 from pathlib import Path
@@ -63,6 +64,23 @@ def setup(tools):
             setup_jreduce()
         elif tool == 'jshrink':
             setup_jshrink()
+        else:
+            pass
+
+
+def clean(tools):
+    for tool in tools:
+        if tool == 'output':
+            p = Path('output')
+            if p.exists():
+                p.rmdir()
+        elif tool == 'jinline':
+            p = Path('tools/jinline/build/inliner.jar')
+            if p.exists():
+                p.unlink()
+            p = Path('output/db.sqlite3')
+            if p.exists():
+                p.unlink()
         else:
             pass
 
@@ -213,7 +231,7 @@ def setup_jreduce():
 
 def setup_jshrink():
     with changedir('tools/jshrink/experiment_resources/jshrink-mtrace/jmtrace'):
-        run(['make', 'JDK=/usr/lib/jvm/java-8-openjdk-amd64', 'OSNAME=linux'])
+        run(['make', 'JDK=$JAVA_HOME', 'OSNAME=linux'])
     with changedir('tools/jshrink/jshrink'):
         run(['mvn', 'compile', '-pl', 'jshrink-app', '-am'])
     with changedir('tools/jshrink'):
@@ -293,7 +311,7 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description='Run all 3 debloat tools in sequence.')
     parser.add_argument('opt', metavar='opt', type=str,
-                        nargs='?', help='[run, setup]')
+                        nargs='?', help='[run, setup, clean]')
     parser.add_argument('tools', metavar='tools', type=str,
                         nargs='*', help='[jinline, jreduce, jshrink]')
 
@@ -307,6 +325,10 @@ def main():
         invoke(tools)
     elif opt == 'setup':
         setup(tools)
+    elif opt == 'clean':
+        clean(tools)
+    else:
+        pass
 
 
 if __name__ == "__main__":
