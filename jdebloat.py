@@ -231,7 +231,13 @@ def setup_jreduce():
 
 def setup_jshrink():
     with changedir('tools/jshrink/experiment_resources/jshrink-mtrace/jmtrace'):
-        run(['make', 'JDK=$JAVA_HOME', 'OSNAME=linux'])
+        env = os.environ.copy()
+        if 'JAVA_HOME' not in env:
+            print('JAVA_HOME not set')
+            sys.exit(1)
+        env['JDK'] = env['JAVA_HOME']
+        env['OSNAME'] = 'linux'
+        run(['make'], env=env)
     with changedir('tools/jshrink/jshrink'):
         run(['mvn', 'compile', '-pl', 'jshrink-app', '-am'])
     with changedir('tools/jshrink'):
