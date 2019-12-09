@@ -215,8 +215,8 @@ def jshrink(src, dest):
 
 
 def setup_jinline():
-    if not os.path.exists(OUTPUT):
-        os.mkdir(OUTPUT)
+    if not os.path.exists(str(OUTPUT)):
+        os.mkdir(str(OUTPUT))
 
     if not os.path.exists('output/db.sqlite3'):
         run(['cp', 'data/inliner/settings.py',
