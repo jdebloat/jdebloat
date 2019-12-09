@@ -7,3 +7,6 @@
 [submodule "tools/jshrink"]
 	path = tools/jshrink
 	url = git@github.com:tianyi-zhang/call-graph-analysis.git
+[submodule "tools/javaq"]
+	path = tools/javaq
+	url = git@laforge.cs.ucla.edu:javaq
