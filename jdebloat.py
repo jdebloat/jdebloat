@@ -19,14 +19,18 @@ SCRIPTS = ROOT / "scripts"
 TARGETS = [
     "initial",
     "initial+jinline",
-    "initial+jreduce",
-    "initial+jreduce+jshrink"
+    "initial+jinline+jshrink",
+    "initial+jinline+jshrink+jreduce"
 ]
 ALL_TARGETS = [
     "initial",
+    "initial+jinline",
     "initial+jshrink",
     "initial+jreduce",
-    "initial+jinline+jshrink"
+    "initial+jinline+jshrink",
+    "initial+jinline+jreduce",
+    "initial+jshrink+jreduce",
+    "initial+jinline+jshrink+jreduce"
 ]
 
 
@@ -37,7 +41,7 @@ def invoke(tools):
     benchmarks = get_benchmarks()
 
     if len(tools) == 0:  # run all 3 tools if `tools` is not specified
-        tools = ['jinline', 'jreduce', 'jshrink']
+        tools = ['jinline', 'jshrink', 'jreduce']
     if tools[0] != 'initial':
         tools.insert(0, 'initial')
 
@@ -58,16 +62,16 @@ def setup(tools):
         setup_javaq()
     if len(tools) == 0:
         setup_jinline()
-        setup_jreduce()
         setup_jshrink()
+        setup_jreduce()
 
     for tool in tools:
         if tool == 'jinline':
             setup_jinline()
-        elif tool == 'jreduce':
-            setup_jreduce()
         elif tool == 'jshrink':
             setup_jshrink()
+        elif tool == 'jreduce':
+            setup_jreduce()
         else:
             pass
 
@@ -125,10 +129,10 @@ def run_tool(benchmark, src_dir, tool):
         compile(benchmark, src_dir, dst_dir)
     elif tool == 'jinline':
         jinline(src_dir, dst_dir)
-    elif tool == 'jreduce':
-        jreduce(src_dir, dst_dir)
     elif tool == 'jshrink':
         jshrink(src_dir, dst_dir)
+    elif tool == 'jreduce':
+        jreduce(src_dir, dst_dir)
 
     test(dst_dir)
     metric(dst_dir)
@@ -149,10 +153,10 @@ def run_target(benchmark, target):
             compile(benchmark, source, dest)
         elif t == "jinline":
             jinline(source, dest)
-        elif t == "jreduce":
-            jreduce(source, dest)
         elif t == "jshrink":
             jshrink(source, dest)
+        elif t == "jreduce":
+            jreduce(source, dest)
 
         test(dest)
         metric(dest)
@@ -259,6 +263,7 @@ def setup_javaq():
     with changedir('tools/javaq'):
         run(['stack', 'install'])
 
+
 def test(dest):
     if(os.path.exists(str(dest / "test.txt"))):
         return
@@ -336,7 +341,7 @@ Examples:
     parser.add_argument('opt', metavar='opt', type=str,
                         nargs='?', help='[run, setup, clean]')
     parser.add_argument('tools', metavar='tools', type=str,
-                        nargs='*', help='[jinline, jreduce, jshrink]')
+                        nargs='*', help='[jinline, jshrink, jreduce]')
 
     args = parser.parse_args()
     return args.opt, args.tools
