@@ -6,7 +6,8 @@ from subprocess import check_output, run, CalledProcessError
 import sys
 import tempfile
 from contextlib import contextmanager
-import argparse
+import shutil
+from argparse import ArgumentParser, RawTextHelpFormatter
 
 BENCHMARKS = "data/benchmarks.csv"
 ROOT = Path(os.path.dirname(os.path.abspath(__file__)))
@@ -18,14 +19,18 @@ SCRIPTS = ROOT / "scripts"
 TARGETS = [
     "initial",
     "initial+jinline",
-    "initial+jreduce",
-    "initial+jreduce+jshrink"
+    "initial+jinline+jshrink",
+    "initial+jinline+jshrink+jreduce"
 ]
 ALL_TARGETS = [
     "initial",
+    "initial+jinline",
     "initial+jshrink",
     "initial+jreduce",
-    "initial+jinline+jshrink"
+    "initial+jinline+jshrink",
+    "initial+jinline+jreduce",
+    "initial+jshrink+jreduce",
+    "initial+jinline+jshrink+jreduce"
 ]
 
 
@@ -36,7 +41,7 @@ def invoke(tools):
     benchmarks = get_benchmarks()
 
     if len(tools) == 0:  # run all 3 tools if `tools` is not specified
-        tools = ['jinline', 'jreduce', 'jshrink']
+        tools = ['jinline', 'jshrink', 'jreduce']
     if tools[0] != 'initial':
         tools.insert(0, 'initial')
 
@@ -52,18 +57,21 @@ def invoke(tools):
 
 
 def setup(tools):
+    if not shutil.which('javaq'):
+        # javaq has not been set up yet. Set it up.
+        setup_javaq()
     if len(tools) == 0:
         setup_jinline()
-        setup_jreduce()
         setup_jshrink()
+        setup_jreduce()
 
     for tool in tools:
         if tool == 'jinline':
             setup_jinline()
-        elif tool == 'jreduce':
-            setup_jreduce()
         elif tool == 'jshrink':
             setup_jshrink()
+        elif tool == 'jreduce':
+            setup_jreduce()
         else:
             pass
 
@@ -73,7 +81,7 @@ def clean(tools):
         if tool == 'output':
             p = Path('output')
             if p.exists():
-                p.rmdir()
+                shutil.rmtree(str(p))
         elif tool == 'jinline':
             p = Path('tools/jinline/build/inliner.jar')
             if p.exists():
@@ -121,10 +129,10 @@ def run_tool(benchmark, src_dir, tool):
         compile(benchmark, src_dir, dst_dir)
     elif tool == 'jinline':
         jinline(src_dir, dst_dir)
-    elif tool == 'jreduce':
-        jreduce(src_dir, dst_dir)
     elif tool == 'jshrink':
         jshrink(src_dir, dst_dir)
+    elif tool == 'jreduce':
+        jreduce(src_dir, dst_dir)
 
     test(dst_dir)
     metric(dst_dir)
@@ -145,10 +153,10 @@ def run_target(benchmark, target):
             compile(benchmark, source, dest)
         elif t == "jinline":
             jinline(source, dest)
-        elif t == "jreduce":
-            jreduce(source, dest)
         elif t == "jshrink":
             jshrink(source, dest)
+        elif t == "jreduce":
+            jreduce(source, dest)
 
         test(dest)
         metric(dest)
@@ -251,6 +259,11 @@ def setup_jshrink():
     run(['chmod', '+x', 'tools/jshrink/experiment_resources/run_experiment_script_all_transformations_with_tamiflex_and_jmtrace.sh'])
 
 
+def setup_javaq():
+    with changedir('tools/javaq'):
+        run(['stack', 'install'])
+
+
 def test(dest):
     if(os.path.exists(str(dest / "test.txt"))):
         return
@@ -317,12 +330,18 @@ class Benchmark:
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(
-        description='Run all 3 debloat tools in sequence.')
+    parser = ArgumentParser(
+        description='''Run all 3 debloat tools in sequence.
+Examples:
+  ./jdebloat.py setup
+  ./jdebloat.py setup jinline jshrink jreduce
+  ./jdebloat.py run
+  ./jdebloat.py run jinline jshrink jreduce
+  ./jdebloat.py clean [output, jinline]''', formatter_class=RawTextHelpFormatter)
     parser.add_argument('opt', metavar='opt', type=str,
                         nargs='?', help='[run, setup, clean]')
     parser.add_argument('tools', metavar='tools', type=str,
-                        nargs='*', help='[jinline, jreduce, jshrink]')
+                        nargs='*', help='[jinline, jshrink, jreduce]')
 
     args = parser.parse_args()
     return args.opt, args.tools
