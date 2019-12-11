@@ -208,10 +208,7 @@ def compile(benchmark, src, dest):
 def jreduce(src, dest):
     if(os.path.exists(str(dest / "app.jar"))):
         return
-    output = read(str(SCRIPTS / "run-jreduce.sh"), str(src), str(dest))
-
-    with open(str(dest / "test.txt"), "w") as f:
-        f.write(str(output))
+    run([str(SCRIPTS / "run-jreduce.sh"), str(src), str(dest)])
 
 
 def jinline(src, dest):
