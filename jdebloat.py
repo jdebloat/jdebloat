@@ -9,6 +9,12 @@ from contextlib import contextmanager
 import shutil
 from argparse import ArgumentParser, RawTextHelpFormatter
 
+LOCAL_PATH = str(Path("~/.local/bin/").expanduser())
+if LOCAL_PATH not in os.get_exec_path():
+    if "PATH" not in os.environ or len(os.environ["PATH"]) == 0:
+        os.environ["PATH"] = LOCAL_PATH
+    os.environ["PATH"] += (":" + LOCAL_PATH)
+
 BENCHMARKS = "data/benchmarks.csv"
 ROOT = Path(os.path.dirname(os.path.abspath(__file__)))
 OUTPUT = ROOT / "output"
