@@ -17,6 +17,14 @@ def update_modified_files_in_place(original_dir, modified_dir):
             if os.path.exists(modified_path):
                 shutil.copyfile(modified_path, original_path)
 
+    for root, dirs, files in os.walk(modified_dir):
+        for name in files:
+            modified_path = os.path.join(root, name)
+            path = os.path.relpath(modified_path, modified_dir)
+            original_path = os.path.join(original_dir, path)
+            if not os.path.exists(original_path):
+                shutil.copyfile(modified_path, original_path)
+
 def main(args):
     test_jar = os.path.join(BASE_DIR, args.test_jar)
     app_lib_jar = os.path.join(BASE_DIR, args.app_lib_jar)
