@@ -12,10 +12,10 @@ TESTPATH=$FOLDER/test.jar:$MYCLASSPATH
 
 if javap -cp "$TESTPATH" org.junit.runner.JUnitCore &> /dev/null
 then
-    java -cp "$TESTPATH" org.junit.runner.JUnitCore $(cat $FOLDER/test.classes.txt)
+    cd $FOLDER && java -cp "$TESTPATH" org.junit.runner.JUnitCore $(cat $FOLDER/test.classes.txt)
 elif javap -cp "$TESTPATH" junit.textui.TestRunner &> /dev/null
 then
-    java -cp "$TESTPATH" junit.textui.TestRunner $(cat $FOLDER/test.classes.txt)
+    cd $FOLDER && java -cp "$TESTPATH" junit.textui.TestRunner $(cat $FOLDER/test.classes.txt)
 else
     exit -1
 # elif javap -cp "$APPCP:$TESTCP" org.junit.jupiter.engine.JupiterTestEngine &> /dev/null

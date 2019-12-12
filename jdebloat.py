@@ -2,6 +2,7 @@
 import csv
 import os
 from pathlib import Path
+import subprocess
 from subprocess import check_output, run, CalledProcessError
 import sys
 import tempfile
@@ -273,9 +274,10 @@ def test(dest):
 
     with tempfile.TemporaryDirectory() as dirpath:
         os.chdir(dirpath)
-        output = read(str(SCRIPTS / "run-test.sh"), str(dest))
         with open(str(dest / "test.txt"), 'w') as f:
-            f.write('\n'.join(output))
+            output = run([str(SCRIPTS / "run-test.sh"), str(dest)], stdout=f, stderr=subprocess.STDOUT)
+            if output.returncode != 0:
+                print("Failed, while testing", str(dest))
 
         os.chdir(str(ROOT))
 
