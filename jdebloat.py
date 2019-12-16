@@ -216,7 +216,7 @@ def jinline(src, dest):
     if(os.path.exists(str(dest / "app.jar"))):
         return
 
-    run([str(SCRIPTS / "run-inliner.sh"), str(src), str(dest)])
+    run([str(SCRIPTS / "run-jinline.sh"), str(src), str(dest)])
 
 
 def jshrink(src, dest):
@@ -231,7 +231,7 @@ def setup_jinline():
         os.mkdir(str(OUTPUT))
 
     if not os.path.exists('output/db.sqlite3'):
-        run(['cp', 'data/inliner/settings.py',
+        run(['cp', 'data/jinline/settings.py',
              'tools/jinline/src/python/settings.py'])
         with changedir('tools/jinline'):
             run(['make', 'setup'])

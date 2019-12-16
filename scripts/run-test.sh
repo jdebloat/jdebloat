@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 FOLDER=$(realpath $1);shift
-MYCLASSPATH=${1:-$FOLDER/app.jar:$FOLDER/lib.jar:$FOLDER/app+lib.jar};shift
+MYCLASSPATH=${1:-$FOLDER/app.jar:$FOLDER/lib.jar};shift
 
 if [ ! -L "src" ]
 then
