@@ -2,6 +2,7 @@
 
 import argparse
 import os
+import re
 import subprocess
 import sys
 import shutil
@@ -64,7 +65,7 @@ def main(args):
 
     skip_log = False
     for path in os.listdir(output_dir):
-        if path.endswith('.log'):
+        if re.match('hotspot.*\.log', path):
             skip_log = True
 
     if not skip_log:
@@ -80,11 +81,11 @@ def main(args):
 
     if not skip_log:
         for path in os.listdir(output_dir):
-            if path.endswith('.log'):
+            if re.match('hotspot.*\.log', path):
                 print('\033[36mGenerating inline targets...\033[m')
                 subprocess.run([script_path, output_dir,
                                 os.path.join(output_dir, path), inline_targets_path],
-                               env=dict(os.environ, DJANGO_SETTINGS_MODULE='settings'))
+                                env=dict(os.environ, DJANGO_SETTINGS_MODULE='settings'))
 
     print('\033[36mExtracting original JAR files...\033[m')
     subprocess.run(['unzip', '-q', '-o', app_lib_jar, '-d', output_files_path])
