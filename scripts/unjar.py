@@ -19,8 +19,18 @@ def changedir(dir):
     finally:
         os.chdir(prevdir)
 
+def extract_jar_all(jar, tofolder):
+    run(["unzip", "-nqqq", str(jar), "-d", str(tofolder)], stderr=DEVNULL)
+
 def extract_jar(jar, tofolder, files=[]):
     run(["unzip", "-nqqq", str(jar), "-d", str(tofolder)] + [f for f in files if f], stderr=DEVNULL)
+
+def deleteFile(tofolder, nam):
+    run(["rm", str(tofolder)+'/'+str(nam)], stderr=DEVNULL)
+
+def deleteDir(tofolder, nam):
+    if len(os.listdir(str(tofolder)+'/'+nam)) == 0:
+        run(["rm", str(tofolder)+'/'+str(nam)], stderr=DEVNULL)
 
 def make_jar(absjar, fromfolder):
     with changedir(fromfolder):
@@ -39,7 +49,7 @@ def main():
 
     $ unjar.py join app+lib.jar app.jar lib.jar > files.txt
 
-    $ unjar.py split app+lib.jar < files.text
+    $ unjar.py split app+lib.jar app.jar lib.jar  < files.text
 
     """
     _, cmd, target, *args = sys.argv
@@ -60,14 +70,22 @@ def main():
             jarname, filename  = line.split()
             dist[jarname].add(filename)
         for n in args:
-            with tempfile.TemporaryDirectory() as stage_folder:
-                for x in grouper(sorted(dist[n]), 10, ""):
-                    extract_jar(target, stage_folder, files=x)
-                make_jar(os.path.realpath(n), stage_folder)
+            if(n=='app.jar'):
+                with tempfile.TemporaryDirectory() as stage_folder:
+                    extract_jar_all(target, stage_folder)
+                    for x in reversed(sorted(dist['lib.jar'])):
+                        if os.path.isdir(str(stage_folder)+'/'+x):
+                            deleteDir(stage_folder, x)
+                        else:
+                            deleteFile(stage_folder, x)
+                    make_jar(os.path.realpath(n), stage_folder)
+            if(n=='lib.jar'):
+                with tempfile.TemporaryDirectory() as stage_folder:
+                    for x in grouper(sorted(dist[n]), 10, ""):
+                        extract_jar(target, stage_folder, files=x)
+                    make_jar(os.path.realpath(n), stage_folder)
     else:
         sys.stderr.write("Expected 'join' or 'split' as initial command.\n")
-
-
 
 if __name__ == "__main__":
     main()
