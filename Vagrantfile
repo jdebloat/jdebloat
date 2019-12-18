@@ -7,6 +7,8 @@ export OSNAME=linux
 # JAVA home path.
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 export JDK=/usr/lib/jvm/java-8-openjdk-amd64
+# Jreduce and javaq path.
+export PATH=$HOME/.local/bin:$PATH
 EOF
 SCRIPT
 
@@ -33,8 +35,8 @@ Vagrant.configure("2") do |config|
   # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
   # documentation for more information about their specific syntax and use.
   config.vm.provision "shell", inline: <<-SHELL
-    apt-get update
-    apt-get install -y git python3 make openjdk-8-jdk maven jq unzip bc python3-venv gcc libgmp3-dev zlib1g-dev
+    apt-get update --fix-missing
+    apt-get install -y --fix-missing git python3 make openjdk-8-jdk maven jq unzip bc python3-venv gcc libgmp3-dev zlib1g-dev
 
     curl -sSL https://get.haskellstack.org/ | sh
     stack upgrade --binary-version 1.9.3

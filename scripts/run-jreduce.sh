@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 
 FROM=$(realpath $1); shift
@@ -24,12 +23,14 @@ jreduce $@\
   -o "_jreduce/output" \
   --timelimit 1800 \
   "app+lib.jar" \
-  $(realpath "$SCRIPT_DIR/run-test.sh") $(realpath "$TO")
+  $(realpath "$SCRIPT_DIR/predicate.sh") $(realpath "$TO") {}
 
-(cd _jreduce/output && jar cf ../../app+lib.after.jar *)
-
-if [ ! -e app+lib.after.jar ]
+# generate the output jar file only if the output folder is not empty.
+if [ "$(find _jreduce/output -mindepth 1 -print -quit 2>/dev/null)" ]
 then
+    ( cd _jreduce/output && jar cf ../../app+lib.after.jar * )
+else
+# else copy the input jar file as the output.
     cp app+lib.jar app+lib.after.jar
 fi
 
