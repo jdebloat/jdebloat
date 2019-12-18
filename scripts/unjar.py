@@ -87,8 +87,5 @@ def main():
     else:
         sys.stderr.write("Expected 'join' or 'split' as initial command.\n")
 
-
-
 if __name__ == "__main__":
     main()
-
