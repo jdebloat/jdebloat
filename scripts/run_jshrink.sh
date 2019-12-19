@@ -40,14 +40,6 @@ if [ ! -f "${DEBLOAT_APP}" ]; then
 	exit 1
 fi
 
-{
-	#Make jtrace
-	cd "${JMTRACE}"
-	make clean
-	./makeit.sh
-	cd ${PWD}
-}&>/dev/null
-
 
 item="${TO}"
 item_dir="${TO}"
@@ -98,7 +90,7 @@ if [[ ${exit_status} == 0 ]]; then
 	lib_num_methods_before=$(cat "${ITEM_LOG_DIR}/log.dat" | awk -F, '($1=="libs_num_methods_before"){print $2}')
 	app_num_methods_after=$(cat "${ITEM_LOG_DIR}/log.dat" | awk -F, '($1=="app_num_methods_after"){print $2}')
 	lib_num_methods_after=$(cat "${ITEM_LOG_DIR}/log.dat" | awk -F, '($1=="libs_num_methods_after"){print $2}')
-	time_elapsed=$(cat "${ITEM_LOG_DIR}/log.dat" | awk -F, '($1=="time_elapsed"){print $2}')		
+	time_elapsed=$(cat "${ITEM_LOG_DIR}/log.dat" | awk -F, '($1=="time_elapsed"){print $2}')
 
 	#The current settings
 	using_public_entry="1"
