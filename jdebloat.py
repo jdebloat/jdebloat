@@ -39,7 +39,7 @@ ALL_TARGETS = [
     "initial+jshrink+jreduce",
     "initial+jinline+jshrink+jreduce"
 ]
-
+TOOL_LIST = ['jinline', 'jshrink', 'jreduce']
 
 def invoke(tools):
     if(os.path.exists(str(OUTPUT / "all.csv"))):
@@ -62,15 +62,10 @@ def invoke(tools):
 
     write_stats(benchmarks, tools)
 
-
 def setup(tools):
     if not shutil.which('javaq'):
         # javaq has not been set up yet. Set it up.
         setup_javaq()
-    if len(tools) == 0:
-        setup_jinline()
-        setup_jshrink()
-        setup_jreduce()
 
     for tool in tools:
         if tool == 'jinline':
@@ -79,26 +74,11 @@ def setup(tools):
             setup_jshrink()
         elif tool == 'jreduce':
             setup_jreduce()
-        else:
-            pass
 
-
-def clean(tools):
-    for tool in tools:
-        if tool == 'output':
-            p = Path('output')
-            if p.exists():
-                shutil.rmtree(str(p))
-        elif tool == 'jinline':
-            p = Path('tools/jinline/build/inliner.jar')
-            if p.exists():
-                p.unlink()
-            p = Path('output/db.sqlite3')
-            if p.exists():
-                p.unlink()
-        else:
-            pass
-
+def clean():
+    p = Path('output')
+    if p.exists():
+        shutil.rmtree(str(p))
 
 def write_stats(benchmarks, tools):
     stats = []
@@ -115,7 +95,6 @@ def write_stats(benchmarks, tools):
         f.write("id,name,size,methods,classes,fields,instructions,tests\n")
         f.writelines('\n'.join(stats))
 
-
 def write_target_stats(benchmarks):
     ''' WARNING: Deprecated '''
     stats = []
@@ -127,7 +106,6 @@ def write_target_stats(benchmarks):
     with open(str(OUTPUT / "all.csv"), "w") as f:
         f.write("id,name,size,methods,classes,fields,instructions,tests\n")
         f.writelines('\n'.join(stats))
-
 
 def run_tool(benchmark, src_dir, tool):
     dst_dir = src_dir.parent / (src_dir.stem + '+' + tool)
@@ -145,7 +123,6 @@ def run_tool(benchmark, src_dir, tool):
     metric(dst_dir)
 
     return dst_dir
-
 
 def run_target(benchmark, target):
     ''' WARNING: Deprecated '''
@@ -170,7 +147,6 @@ def run_target(benchmark, target):
 
         source = dest
 
-
 @contextmanager
 def changedir(dir):
     prevdir = os.getcwd()
@@ -179,7 +155,6 @@ def changedir(dir):
         yield
     finally:
         os.chdir(prevdir)
-
 
 def read(*args, **kwargs):
     try:
@@ -190,13 +165,11 @@ def read(*args, **kwargs):
         # raise
         return []
 
-
 def git(*cmd, work_folder="."):
     args = []
     args += ['-C', str(work_folder)]
     args += [str(c) for c in cmd]
     return read("git", *args)
-
 
 def compile(benchmark, src, dest):
     if(os.path.exists(str(dest / "app.jar"))):
@@ -205,12 +178,10 @@ def compile(benchmark, src, dest):
     run([str(SCRIPTS / "benchmark.py"), str(DATA /
                                             "excluded-tests.txt"), str(src), str(dest)])
 
-
 def jreduce(src, dest):
     if(os.path.exists(str(dest / "app.jar"))):
         return
     run([str(SCRIPTS / "run-jreduce.sh"), str(src), str(dest)])
-
 
 def jinline(src, dest):
     if(os.path.exists(str(dest / "app.jar"))):
@@ -218,13 +189,11 @@ def jinline(src, dest):
 
     run([str(SCRIPTS / "run-jinline.sh"), str(src), str(dest)])
 
-
 def jshrink(src, dest):
     if(os.path.exists(str(dest / "app.jar"))):
         return
 
     run([str(SCRIPTS / "jshrink_script.sh"), str(src), str(dest)])
-
 
 def setup_jinline():
     if not os.path.exists(str(OUTPUT)):
@@ -238,11 +207,9 @@ def setup_jinline():
     with changedir('tools/jinline'):
         run(['make'])
 
-
 def setup_jreduce():
     with changedir('tools/jreduce'):
         run(['stack', 'install'])
-
 
 def setup_jshrink():
     with changedir('tools/jshrink/experiment_resources/jshrink-mtrace/jmtrace'):
@@ -262,11 +229,9 @@ def setup_jshrink():
          'tools/jshrink/experiment_resources/run_experiment_script_all_transformations_with_tamiflex_and_jmtrace.sh'])
     run(['chmod', '+x', 'tools/jshrink/experiment_resources/run_experiment_script_all_transformations_with_tamiflex_and_jmtrace.sh'])
 
-
 def setup_javaq():
     with changedir('tools/javaq'):
         run(['stack', 'install'])
-
 
 def test(dest):
     if(os.path.exists(str(dest / "test.txt"))):
@@ -281,7 +246,6 @@ def test(dest):
 
         os.chdir(str(ROOT))
 
-
 def metric(dest):
     if(os.path.exists(str(dest / "stats.csv"))):
         return
@@ -289,7 +253,6 @@ def metric(dest):
     output = read(str(SCRIPTS / "metric.py"), str(dest))
     with open(str(dest / "stats.csv"), "w") as f:
         f.write('\n'.join(output))
-
 
 def apply_patch(benchmark):
     path = OUTPUT / benchmark.id / SRC_FOLDER / "TIMESTAMP"
@@ -304,7 +267,6 @@ def apply_patch(benchmark):
     with open(str(path), 'w'):
         pass
 
-
 def download_benchmark(benchmark):
     path = OUTPUT / benchmark.id / SRC_FOLDER
     if(os.path.exists(str(path / ".git" / "HEAD"))):
@@ -316,7 +278,6 @@ def download_benchmark(benchmark):
     git("clone", benchmark.url, path)
     git("checkout", "-b", "onr", benchmark.rev, work_folder=path)
 
-
 def get_benchmarks():
     data = []
     with open(BENCHMARKS) as bench_file:
@@ -326,13 +287,17 @@ def get_benchmarks():
             data.append(Benchmark(row[0], row[1], row[2]))
     return data
 
-
 class Benchmark:
     def __init__(self, benchmark_id, url, rev):
         self.id = benchmark_id
         self.url = url
         self.rev = rev
 
+def verify_tools(tools):
+    for tool in tools:
+         if tool not in TOOL_LIST:
+             print('Unknown tool:', tool)
+             sys.exit(1)
 
 def parse_args():
     parser = ArgumentParser(
@@ -340,29 +305,38 @@ def parse_args():
 Examples:
   ./jdebloat.py setup
   ./jdebloat.py setup jinline jshrink jreduce
-  ./jdebloat.py run
   ./jdebloat.py run jinline jshrink jreduce
-  ./jdebloat.py clean [output, jinline]''', formatter_class=RawTextHelpFormatter)
-    parser.add_argument('opt', metavar='opt', type=str,
-                        nargs='?', help='[run, setup, clean]')
-    parser.add_argument('tools', metavar='tools', type=str,
-                        nargs='*', help='[jinline, jshrink, jreduce]')
+  ./jdebloat.py clean''', formatter_class=RawTextHelpFormatter)
+
+    subparsers = parser.add_subparsers(dest='command')
+    subparsers.required = True
+    clean_parser = subparsers.add_parser('clean')
+
+    tools_parser = subparsers.add_parser('setup')
+    tools_parser.add_argument('tools',
+                               nargs='*', help=str(TOOL_LIST),
+                               default=TOOL_LIST)
+
+    run_parser = subparsers.add_parser('run')
+    run_parser.add_argument('tools',
+                            nargs='*',
+                            help=str(TOOL_LIST),
+                            default=TOOL_LIST)
 
     args = parser.parse_args()
-    return args.opt, args.tools
+    if args.command != 'clean':
+        verify_tools(args.tools)
 
+    return args
 
 def main():
-    opt, tools = parse_args()
-    if not opt or opt == 'run':
-        invoke(tools)
-    elif opt == 'setup':
-        setup(tools)
-    elif opt == 'clean':
-        clean(tools)
-    else:
-        pass
-
+    args = parse_args()
+    if args.command == 'clean':
+        clean()
+    elif args.command == 'run':
+        invoke(args.tools)
+    elif args.command == 'setup':
+        setup(args.tools)
 
 if __name__ == "__main__":
     main()
