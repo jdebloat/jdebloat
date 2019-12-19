@@ -61,7 +61,7 @@ make inliner
     * jinline [Contains the JInline tool]
         * README.md [The JInline tool README file]
     * jshrink [Contains the JShrink tool]
-        * README.md [The JDebloat README file]
+        * README.md [The JShrink README file]
     * jreduce [Contains the JReduce tool]
         * README.md [The JReduce README file]
 
