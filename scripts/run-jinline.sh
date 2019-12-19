@@ -15,7 +15,7 @@ ln -s "$FROM/src" "$TO"
 
 pushd $TO
 
-$SCRIPT_DIR/run-inliner.py $FROM/test.jar $FROM/test.classes.txt $TO/app+lib.jar $TO -o $TO/app+lib.after.jar
+$SCRIPT_DIR/run-jinline.py $FROM/test.jar $FROM/test.classes.txt $TO/app+lib.jar $TO -o $TO/app+lib.after.jar
 
 if [ ! -e app+lib.after.jar ]
 then
