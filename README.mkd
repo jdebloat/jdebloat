@@ -1,51 +1,105 @@
 # ONR TPCP Synergistic Customization Project for Java Bytecode Debloating and Delayering 
 
-You can find both tools and subject programs in the VM image. You are required to install the following software, described below.
+There are two options to execute this tool explained below.
 
-## Requirements for running the VM
+## Using a VM
+
+You can find both tools and subject programs in the VM image. You are required to install the following software, described below.
 
 - VirtualBox 5.2.22
 - vagrant 2.2.2
 
-## Running on a Linux Machine
-
-The tools can be run in a Virtual Machine. To setup and enter the VM, please
+To setup and enter the VM, please
 tun the following:
 
 ```
 vagrant up
 vagrant ssh
 cd /vagrant
+```
+
+## Using a Linux Machine locally
+
+You are required to install the following software, described below.
+
+- Stack (Instructions here - https://docs.haskellstack.org/en/stable/install_and_upgrade/)
+- Java
+- Git
+- Python
+
+To setup, please set the JAVA\_HOME environment variable to point to the Java installation home folder (Instructions here - https://docs.oracle.com/cd/E19182-01/821-0917/inst_jdk_javahome_t/index.html)
+
+You are also required to check out the tool and subject programs from the shared repository.
+
+## Setup
+
+Before running the tool, please run the following for setup in the tool home folder:
+
+```
 git submodule init
 git submodule update
 ```
 
-Some of the tools require setup. You can run the setup for all the projects with
-the following command:
+Some of the tools require setup. You can run the setup for all the projects with the following command:
 
 ```
-make setup
+./jdebloat.py setup
 ```
 
 ## Running the tools
 
+The tool can be executed through the interface provided by the jdebloat.py script. 
+
+The usage for the script can be listed with the help([-h]) option as follows.
+
+```
+./jdebloat.py -h
+
+usage: jdebloat.py [-h] {clean,setup,run}
+
+positional arguments:
+  {clean,setup,run}
+
+optional arguments:
+  -h, --help         show this help message and exit
+
+```
+
+The three positional arguments available for each tool in the package:
+1. Setup - to perform setup and compilation for the tool
+2. Run - to execute the tool with the benchmark projects
+3. Clean - to perform cleanup for the tool
+
+
+
+Examples:
+Run all 3 debloat tools in sequence.
+
+```
+./jdebloat.py setup
+./jdebloat.py run
+./jdebloat.py clean
+```
+
 To run the JReduce tool, run:
 
 ```
-make jreduce-install
-make jreduce
+./jdebloat.py setup jreduce
+./jdebloat.py run jreduce
 ```
 
-To run the JDebloat tool, run:
+To run the JShrink tool, run:
 
 ```
-make jdebloat
+./jdebloat.py setup jshrink
+./jdebloat.py run jshrink
 ```
 
 To run the JInline tool, run:
 
 ```
-make inliner
+./jdebloat.py setup jinline
+./jdebloat.py run jinline
 ```
 
 ## Directory Structure
