@@ -22,23 +22,15 @@ cd /vagrant
 
 You are required to install the following software, described below.
 
-- Stack (Instructions here - https://docs.haskellstack.org/en/stable/install_and_upgrade/)
-- Java
+- Stack 1.9.3 (Installation instructions here - https://docs.haskellstack.org/en/stable/install_and_upgrade/)
+    - After installation, run `stack upgrade --binary-version 1.9.3`
+- Java 8
 - Git
-- Python
+- Python 3
 
 To setup, please set the JAVA\_HOME environment variable to point to the Java installation home folder (Instructions here - https://docs.oracle.com/cd/E19182-01/821-0917/inst_jdk_javahome_t/index.html)
 
-You are also required to check out the tool and subject programs from the shared repository.
-
 ## Setup
-
-Before running the tool, please run the following for setup in the home folder:
-
-```
-git submodule init
-git submodule update
-```
 
 Some of the tools require setup. You can run the setup for all the projects with the following command:
 
@@ -72,7 +64,7 @@ The three positional arguments available for each tool in the package:
 
 
 
-Examples:
+### Examples:
 Run all 3 debloat tools in sequence.
 
 ```
