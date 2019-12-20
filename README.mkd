@@ -33,7 +33,7 @@ You are also required to check out the tool and subject programs from the shared
 
 ## Setup
 
-Before running the tool, please run the following for setup in the tool home folder:
+Before running the tool, please run the following for setup in the home folder:
 
 ```
 git submodule init
