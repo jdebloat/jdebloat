@@ -98,7 +98,7 @@ To run the JInline tool, run:
 
 * results [Directory containing the benchmark results]
 * data [Contains misc. data used by the tools]
-* jdebloat.py [The script which runs jdebloat]
+* jdebloat.py [The script which runs JDebloat]
 * output [The output directory]
 * README.mkd [The setup README]
 * scripts [Contains scripts used by jdebloat.py to run the tools]
