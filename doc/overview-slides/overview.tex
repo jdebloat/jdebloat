@@ -54,7 +54,7 @@
 \usetikzlibrary{tikzmark}
 \usetikzmarklibrary{listings}
 
-\title{JDebloat}
+\title{JDebloat: Overview}
 \author{Jon Eyolfson}
 \date{2020-02-26}
 
@@ -82,169 +82,266 @@
   \setcounter{framenumber}{0}
 
   \begin{frame}
-    \frametitle{Overall Benchmark Results}
-    Before(7 Benchmarks)
+    \frametitle{Push-Button Debloating}
+
     \begin{center}
-      \begin{tabular}{c|r|r}
-        \textbf{Tool} &
-        \textbf{Mean Size Reduction(\%)} &
-        \textbf{Median Size Reduction (\%)}\\
-        \hline
-        jinline & 20.0 & 19.8\\
-        jshrink & 22.9 & 28.9\\
-        jreduce & 15.4 & 0.6\\
-        jinline+jshrink+jreduce & \textbf{38.5} & \textbf{31.0}\\
-      \end{tabular}
+      \begin{tikzpicture}[
+        outer sep=0.05cm,
+        node distance=0.8cm
+      ]
+        \tikzstyle{bigbox} = [
+          draw=blue!50,
+          thick,
+          fill=blue!10,
+          rounded corners,
+          rectangle
+        ]
+        \tikzstyle{box} = [
+          minimum size=0.6cm,
+          rounded corners,
+          rectangle,
+          fill=blue!50
+        ]
+
+        \node[box] (1) {JReduce};
+        \node[box,below of=1] (2) {JShrink};
+        \node[box,below of=2] (3) {JInline};
+
+        \begin{pgfonlayer}{background}
+          \node[bigbox] [fit = (1) (3)] {};
+        \end{pgfonlayer}
+
+        \node [above of=1] {\bfseries JDebloat};
+      \end{tikzpicture}
     \end{center}
 
-    \vspace{1em}
+    \vspace{2em}
 
-    After(25 Benchmarks)
-    \begin{center}
-      \begin{tabular}{c|r|r}
-        \textbf{Tool} &
-        \textbf{Mean Size Reduction(\%)} &
-        \textbf{Median Size Reduction (\%)}\\
-        \hline
-        jinline & 14.6 & 18.1\\
-        jshrink & 11.4 & 3.1\\
-        jreduce & 40.24 & 30.4\\
-        jinline+jshrink+jreduce & \textbf{49.9} & \textbf{30.3}\\
-      \end{tabular}
-    \end{center}
+    Just run \texttt{./jdebloat} on a JAR file (with tests)
   \end{frame}
 
   \begin{frame}
-    \frametitle{Push-Button Debloating}
-    just \texttt{./jdebloat.py run}
+    \frametitle{We Added More Extensive Benchmarks}
+
+    \begin{center}
+      \LARGE 7 $\to$ \textbf{25}
+    \end{center}
+
+    \vspace{4em}
+
+    Largest program has 175,548 methods (previous largest 3,586)
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{JReduce: A Dynamic Java Bytecode Reducer}
+
+    Focus on buggy input reduction to decompilers, instead of tree-shaking
+
+    \vspace{4em}
+
+    Extended idea to remove methods and fields (isntead of classes)
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{JReduce Produced Better Reduction}
+
+    \begin{tikzpicture}
+      \begin{axis}[
+        xbar,
+        y axis line style = {opacity = 0},
+        axis x line       = none,
+        xmin = 0,
+        tickwidth         = 0pt,
+        enlarge y limits  = 1,
+        symbolic y coords = {Median,Mean},
+        ytick             = data,
+        nodes near coords,
+        nodes near coords style={font=\footnotesize},
+        nodes near coords align={anchor=west},
+        point meta=explicit symbolic,
+      ]
+        \addplot [color=blue,fill=blue!50] coordinates {
+          (40.2,Mean) [40.2\%]
+          (30.4,Median) [30.4\%]
+        }; 
+        \addplot [color=red, fill=red!50]  coordinates {
+          (15.4,Mean) [15.4\%]
+          (0.6,Median) [0.6\%]
+        };
+      \end{axis}
+    \end{tikzpicture}
+
+    \vspace{-2em}
+
+    Magnitude faster results compared to delta-debugging
+
+    \vspace{2em}
+
+    \textbf{Published in [FSE'19]}
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{JReduce Is Improving its Modeling Language}
+
+
+    Switching from Graphics to Logics
+    
+    \vspace{2em}
+
+    8 times better reduction than \textbf{[FSE'19]}, while only being 2-3 times
+    slower
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{JShrink Uses Call Graph Analysis to Remove Methods}
+
+    Builds a static call graph, and handles reflection by adding dynamic
+    information
+
+    \vspace{2em}
+
+    Able to specify program entry points
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{JShrink Handles More Dynamic Features}
+
+    \begin{tikzpicture}
+      \begin{axis}[
+        xbar,
+        y axis line style = {opacity = 0},
+        axis x line       = none,
+        xmin = 0,
+        tickwidth         = 0pt,
+        enlarge y limits  = 1,
+        symbolic y coords = {Median,Mean},
+        ytick             = data,
+        nodes near coords,
+        nodes near coords style={font=\footnotesize},
+        nodes near coords align={anchor=west},
+        point meta=explicit symbolic,
+      ]
+        \addplot [color=blue,fill=blue!50] coordinates {
+          (11.4,Mean) [11.4\%]
+          (3.1,Median) [3.1\%]
+        }; 
+        \addplot [color=red, fill=red!50]  coordinates {
+          (22.9,Mean) [22.9\%]
+          (28.9,Median) [28.9\%]
+        };
+      \end{axis}
+    \end{tikzpicture}
+
+    \vspace{-2em}
+
+    Includes rollback feature to ensure semantic preservation
+
+    \vspace{2em}
+
+    Under submission to \textbf{[FSE'20]}
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{JShrink May Help Developers}
+
+    New developement of a test-left-out for dynamic analysis testing
+
+    \vspace{2em}
+
+    Extensive comparsion with ProGuard
   \end{frame}
 
   \begin{frame}[fragile]
-    \frametitle{JInline Overview}
-    \begin{columns}[t]
-      \begin{column}{0.5\textwidth}
-        \hspace{3.4em} \structure{Before}
-        \begin{lstlisting}[xleftmargin=4em]
-public class Application {
-  // ...
-  public void bar() {
-    int x = a.foo();
-  }
-  // ...
-}
+    \frametitle{JInline Finds Call Sites to Inline}
 
-public class LibraryA {
-  // ...
-  public int foo() {
-    return /* complex */;
-  }
-  // ...
-}
-        \end{lstlisting}
-      \end{column}
-      \begin{column}{0.5\textwidth}
-        \hspace{3.4em} \structure{After}
-        \begin{lstlisting}[xleftmargin=4em]
-public class Application {
-  // ...
-  public void bar() {
-    int x = /* complex */;
-  }
-  // ...
-}
-        \end{lstlisting}
-      \end{column}
-    \end{columns}
-    \begin{tikzpicture}[remember picture,
-                        overlay,
-                        shift={(current page.south west)}]
-      \draw [blue, ->, >=stealth']
-        ($(current page.center)+(-4em,-6.8em)$)
-        -- node [above left, align=center, blue]
-        {\footnotesize Inline \texttt{foo}}
-        ($(current page.center)+(4em,0)$);
-      \draw [blue, ->, >=stealth']
-        ($(current page.center)+(-4em,-6.8em)$)
-        -- node [below, align=center, blue]
-        {\footnotesize Remove \texttt{LibraryA}}
-        ($(current page.center)+(4em,-6.8em)$);
+    We replace a method call with the method body
+
+    \vspace{2em}
+
+    Allows us to remove the method (and maybe even library)
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{JInline Is More Aggressive}
+
+    \begin{tikzpicture}
+      \begin{axis}[
+        xbar,
+        y axis line style = {opacity = 0},
+        axis x line       = none,
+        xmin = 0,
+        tickwidth         = 0pt,
+        enlarge y limits  = 1,
+        symbolic y coords = {Median,Mean},
+        ytick             = data,
+        nodes near coords,
+        nodes near coords style={font=\footnotesize},
+        nodes near coords align={anchor=west},
+        point meta=explicit symbolic,
+      ]
+        \addplot [color=blue,fill=blue!50] coordinates {
+          (18.1,Mean) [18.1\%]
+          (14.6,Median) [14.6\%]
+        }; 
+        \addplot [color=red, fill=red!50]  coordinates {
+          (14.6,Mean) [14.6\%]
+          (20.0,Median) [20.0\%]
+        };
+      \end{axis}
     \end{tikzpicture}
+
+    \vspace{-2em}
+
+    Inlines targets that don't have a single receiver
+
+    \vspace{2em}
+
+    \textbf{[SOSP'19]} submission related to reducing library dependence
   \end{frame}
 
   \begin{frame}
-    \frametitle{JInline Delta}
-    Enable inlining of multiple targets
+    \frametitle{JInline Further Increases its Reach}
 
-    More aggressive inlining might reduce immediate reduction, but helps later
+    Currently inlines all targets
+
+    \vspace{2em}
+
+    In the future we want to inline call sites with many recievers, only if it
+    helps other tools
   \end{frame}
 
   \begin{frame}
-    \frametitle{JInline}
-    Gerenuk, published in SOSP, ``object debloating''
+    \frametitle{All Tools Synergize Better Together}
+
+    \begin{tikzpicture}
+      \begin{axis}[
+        xbar,
+        y axis line style = {opacity = 0},
+        axis x line       = none,
+        xmin = 0,
+        tickwidth         = 0pt,
+        enlarge y limits  = 1,
+        symbolic y coords = {Median,Mean},
+        ytick             = data,
+        nodes near coords,
+        nodes near coords style={font=\footnotesize},
+        nodes near coords align={anchor=west},
+        point meta=explicit symbolic,
+      ]
+        \addplot [color=blue,fill=blue!50] coordinates {
+          (49.9,Mean) [49.9\%]
+          (30.3,Median) [30.3\%]
+        }; 
+        \addplot [color=red, fill=red!50]  coordinates {
+          (38.5,Mean) [38.5\%]
+          (31.0,Median) [31.0\%]
+        };
+      \end{axis}
+    \end{tikzpicture}
+
+    \vspace{-2em}
+
+    Recall, our benchmarks are orders of magnitude larger
   \end{frame}
 
-  \begin{frame}
-    \frametitle{JInline Future Work}
-    Currently inlines all targets that we can
-
-    To increase synergy, only inline at a callsite if it will help the other
-    tools
-  \end{frame}
-
-  \begin{frame}
-    \frametitle{JShrink Overview}
-    JShrink works by generating a static call graph of an input program.
-    It proceeds to remove methods that are not used based on static call graph
-    analysis.
-    When using JShrink, the user is required to specify entry points for
-    constructing the call graph.
-    JShrink provides three pre-programmed options: (1) all main methods, (2) all
-    public methods (excluding tests), and/or (3) all JUnit Tests. The user may
-    also specify custom entry points if required.
-  \end{frame}
-
-  \begin{frame}
-    \frametitle{JShrink Delta}
-    JMTrace(java agent) to handle dynamic class loading
-  \end{frame}
-
-  \begin{frame}
-    \frametitle{JShrink Research Output}
-
-    JShrink under submission
-  \end{frame}
-
-  \begin{frame}
-    \frametitle{JShrink Future Work}
-        ??
-  \end{frame}
-
-  \begin{frame}
-    \frametitle{JReduce Overview}
-    JReduce is a tool that uses a variant of delta-debugging to reduce the
-    classes of a project given a property.
-  \end{frame}
-
-  \begin{frame}
-    \frametitle{JReduce Delta}
-
-    Last year: focus on reducing number of classes
-
-    Delta this year: extend idea to also remove methods and fields
-  \end{frame}
-
-  \begin{frame}
-    \frametitle{JReduce Research Output}
-
-    JReduce was published in FSE'19
-  \end{frame}
-
-  \begin{frame}
-    \frametitle{JReduce Future Work}
-
-    Our current work, which I'm also going to present. Is improving the
-    modeling language from Graphs to Logics. This enable us to get around 8
-    times better reduction than [FSE'19], while only being 2-3 times slower
-    (preliminary numbers).
-  \end{frame}
 \end{document}
