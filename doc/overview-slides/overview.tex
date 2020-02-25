@@ -1,0 +1,250 @@
+\documentclass[aspectratio=169]{beamer}
+
+% Suppress all navigation symbols
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{headline}{}
+\setbeamertemplate{footline}{}
+\setbeamertemplate{itemize items}[circle]
+\setbeamertemplate{footline}[frame number]
+
+\setbeamercolor{structure}{fg=blue}
+\setbeamercolor{normal text}{fg=black, bg=white}
+\setbeamerfont{title}{series=\bfseries, size=\Huge}
+\setbeamerfont{frametitle}{series=\bfseries, size=\LARGE}
+
+\setbeamertemplate{footline}{
+  \begin{tikzpicture}[remember picture,
+                      overlay,
+                      shift={(current page.south west)}]
+    \node [black!50, inner sep=2mm, anchor=south east]
+          at (current page.south east)
+          {\large \bfseries \insertframenumber};
+  \end{tikzpicture}
+}
+
+\definecolor{red}{RGB}{220, 50, 47}
+\definecolor{green}{RGB}{133, 153, 0}
+\definecolor{cyan}{RGB}{42, 161, 152}
+\definecolor{blue}{RGB}{38, 139, 210}
+\definecolor{yellow}{RGB}{181, 137, 0}
+
+\usepackage{fontspec}
+\setsansfont{Overpass}[Scale=MatchLowercase]
+\setmonofont{Overpass Mono}[Scale=MatchLowercase]
+
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily\small,
+  commentstyle={\color{black!50}},
+  language=Java,
+}
+
+\usepackage{pgfplots}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+\usetikzlibrary{backgrounds}
+\usetikzlibrary{calc}
+\usetikzlibrary{decorations.pathreplacing}
+\usetikzlibrary{fit}
+\usetikzlibrary{positioning}
+\usetikzlibrary{matrix}
+\usetikzlibrary{scopes}
+\usetikzlibrary{shapes}
+\usetikzlibrary{tikzmark}
+\usetikzmarklibrary{listings}
+
+\title{JDebloat}
+\author{Jon Eyolfson}
+\date{2020-02-26}
+
+\setbeamertemplate{title page}
+{
+  \begin{tikzpicture}[remember picture,
+                      overlay,
+                      shift={(current page.south west)}]
+    \node (title) [inner sep=0, scale=1.2, align=center]
+          at (\paperwidth / 2, \paperheight * 2 / 3)
+          {\usebeamerfont{title}\usebeamercolor[fg]{title} \inserttitle};
+    \node (author) [scale=1.5] at (\paperwidth / 2, \paperheight / 3)
+          {\insertauthor};
+    \node [anchor=south east, inner sep=2mm] at (\paperwidth, 0)
+          {\bfseries \insertdate};
+  \end{tikzpicture}
+}
+
+\begin{document}
+
+  \begin{frame}[plain]
+    \titlepage
+  \end{frame}
+
+  \setcounter{framenumber}{0}
+
+  \begin{frame}
+    \frametitle{Overall Benchmark Results}
+    Before(7 Benchmarks)
+    \begin{center}
+      \begin{tabular}{c|r|r}
+        \textbf{Tool} &
+        \textbf{Mean Size Reduction(\%)} &
+        \textbf{Median Size Reduction (\%)}\\
+        \hline
+        jinline & 20.0 & 19.8\\
+        jshrink & 22.9 & 28.9\\
+        jreduce & 15.4 & 0.6\\
+        jinline+jshrink+jreduce & \textbf{38.5} & \textbf{31.0}\\
+      \end{tabular}
+    \end{center}
+
+    \vspace{1em}
+
+    After(25 Benchmarks)
+    \begin{center}
+      \begin{tabular}{c|r|r}
+        \textbf{Tool} &
+        \textbf{Mean Size Reduction(\%)} &
+        \textbf{Median Size Reduction (\%)}\\
+        \hline
+        jinline & 14.6 & 18.1\\
+        jshrink & 11.4 & 3.1\\
+        jreduce & 40.24 & 30.4\\
+        jinline+jshrink+jreduce & \textbf{49.9} & \textbf{30.3}\\
+      \end{tabular}
+    \end{center}
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{Push-Button Debloating}
+    just \texttt{./jdebloat.py run}
+  \end{frame}
+
+  \begin{frame}[fragile]
+    \frametitle{JInline Overview}
+    \begin{columns}[t]
+      \begin{column}{0.5\textwidth}
+        \hspace{3.4em} \structure{Before}
+        \begin{lstlisting}[xleftmargin=4em]
+public class Application {
+  // ...
+  public void bar() {
+    int x = a.foo();
+  }
+  // ...
+}
+
+public class LibraryA {
+  // ...
+  public int foo() {
+    return /* complex */;
+  }
+  // ...
+}
+        \end{lstlisting}
+      \end{column}
+      \begin{column}{0.5\textwidth}
+        \hspace{3.4em} \structure{After}
+        \begin{lstlisting}[xleftmargin=4em]
+public class Application {
+  // ...
+  public void bar() {
+    int x = /* complex */;
+  }
+  // ...
+}
+        \end{lstlisting}
+      \end{column}
+    \end{columns}
+    \begin{tikzpicture}[remember picture,
+                        overlay,
+                        shift={(current page.south west)}]
+      \draw [blue, ->, >=stealth']
+        ($(current page.center)+(-4em,-6.8em)$)
+        -- node [above left, align=center, blue]
+        {\footnotesize Inline \texttt{foo}}
+        ($(current page.center)+(4em,0)$);
+      \draw [blue, ->, >=stealth']
+        ($(current page.center)+(-4em,-6.8em)$)
+        -- node [below, align=center, blue]
+        {\footnotesize Remove \texttt{LibraryA}}
+        ($(current page.center)+(4em,-6.8em)$);
+    \end{tikzpicture}
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{JInline Delta}
+    Enable inlining of multiple targets
+
+    More aggressive inlining might reduce immediate reduction, but helps later
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{JInline}
+    Gerenuk, published in SOSP, ``object debloating''
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{JInline Future Work}
+    Currently inlines all targets that we can
+
+    To increase synergy, only inline at a callsite if it will help the other
+    tools
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{JShrink Overview}
+    JShrink works by generating a static call graph of an input program.
+    It proceeds to remove methods that are not used based on static call graph
+    analysis.
+    When using JShrink, the user is required to specify entry points for
+    constructing the call graph.
+    JShrink provides three pre-programmed options: (1) all main methods, (2) all
+    public methods (excluding tests), and/or (3) all JUnit Tests. The user may
+    also specify custom entry points if required.
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{JShrink Delta}
+    JMTrace(java agent) to handle dynamic class loading
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{JShrink Research Output}
+
+    JShrink under submission
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{JShrink Future Work}
+        ??
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{JReduce Overview}
+    JReduce is a tool that uses a variant of delta-debugging to reduce the
+    classes of a project given a property.
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{JReduce Delta}
+
+    Last year: focus on reducing number of classes
+
+    Delta this year: extend idea to also remove methods and fields
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{JReduce Research Output}
+
+    JReduce was published in FSE'19
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{JReduce Future Work}
+
+    Our current work, which I'm also going to present. Is improving the
+    modeling language from Graphs to Logics. This enable us to get around 8
+    times better reduction than [FSE'19], while only being 2-3 times slower
+    (preliminary numbers).
+  \end{frame}
+\end{document}
