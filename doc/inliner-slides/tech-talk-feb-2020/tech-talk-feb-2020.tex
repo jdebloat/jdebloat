@@ -200,8 +200,8 @@ public class Application {
                 C.foo */
     // ...
     o.foo(); /* resolves to
-                C.foo
-                or D.foo */
+                many different
+                .foo methods */
   }
   // ...
 }
@@ -210,7 +210,7 @@ public class Application {
 
   \begin{frame}
     \frametitle{JInline Leverages Soot to Transform JARs}
-    
+
     \structure{Soot:} framework for analyzing and transforming Java applications
 
     \vspace{2em}
@@ -227,10 +227,30 @@ public class Application {
 
     The major factors are:
     \begin{itemize}
-      \item Virtual call has multiple targets
       \item Size restrictions (program size explosion)
       \item Recursion (both direct and indirect)
+      \item Virtual call has multiple targets
     \end{itemize}
+  \end{frame}
+
+  \begin{frame}[fragile]
+    \frametitle{We Extended JInline to Handle Multi-Typed Callsites}
+
+    If a callsite only has one type at runtime, just inline that type
+
+    \vspace{2em}
+
+    We extend this idea to multiple types
+
+    \vspace{4em}
+
+    \texttt{o.foo} becomes:
+    \begin{lstlisting}
+if type(o) == A:
+    /* inlined body of A.foo */
+else if type(o) == B:
+    /* inlined body of B.foo */
+    \end{lstlisting}
   \end{frame}
 
   \begin{frame}
@@ -250,21 +270,53 @@ public class Application {
         y axis line style = { draw=none },
         enlarge y limits  = 0.2,
         tickwidth=0pt,
-        symbolic y coords = {javapoet, DiskLruCache, JavaVerbalExpressions, junit4, RxRelay},
+        symbolic y coords = {javapoet, DiskLruCache, Gson, junit4, RxRelay},
         nodes near coords,
         nodes near coords style={font=\footnotesize},
         nodes near coords align={anchor=west},
         point meta=explicit symbolic,
       ]
         \addplot coordinates {
-          (1.04,javapoet) [1.04 (3441)]
-          (1.05,DiskLruCache) [1.05 (1285)]
-          (1.12,JavaVerbalExpressions) [1.12 (906)]
-          (1.02,junit4) [1.02 (2753)]
-          (1,RxRelay) [1.00 (1375 methods inlined)]
+          (1.18,javapoet) [1.18 (3441)]
+          (1.08,DiskLruCache) [1.08 (1285)]
+          (1.09,Gson) [1.09 (1548)]
+          (1.09,junit4) [1.09 (2753)]
+          (1,RxRelay) [1.00 (1375 callsites inlined)]
         };
       \end{axis}
     \end{tikzpicture}
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{Future JInline Work}
+
+    Currently, JInline aggressively inlines everything that it can
+
+    \vspace{2em}
+
+    Instead, we can inline a method only when it helps the other tools
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{We Can Improve Inlining at Runtime}
+
+    Currently we use the JVM's decisions as the ``ground truth'' for our inline
+    targets
+
+    \vspace{2em}
+
+    We looked more closely into how the JVM makes inlining decisions
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{Current Work: Improving JIT Inlining}
+    The JVM's current profiling for inline targets is very simple
+
+    \hspace{1em} Fixed heuristics
+
+    \vspace{2em}
+
+    Goal: learn better inlining decisions using machine learning
   \end{frame}
 
 \end{document}
