@@ -167,7 +167,7 @@
   \end{frame}
 
   \begin{frame}
-    \frametitle{JReduce overview}
+    \frametitle{JReduce Overview}
     \begin{tikzpicture}
       \node [box, draw=black] (dependencygraph) {Dependency Graph};
 
@@ -252,7 +252,7 @@
   \end{frame}
 
   \begin{frame}
-    \frametitle{JShrink Uses Call Graph Analysis to Remove Methods}
+    \frametitle{JShrink Uses Call Graph Analysis to Reduce Code Size}
 
     Builds a static call graph, and handles reflection by adding dynamic
     information
@@ -260,6 +260,16 @@
     \vspace{2em}
 
     Able to specify program entry points
+
+    \vspace{2em}
+
+    JShrink performs 4 transformations:
+    \begin{enumerate}
+      \item Unused method removal
+      \item Unused field removal
+      \item Static inlining
+      \item Class collapsing / class hierarchy specialization
+    \end{enumerate}
   \end{frame}
 
   \begin{frame}
@@ -321,9 +331,7 @@
 
     \vspace{-2em}
 
-    Includes rollback feature to ensure semantic preservation
-
-    \vspace{2em}
+    We developed a profiling tool named JMTrace for our dynamic analysis
 
     Under submission to \textbf{[FSE'20]}
   \end{frame}
@@ -336,6 +344,10 @@
     \vspace{2em}
 
     Extensive comparsion with ProGuard
+
+    \vspace{2em}
+
+    Includes rollback feature to ensure semantic preservation
   \end{frame}
 
   \begin{frame}[fragile]
@@ -346,6 +358,35 @@
     \vspace{2em}
 
     Allows us to remove the method (and maybe even library)
+
+  \end{frame}
+
+  \begin{frame}[fragile]
+    \frametitle{JInline Overview}
+
+    \centering
+    \begin{tikzpicture}[
+      database/.style={ellipse, draw},
+      jar/.style={},
+      jvm/.style={rectangle, draw},
+      ours/.style={rectangle, draw, blue, thick},
+      node distance=0.7cm, ->, >=stealth', shorten >=1mm
+    ]
+      \node [jar] (original) {Original JAR};
+      \node [jvm, right=of original, yshift=-0.7cm] (jvm) {JVM (Instrumented)};
+      \node [database, right=of jvm, yshift=-0.7cm] (database) {Database};
+      \node [ours, right=of database, yshift=-0.7cm] (jinliner)
+            {\bfseries JInline};
+      \node [jar, right=of jinliner, yshift=-0.7cm] (modified) {Modified JAR};
+
+      \path (original.south east) edge (jvm.north west)
+            (jvm.south east) edge
+              node [below left] {\footnotesize Filtering} (database.north west)
+            (database.south east) edge (jinliner.north west)
+            (original.south) edge [bend right=45] (jinliner.south west)
+            (jinliner.south east) edge (modified.north west);
+    \end{tikzpicture}
+
   \end{frame}
 
   \begin{frame}
@@ -384,34 +425,6 @@
     \vspace{2em}
 
     \textbf{[SOSP'19]} submission related to reducing library dependence
-  \end{frame}
-
-  \begin{frame}[fragile]
-    \frametitle{JInline overview}
-
-    \centering
-    \begin{tikzpicture}[
-      database/.style={ellipse, draw},
-      jar/.style={},
-      jvm/.style={rectangle, draw},
-      ours/.style={rectangle, draw, blue, thick},
-      node distance=0.7cm, ->, >=stealth', shorten >=1mm
-    ]
-      \node [jar] (original) {Original JAR};
-      \node [jvm, right=of original, yshift=-0.7cm] (jvm) {JVM (Instrumented)};
-      \node [database, right=of jvm, yshift=-0.7cm] (database) {Database};
-      \node [ours, right=of database, yshift=-0.7cm] (jinliner)
-            {\bfseries JInline};
-      \node [jar, right=of jinliner, yshift=-0.7cm] (modified) {Modified JAR};
-
-      \path (original.south east) edge (jvm.north west)
-            (jvm.south east) edge
-              node [below left] {\footnotesize Filtering} (database.north west)
-            (database.south east) edge (jinliner.north west)
-            (original.south) edge [bend right=45] (jinliner.south west)
-            (jinliner.south east) edge (modified.north west);
-    \end{tikzpicture}
-
   \end{frame}
 
   \begin{frame}
