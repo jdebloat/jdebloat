@@ -129,8 +129,8 @@
           \node[bigbox] [fit = (1) (3)] (jdebloatbox) {};
         \end{pgfonlayer}
 
-        \node[box, left=of 2.west, anchor=east] (input) {Java Bytecode};
-        \node[box, right=of 2.east, anchor=west, align=center] (output) {Reduced\\Java Bytecode};
+        \node[box, left=of 2.west, anchor=east] (input) {Bytecode};
+        \node[box, right=of 2.east, anchor=west, align=center] (output) {Reduced\\Bytecode};
 
         \draw[arrow] (input.east) -- (jdebloatbox);
         \draw[arrow] (jdebloatbox.east) -- (output.west);
@@ -167,22 +167,21 @@
   \end{frame}
 
   \begin{frame}
-    \frametitle{JReduce Overview}
+    \frametitle{JReduce Uses Tests to Remove Code}
+    \centering
     \begin{tikzpicture}
-      \node [box, draw=black] (dependencygraph) {Dependency Graph};
+      \node [box] (dependencygraph) {Dependency Graph};
 
       \node [
         box,
         minimum width=6em,
         below=1.5cm and .75cm of dependencygraph.south west,
-        draw=black
       ] (test) {Test};
 
       \node [
         box,
         minimum width=6em,
         below=1.5cm and .75cm of dependencygraph.south east,
-        draw=black
       ] (reduce) {Reduce};
 
       \draw[arrow] (dependencygraph.south) -- (reduce.north);
@@ -193,8 +192,8 @@
         \node[draw, bigbox,fit=(dependencygraph) (test) (reduce)] (outline) {};
       \end{pgfonlayer}
 
-      \node [box, left=1.5cm of outline, draw=black] (input) {Java Bytecode};
-      \node [box, right=1.5cm of outline, draw=black,align=center] (output) {Reduced\\Java Bytecode};
+      \node [box, left=1.5cm of outline] (input) {Bytecode};
+      \node [box, right=1.5cm of outline, align=center] (output) {Reduced\\Bytecode};
 
       \draw[arrow] (input.east) -- (outline.west);
       \draw[arrow] (outline.east) -- (output.west);
@@ -247,21 +246,12 @@
 
     \vspace{2em}
 
-    8.1 times better reduction than \textbf{[FSE'19]}, while only being .51
+    8.1 times better reduction than \textbf{[FSE'19]}, while only being 0.57
     times slower
   \end{frame}
 
   \begin{frame}
-    \frametitle{JShrink Uses Call Graph Analysis to Reduce Code Size}
-
-    Builds a static call graph, and handles reflection by adding dynamic
-    information
-
-    \vspace{2em}
-
-    Able to specify program entry points
-
-    \vspace{2em}
+    \frametitle{JShrink Removes Unused Code Through Analysis}
 
     JShrink performs 4 transformations:
     \begin{enumerate}
@@ -270,16 +260,26 @@
       \item Static inlining
       \item Class collapsing / class hierarchy specialization
     \end{enumerate}
+
+    \vspace{2em}
+
+    Builds a static call graph, and handles reflection by adding dynamic
+    information
+
+    \vspace{2em}
+
+    Able to specify program entry points
   \end{frame}
 
   \begin{frame}
-    \frametitle{JShrink Overview}
+    \frametitle{JShrink Uses Call Graph Analysis to Reduce Code Size}
 
+    \centering
     \begin{tikzpicture}
-      \node[box, draw=black, align=center] (cga) {Call Graph\\Analysis};
-      \node[box, draw=black, right=of cga, align=center] (bytecodetransformations) {Bytecode\\Transformations};
-      \node[box, draw=black, above=of cga, align=center] (tamiflex) {TamiFlex:\\Field Access Analysis};
-      \node[box, draw=black, below=of cga] (jmtrace) {JMTrace};
+      \node[box, align=center] (cga) {Call Graph\\Analysis};
+      \node[box, right=of cga, align=center] (bytecodetransformations) {Bytecode\\Transformations};
+      \node[box, above=of cga, align=center] (tamiflex) {TamiFlex:\\Field Access Analysis};
+      \node[box, below=of cga] (jmtrace) {JMTrace};
 
       \draw[arrow] (tamiflex) -- (cga.north);
       \draw[arrow] (cga) -- (bytecodetransformations);
@@ -289,10 +289,10 @@
         \node[draw, bigbox, fit=(cga) (bytecodetransformations) (tamiflex) (jmtrace)] (jshrink) {};
       \end{pgfonlayer}
 
-      \node[box, draw=black, left=of tamiflex] (inputbc) {Java Bytecode};
-      \node[box, draw=black, left=2.1cm of jmtrace, align=center] (entrypoints) {Program\\Entry Points};
+      \node[box, left=of tamiflex] (inputbc) {Bytecode};
+      \node[box, left=2.1cm of jmtrace, align=center] (entrypoints) {Entry Points};
 
-      \node[box, draw=black, right=of jshrink, align=center] (output) {Reduced\\Java Bytecode};
+      \node[box, right=of jshrink, align=center] (output) {Reduced\\Bytecode};
 
       \draw[arrow] (jshrink.east) -- (output.west);
       \draw[arrow] (inputbc.east) -- (jshrink.west);
@@ -332,18 +332,13 @@
     \vspace{-2em}
 
     We developed a profiling tool named JMTrace for our dynamic analysis
-
-    Under submission to \textbf{[FSE'20]}
+    (submitted to \textbf{[FSE'20]})
   \end{frame}
 
   \begin{frame}
     \frametitle{JShrink May Help Developers}
 
-    New developement of a test-left-out for dynamic analysis testing
-
-    \vspace{2em}
-
-    Extensive comparsion with ProGuard
+    Extensive comparison with ProGuard
 
     \vspace{2em}
 
@@ -362,28 +357,27 @@
   \end{frame}
 
   \begin{frame}[fragile]
-    \frametitle{JInline Overview}
+    \frametitle{JInline Uses Program Behavior to Inline Code}
 
     \centering
     \begin{tikzpicture}[
-      database/.style={ellipse, draw},
-      jar/.style={},
-      jvm/.style={rectangle, draw},
-      ours/.style={rectangle, draw, blue, thick},
       node distance=0.7cm, ->, >=stealth', shorten >=1mm
     ]
-      \node [jar] (original) {Original JAR};
-      \node [jvm, right=of original, yshift=-0.7cm] (jvm) {JVM (Instrumented)};
-      \node [database, right=of jvm, yshift=-0.7cm] (database) {Database};
-      \node [ours, right=of database, yshift=-0.7cm] (jinliner)
-            {\bfseries JInline};
-      \node [jar, right=of jinliner, yshift=-0.7cm] (modified) {Modified JAR};
+      \node [box] (original) {Bytecode};
+      \node [box, right=of original, yshift=-0.7cm] (jvm) {JVM (Instrumented)};
+      \node [box, right=of jvm, yshift=-0.7cm] (database) {Database};
+      \node [box, right=of database, yshift=-0.7cm] (jinliner)
+            {Transformer};
+      \node [box, right=of jinliner, yshift=-0.9cm, align=center] (modified) {Inlined\\Bytecode};
+
+      \begin{pgfonlayer}{background}
+        \node[draw, bigbox, fit=(jvm) (database) (jinliner)] (jinline) {};
+      \end{pgfonlayer}
 
       \path (original.south east) edge (jvm.north west)
             (jvm.south east) edge
               node [below left] {\footnotesize Filtering} (database.north west)
             (database.south east) edge (jinliner.north west)
-            (original.south) edge [bend right=45] (jinliner.south west)
             (jinliner.south east) edge (modified.north west);
     \end{tikzpicture}
 
