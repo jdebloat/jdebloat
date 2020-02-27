@@ -54,8 +54,25 @@
 \usetikzlibrary{tikzmark}
 \usetikzmarklibrary{listings}
 
+\tikzset{
+    arrow/.style={->,>=stealth', shorten >=2pt, thick},
+    box/.style = {
+      minimum size=0.6cm,
+      rounded corners,
+      rectangle,
+      fill=blue!50
+    },
+    bigbox/.style = {
+      draw=blue!50,
+      thick,
+      fill=blue!10,
+      rounded corners,
+      rectangle
+    },
+}
+
 \title{JInline}
-\author{Jonathan Eyolfson and Christian Navasca}
+\author{Christian Navasca}
 \date{2020-02-26}
 
 \setbeamertemplate{title page}
@@ -139,24 +156,23 @@ public class Application {
 
     \centering
     \begin{tikzpicture}[
-      database/.style={ellipse, draw},
-      jar/.style={},
-      jvm/.style={rectangle, draw},
-      ours/.style={rectangle, draw, blue, thick},
       node distance=0.7cm, ->, >=stealth', shorten >=1mm
     ]
-      \node [jar] (original) {Original JAR};
-      \node [jvm, right=of original, yshift=-0.7cm] (jvm) {JVM (Instrumented)};
-      \node [database, right=of jvm, yshift=-0.7cm] (database) {Database};
-      \node [ours, right=of database, yshift=-0.7cm] (jinliner)
-            {\bfseries JInline};
-      \node [jar, right=of jinliner, yshift=-0.7cm] (modified) {Modified JAR};
+      \node [box] (original) {Bytecode};
+      \node [box, right=of original, yshift=-0.7cm] (jvm) {JVM (Instrumented)};
+      \node [box, right=of jvm, yshift=-0.7cm] (database) {Database};
+      \node [box, right=of database, yshift=-0.7cm] (jinliner)
+            {Transformer};
+      \node [box, right=of jinliner, yshift=-0.9cm, align=center] (modified) {Inlined\\Bytecode};
+
+      \begin{pgfonlayer}{background}
+        \node[draw, bigbox, fit=(jvm) (database) (jinliner)] (jinline) {};
+      \end{pgfonlayer}
 
       \path (original.south east) edge (jvm.north west)
             (jvm.south east) edge
               node [below left] {\footnotesize Filtering} (database.north west)
             (database.south east) edge (jinliner.north west)
-            (original.south) edge [bend right=45] (jinliner.south west)
             (jinliner.south east) edge (modified.north west);
     \end{tikzpicture}
   \end{frame}
@@ -281,7 +297,7 @@ else if type(o) == B:
           (1.08,DiskLruCache) [1.08 (1285)]
           (1.09,Gson) [1.09 (1548)]
           (1.09,junit4) [1.09 (2753)]
-          (1,RxRelay) [1.00 (1375 callsites inlined)]
+          (1,RxRelay) [1.00 (1375 methods inlined)]
         };
       \end{axis}
     \end{tikzpicture}
@@ -312,7 +328,7 @@ else if type(o) == B:
     \frametitle{Current Work: Improving JIT Inlining}
     The JVM's current profiling for inline targets is very simple
 
-    \hspace{1em} Fixed heuristics
+    \hspace{1em} Uses heuristics
 
     \vspace{2em}
 
