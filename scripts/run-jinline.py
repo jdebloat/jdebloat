@@ -41,8 +41,6 @@ def main(args):
     output_soot_path = os.path.join(output_dir, 'sootOutput')
     output_jar = os.path.join(BASE_DIR, args.output_jar)
 
-    benchmark_dir = os.path.join(os.path.dirname(output_dir), 'benchmark')
-
     classpath = '{}:{}'.format(test_jar, app_lib_jar)
 
     test_runner = None
@@ -77,12 +75,7 @@ def main(args):
                         "-Xcomp",
                         "-XX:MinInliningThreshold=1",
                         "-XX:MaxInlineSize=70",
-                        '-cp', classpath] + test_args, cwd=benchmark_dir)
-        for f in os.listdir(benchmark_dir):
-            if re.match('hotspot.*\.log', f):
-                src = os.path.join(benchmark_dir, f)
-                dst = os.path.join(output_dir, f)
-                shutil.move(src, dst)
+                        "-cp", classpath] + test_args, cwd=output_dir)
     else:
         print('\033[33mSkipped running original tests and generating inline targets...\033[m')
 
