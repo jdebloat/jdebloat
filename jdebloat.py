@@ -16,10 +16,15 @@ if LOCAL_PATH not in os.get_exec_path():
         os.environ["PATH"] = LOCAL_PATH
     os.environ["PATH"] += (":" + LOCAL_PATH)
 
+# MODE = "TUTORIAL" # MODE: either "TUTORIAL" or "BENCHMARKING"
+MODE = "BENCHMARKING"
+
 BENCHMARKS = "data/benchmarks.csv"
+EXAMPLES = "data/examples.csv"
 ROOT = Path(os.path.dirname(os.path.abspath(__file__)))
 OUTPUT = ROOT / "output"
 DATA = ROOT / "data"
+EXAMPLES_FOLDER = ROOT / "examples"
 PATCHES = DATA / "patches"
 SRC_FOLDER = "benchmark"
 SCRIPTS = ROOT / "scripts"
@@ -43,18 +48,17 @@ TOOL_LIST = ['jinline', 'jshrink', 'jreduce']
 
 def invoke(tools):
     if(os.path.exists(str(OUTPUT / "all.csv"))):
-        return
-
-    benchmarks = get_benchmarks()
+        os.remove(str(OUTPUT / "all.csv"))
+        # return
 
     if len(tools) == 0:  # run all 3 tools if `tools` is not specified
         tools = ['jinline', 'jshrink', 'jreduce']
     if tools[0] != 'initial':
         tools.insert(0, 'initial')
 
+    benchmarks = get_benchmarks()
     for benchmark in benchmarks:
         download_benchmark(benchmark)
-        apply_patch(benchmark)
 
         src_dir = OUTPUT / benchmark.id / SRC_FOLDER
         for tool in tools:  # then run tools in sequence
@@ -187,23 +191,39 @@ def jinline(src, dest):
     if(os.path.exists(str(dest / "app.jar"))):
         return
 
+    clean_jinline_db()
+    setup_jinline_db()
     run([str(SCRIPTS / "run-jinline.sh"), str(src), str(dest)])
 
 def jshrink(src, dest):
     if(os.path.exists(str(dest / "app.jar"))):
         return
 
+    p = ROOT / "tools" / "jshrink" / "experiment_resources" / "size_data.csv"
+    if p.exists():
+        os.remove(str(p))
+
     run([str(SCRIPTS / "jshrink_script.sh"), str(src), str(dest)])
 
-def setup_jinline():
-    if not os.path.exists(str(OUTPUT)):
-        os.mkdir(str(OUTPUT))
-
+def setup_jinline_db():
+    print("JInline: creating DB...")
     if not os.path.exists('output/db.sqlite3'):
         run(['cp', 'data/jinline/settings.py',
              'tools/jinline/src/python/settings.py'])
         with changedir('tools/jinline'):
             run(['make', 'setup'])
+
+def clean_jinline_db():
+    print("JInline: cleaning DB...")
+    p = Path('output/db.sqlite3')
+    if p.exists():
+        os.remove(str(p))
+
+def setup_jinline():
+    if not os.path.exists(str(OUTPUT)):
+        os.mkdir(str(OUTPUT))
+
+    setup_jinline_db()
     with changedir('tools/jinline'):
         run(['make'])
 
@@ -269,21 +289,45 @@ def apply_patch(benchmark):
 
 def download_benchmark(benchmark):
     path = OUTPUT / benchmark.id / SRC_FOLDER
-    if(os.path.exists(str(path / ".git" / "HEAD"))):
-        return
+    if benchmark.url != "":
+        if(os.path.exists(str(path / ".git" / "HEAD"))):
+            return
 
-    if(os.path.exists(str(path))):
-        os.rmdir(path)
+        if(os.path.exists(str(path))):
+            shutil.rmtree(str(path))
 
-    git("clone", benchmark.url, path)
-    git("checkout", "-b", "onr", benchmark.rev, work_folder=path)
+        git("clone", benchmark.url, path)
+        git("checkout", "-b", "onr", benchmark.rev, work_folder=path)
+        apply_patch(benchmark)
+    else:  # no url provided. Search locally in `examples/` directory
+        if(os.path.exists(str(path / "pom.xml"))):
+            return
+
+        if(os.path.exists(str(path))):
+            shutil.rmtree(str(path))
+
+        if not (EXAMPLES_FOLDER / benchmark.id).exists():
+            print("Example project '{}' doesn't exist.".format(benchmark.id))
+            return
+
+        shutil.copytree(str(EXAMPLES_FOLDER / benchmark.id), str(path))
+
 
 def get_benchmarks():
+    if MODE == "TUTORIAL":
+        file_name = EXAMPLES
+    elif MODE == "BENCHMARKING":
+        file_name = BENCHMARKS
+    else:
+        print("Running in unknown mode:", MODE)
+        sys.exit(1)
+
     data = []
-    with open(BENCHMARKS) as bench_file:
+    with open(file_name) as bench_file:
         reader = csv.reader(bench_file, delimiter=',')
         next(reader)  # skip header
         for row in reader:
+            row += [""] * (3 - len(row)) # fill up row with empty strings if len(row) < 3
             data.append(Benchmark(row[0], row[1], row[2]))
     return data
 
@@ -295,9 +339,9 @@ class Benchmark:
 
 def verify_tools(tools):
     for tool in tools:
-         if tool not in TOOL_LIST:
-             print('Unknown tool:', tool)
-             sys.exit(1)
+        if tool not in TOOL_LIST:
+            print('Unknown tool:', tool)
+            sys.exit(1)
 
 def parse_args():
     parser = ArgumentParser(
