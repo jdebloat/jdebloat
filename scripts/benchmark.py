@@ -115,17 +115,15 @@ def main(argv):
 
 
     print("Looking at: " + str(benchmark))
-    if not (benchmark / "libs").exists():
+    if not (benchmark / "target").exists():
         print("Building")
         build(benchmark)
 
     targets = list(benchmark.glob("*/target/classes"))
     test_targets = list(benchmark.glob("*/target/test-classes"))
-    resources = list(benchmark.glob("*/src/test/resources"))
     if (benchmark / "target").exists():
         targets.append(benchmark / "target" / "classes")
         test_targets.append(benchmark / "target" / "test-classes")
-        resources.append(benchmark / "src" /"test" / "resources")
 
     test_classes = set.union(*[set(extract_testclasses(t.parent)) for t in test_targets]) - excluded
     (extract / "test.classes.txt").write_text('\n'.join(test_classes) + '\n')
@@ -138,9 +136,7 @@ def main(argv):
     test_cp = set(extract_classpath(benchmark, "test"))
     make_jar(test_targets, test_cp - compile_cp, extract / "test.jar")
 
-    for t in resources:
-        x = t.parent.parent
-        copy_files(t, extract / "src" / t.relative_to(x))
+    run(["ln", "-s", str(benchmark / "src"), str(extract / "src")])
 
     dct["classpath"] = {
         "lib": sorted(compile_cp),
