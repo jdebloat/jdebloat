@@ -16,8 +16,7 @@ if LOCAL_PATH not in os.get_exec_path():
         os.environ["PATH"] = LOCAL_PATH
     os.environ["PATH"] += (":" + LOCAL_PATH)
 
-# MODE = "TUTORIAL" # MODE: either "TUTORIAL" or "BENCHMARKING"
-MODE = "BENCHMARKING"
+MODE = "TUTORIAL" # MODE: either "TUTORIAL" or "BENCHMARKING"
 
 BENCHMARKS = "data/benchmarks.csv"
 EXAMPLES = "data/examples.csv"
@@ -46,7 +45,7 @@ ALL_TARGETS = [
 ]
 TOOL_LIST = ['jinline', 'jshrink', 'jreduce']
 
-def invoke(tools):
+def invoke(tools, benchmark):
     if(os.path.exists(str(OUTPUT / "all.csv"))):
         os.remove(str(OUTPUT / "all.csv"))
         # return
@@ -56,7 +55,7 @@ def invoke(tools):
     if tools[0] != 'initial':
         tools.insert(0, 'initial')
 
-    benchmarks = get_benchmarks()
+    benchmarks = get_benchmarks(benchmark)
     for benchmark in benchmarks:
         download_benchmark(benchmark)
 
@@ -177,19 +176,22 @@ def git(*cmd, work_folder="."):
 
 def compile(benchmark, src, dest):
     if(os.path.exists(str(dest / "app.jar"))):
-        return
+        shutil.rmtree(str(dest))
+        # return
 
     run([str(SCRIPTS / "benchmark.py"), str(DATA /
                                             "excluded-tests.txt"), str(src), str(dest)])
 
 def jreduce(src, dest):
     if(os.path.exists(str(dest / "app.jar"))):
-        return
+        shutil.rmtree(str(dest))
+        # return
     run([str(SCRIPTS / "run-jreduce.sh"), str(src), str(dest)])
 
 def jinline(src, dest):
     if(os.path.exists(str(dest / "app.jar"))):
-        return
+        shutil.rmtree(str(dest))
+        # return
 
     clean_jinline_db()
     setup_jinline_db()
@@ -197,7 +199,8 @@ def jinline(src, dest):
 
 def jshrink(src, dest):
     if(os.path.exists(str(dest / "app.jar"))):
-        return
+        shutil.rmtree(str(dest))
+        # return
 
     p = ROOT / "tools" / "jshrink" / "experiment_resources" / "size_data.csv"
     if p.exists():
@@ -313,7 +316,7 @@ def download_benchmark(benchmark):
         shutil.copytree(str(EXAMPLES_FOLDER / benchmark.id), str(path))
 
 
-def get_benchmarks():
+def get_benchmarks(bm_name):
     if MODE == "TUTORIAL":
         file_name = EXAMPLES
     elif MODE == "BENCHMARKING":
@@ -329,6 +332,13 @@ def get_benchmarks():
         for row in reader:
             row += [""] * (3 - len(row)) # fill up row with empty strings if len(row) < 3
             data.append(Benchmark(row[0], row[1], row[2]))
+
+    if bm_name != "all":
+        data = [bm for bm in data if bm.id == bm_name]
+        if len(data) == 0:
+            print("Project {} doesn't exist.".format(bm_name))
+            sys.exit(1)
+
     return data
 
 class Benchmark:
@@ -345,27 +355,45 @@ def verify_tools(tools):
 
 def parse_args():
     parser = ArgumentParser(
-        description='''Run all 3 debloat tools in sequence.
+        description='''Run debloat tools in sequence.
+
 Examples:
-  ./jdebloat.py setup
-  ./jdebloat.py setup jinline jshrink jreduce
-  ./jdebloat.py run jinline jshrink jreduce
-  ./jdebloat.py clean''', formatter_class=RawTextHelpFormatter)
+   ./jdebloat.py setup
+        (setup environment for all tools)
+or ./jdebloat.py setup jinline jshrink jreduce
+        (essnentially the same as ./jdebloat.py setup)
+or ./jdebloat.py run
+        (run all tools on all benchmarks in the order of "jinline jshrink jreduce")
+or ./jdebloat.py run jinline
+        (run jinline only on all benchmarks)
+or ./jdebloat.py run jinline jshrink jreduce
+        (essnentially the same as ./jdebloat.py run)
+or ./jdebloat.py run jshrink --benchmark=jshrink-test
+        (run jshrink only on "jshrink-test" benchmark only)
+or ./jdebloat.py clean
+        (clean all debloating outputs)''', formatter_class=RawTextHelpFormatter)
 
     subparsers = parser.add_subparsers(dest='command')
     subparsers.required = True
-    clean_parser = subparsers.add_parser('clean')
+    clean_parser = subparsers.add_parser('clean', help='Clean debloating outputs.')
 
-    tools_parser = subparsers.add_parser('setup')
+    tools_parser = subparsers.add_parser('setup', help =
+        'Setup environment for the specific tool(s).')
     tools_parser.add_argument('tools',
                                nargs='*', help=str(TOOL_LIST),
                                default=TOOL_LIST)
 
-    run_parser = subparsers.add_parser('run')
+    run_parser = subparsers.add_parser('run', help = '''\
+Run tool(s) in speficifed order.
+Different orders can generate different debloating results.
+The default sequence is "jinline jshrink jreduce".''')
     run_parser.add_argument('tools',
                             nargs='*',
                             help=str(TOOL_LIST),
                             default=TOOL_LIST)
+    run_parser.add_argument('--benchmark', type = str, default = 'all', help = '''\
+Specify a certain project to debloat.
+Debloat all benchmarks by default.''')
 
     args = parser.parse_args()
     if args.command != 'clean':
@@ -378,7 +406,7 @@ def main():
     if args.command == 'clean':
         clean()
     elif args.command == 'run':
-        invoke(args.tools)
+        invoke(args.tools, args.benchmark)
     elif args.command == 'setup':
         setup(args.tools)
 

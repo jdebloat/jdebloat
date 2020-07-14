@@ -47,7 +47,7 @@ def build(benchmark):
             "-Dmaven.repo.local=libs",
             "install",
             "--batch-mode",
-            "-fn"])
+            "-fn"], stdout=DEVNULL)
 
 def extract_classpath(benchmark, scope):
     with changedir(benchmark):
@@ -113,10 +113,9 @@ def main(argv):
 
     dct = extract_gitinfo(benchmark)
 
-
     print("Looking at: " + str(benchmark))
     if not (benchmark / "target").exists():
-        print("Building")
+        print("Building...")
         build(benchmark)
 
     targets = list(benchmark.glob("*/target/classes"))
