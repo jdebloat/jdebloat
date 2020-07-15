@@ -391,7 +391,7 @@ The default sequence is "jinline jshrink jreduce".''')
                             nargs='*',
                             help=str(TOOL_LIST),
                             default=TOOL_LIST)
-    run_parser.add_argument('--benchmark', type = str, default = 'all', help = '''\
+    run_parser.add_argument('-b', '--benchmark', type = str, default = 'all', help = '''\
 Specify a certain project to debloat.
 Debloat all benchmarks by default.''')
 
