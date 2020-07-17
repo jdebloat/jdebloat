@@ -16,8 +16,6 @@ if LOCAL_PATH not in os.get_exec_path():
         os.environ["PATH"] = LOCAL_PATH
     os.environ["PATH"] += (":" + LOCAL_PATH)
 
-MODE = "TUTORIAL" # MODE: either "TUTORIAL" or "BENCHMARKING"
-
 BENCHMARKS = "data/benchmarks.csv"
 EXAMPLES = "data/examples.csv"
 ROOT = Path(os.path.dirname(os.path.abspath(__file__)))
@@ -45,7 +43,7 @@ ALL_TARGETS = [
 ]
 TOOL_LIST = ['jinline', 'jshrink', 'jreduce']
 
-def invoke(tools, benchmark):
+def invoke(tools, csv_file, benchmark):
     if(os.path.exists(str(OUTPUT / "all.csv"))):
         os.remove(str(OUTPUT / "all.csv"))
         # return
@@ -55,7 +53,7 @@ def invoke(tools, benchmark):
     if tools[0] != 'initial':
         tools.insert(0, 'initial')
 
-    benchmarks = get_benchmarks(benchmark)
+    benchmarks = get_benchmarks(csv_file, benchmark)
     for benchmark in benchmarks:
         download_benchmark(benchmark)
 
@@ -316,17 +314,14 @@ def download_benchmark(benchmark):
         shutil.copytree(str(EXAMPLES_FOLDER / benchmark.id), str(path))
 
 
-def get_benchmarks(bm_name):
-    if MODE == "TUTORIAL":
-        file_name = EXAMPLES
-    elif MODE == "BENCHMARKING":
-        file_name = BENCHMARKS
-    else:
-        print("Running in unknown mode:", MODE)
+def get_benchmarks(csv_file, bm_name):
+    file_name = str(DATA / (csv_file + ".csv"))
+    if not os.path.exists(file_name):
+        print("Cannot find the benchmark csv file:", str(file_name))
         sys.exit(1)
 
     data = []
-    with open(file_name) as bench_file:
+    with open(str(file_name)) as bench_file:
         reader = csv.reader(bench_file, delimiter=',')
         next(reader)  # skip header
         for row in reader:
@@ -391,6 +386,10 @@ The default sequence is "jinline jshrink jreduce".''')
                             nargs='*',
                             help=str(TOOL_LIST),
                             default=TOOL_LIST)
+    run_parser.add_argument('--csv', type = str, default = 'examples', help = '''\
+Specify the <file name> of the benchmark csv file. The csv file should be put
+under data/ directory and be like data/<file name>.csv.
+Using data/examples.csv by default.''')
     run_parser.add_argument('-b', '--benchmark', type = str, default = 'all', help = '''\
 Specify a certain project to debloat.
 Debloat all benchmarks by default.''')
@@ -406,7 +405,7 @@ def main():
     if args.command == 'clean':
         clean()
     elif args.command == 'run':
-        invoke(args.tools, args.benchmark)
+        invoke(args.tools, args.csv, args.benchmark)
     elif args.command == 'setup':
         setup(args.tools)
 
