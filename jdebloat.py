@@ -62,6 +62,7 @@ def invoke(tools, csv_file, benchmark):
             src_dir = run_tool(benchmark, src_dir, tool)
 
     write_stats(benchmarks, tools)
+    read_stats(tools)
 
 def setup(tools):
     if not shutil.which('javaq'):
@@ -95,6 +96,59 @@ def write_stats(benchmarks, tools):
     with open(str(OUTPUT / 'all.csv'), 'w') as f:
         f.write("id,name,size,methods,classes,fields,instructions,tests\n")
         f.writelines('\n'.join(stats))
+
+def read_stats(tools):
+    class BenchmarkStat:
+        def __init__(self, bid):
+            self.id = bid
+            self.sizes = [0, 0]
+            self.tests = [0, 0]
+
+        def print_stat(self):
+            size_reduction = (self.sizes[0] - self.sizes[1]) / self.sizes[0]
+            print("Benchmark {}:".format(bid))
+            print("  Size before debloating: {}".format(self.sizes[0]))
+            print("  Size after  debloating: {}".format(self.sizes[1]))
+            print("  Size reduction: {:.2%}".format(size_reduction))
+            print("  Total test cases before debloating: {}".format(self.tests[0]))
+            print("  Total test cases after  debloating: {}, ({} successes, {} failures)".format(
+                self.tests[1], self.tests[1], self.tests[0] - self.tests[1]))
+
+    with open(str(OUTPUT / "all.csv"), "r") as f:
+        f.readline()  # skip the header line
+        lines = f.readlines()
+
+        bid_list = []
+        bm_map = {}
+        for line in lines:
+            items = line.split(',')
+            bid = items[0]
+            size = items[2]
+            test = items[-1]
+
+            if bid not in bid_list:
+                bid_list.append(bid)
+            if bid not in bm_map:
+                bm_map[bid] = BenchmarkStat(bid)
+                bm_map[bid].sizes[0] = int(size)
+                bm_map[bid].tests[0] = int(test)
+            else:
+                bm_map[bid].sizes[1] = int(size)
+                bm_map[bid].tests[1] = int(test)
+
+        tools = tools[1:]  # skip 'initial' phase
+        tool_chain = tools[0]
+        for t in tools[1:]:
+            tool_chain += "->" + t
+
+        print()
+        print("=====================================================================")
+        print("                          Debloating Stats:")
+        print("=====================================================================")
+
+        print("Using debloating tool(s): " + tool_chain)
+        for bid in bid_list:
+            bm_map[bid].print_stat()
 
 def write_target_stats(benchmarks):
     ''' WARNING: Deprecated '''
