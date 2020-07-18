@@ -1,4 +1,5 @@
 id,url,rev
 jshrink-test
-maven-wrapper,https://github.com/takari/maven-wrapper,2528f4144d0e50f1e10d7e84c1fddd1edf88ce58
 jinline-test
+jreduce-test
+maven-wrapper,https://github.com/takari/maven-wrapper,2528f4144d0e50f1e10d7e84c1fddd1edf88ce58
