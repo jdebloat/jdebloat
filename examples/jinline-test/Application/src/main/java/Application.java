@@ -1,18 +1,13 @@
 import edu.ucla.cs.onr.test.*;
 
 public class Application {
-	public static void main(String[] args) {
-    Library lib;
-    if(args[0].equals("a"))
-      lib = new Library();
+	public int doubleOrSquare(int num, boolean dbl) {
+    Squarer lib;
+    if(dbl)
+      lib = new Doubler();
     else
-      lib = new Library_Child();
+      lib = new Squarer();
 
-    System.out.println(new Application().square(2, lib));
-		return;
+		return lib.doIt(num);
 	}
-
-  public int square(int num, Library lib) {
-    return lib.square(num);
-  }
 };

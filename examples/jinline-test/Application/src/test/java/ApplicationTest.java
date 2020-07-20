@@ -14,9 +14,8 @@ public class ApplicationTest {
     }
   }
 
-  private int square(int a) {
+  private int square(int num) {
     Application app = new Application();
-    Library lib = new Library();
-    return app.square(a, lib);
+    return app.doubleOrSquare(num, true);
   }
 };
