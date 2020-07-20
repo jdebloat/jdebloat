@@ -9,7 +9,7 @@ public class Application {
     else {
       doer = new Squarer();
     }
-    int result = doer.doIt(val)
+    int result = doer.doIt(val);
     return result;
   }
 }
