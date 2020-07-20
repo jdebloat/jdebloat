@@ -145,3 +145,8 @@ We tested JDebloat on 25 benchmarks and found the following reductions:
 
 The links to all of these repositories, as well as the commits we used, are
 listed in `data/benchmarks.csv`.
+
+## Making the Docker image
+
+    git archive --format=tar.gz HEAD > jdebloat.tar.gz
+    docker build -t jdebloat:latest .
