@@ -8,6 +8,7 @@ RUN stack upgrade --binary-version 1.9.3
 
 WORKDIR /home/docker
 USER docker
-COPY . .
+COPY --chown=docker:docker  . .
+RUN find . \( -name ".git" -o -name ".gitignore" -o -name ".gitmodules" -o -name ".gitattributes" \) -exec rm -rf -- {} +
 RUN python jdebloat.py setup 2>/dev/null
 ENTRYPOINT ["/bin/bash"]
