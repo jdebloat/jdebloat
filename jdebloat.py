@@ -16,8 +16,6 @@ if LOCAL_PATH not in os.get_exec_path():
         os.environ["PATH"] = LOCAL_PATH
     os.environ["PATH"] += (":" + LOCAL_PATH)
 
-MODE = "TUTORIAL" # MODE: either "TUTORIAL" or "BENCHMARKING"
-
 BENCHMARKS = "data/benchmarks.csv"
 EXAMPLES = "data/examples.csv"
 ROOT = Path(os.path.dirname(os.path.abspath(__file__)))
@@ -45,7 +43,7 @@ ALL_TARGETS = [
 ]
 TOOL_LIST = ['jinline', 'jshrink', 'jreduce']
 
-def invoke(tools, benchmark):
+def invoke(tools, csv_file, benchmark):
     if(os.path.exists(str(OUTPUT / "all.csv"))):
         os.remove(str(OUTPUT / "all.csv"))
         # return
@@ -55,7 +53,7 @@ def invoke(tools, benchmark):
     if tools[0] != 'initial':
         tools.insert(0, 'initial')
 
-    benchmarks = get_benchmarks(benchmark)
+    benchmarks = get_benchmarks(csv_file, benchmark)
     for benchmark in benchmarks:
         download_benchmark(benchmark)
 
@@ -64,6 +62,7 @@ def invoke(tools, benchmark):
             src_dir = run_tool(benchmark, src_dir, tool)
 
     write_stats(benchmarks, tools)
+    read_stats(tools)
 
 def setup(tools):
     if not shutil.which('javaq'):
@@ -97,6 +96,59 @@ def write_stats(benchmarks, tools):
     with open(str(OUTPUT / 'all.csv'), 'w') as f:
         f.write("id,name,size,methods,classes,fields,instructions,tests\n")
         f.writelines('\n'.join(stats))
+
+def read_stats(tools):
+    class BenchmarkStat:
+        def __init__(self, bid):
+            self.id = bid
+            self.sizes = [0, 0]
+            self.tests = [0, 0]
+
+        def print_stat(self):
+            size_reduction = (self.sizes[0] - self.sizes[1]) / self.sizes[0]
+            print("Benchmark {}:".format(bid))
+            print("  Size before debloating: {}".format(self.sizes[0]))
+            print("  Size after  debloating: {}".format(self.sizes[1]))
+            print("  Size reduction: {:.2%}".format(size_reduction))
+            print("  Total test cases before debloating: {}".format(self.tests[0]))
+            print("  Total test cases after  debloating: {}, ({} successes, {} failures)".format(
+                self.tests[1], self.tests[1], self.tests[0] - self.tests[1]))
+
+    with open(str(OUTPUT / "all.csv"), "r") as f:
+        f.readline()  # skip the header line
+        lines = f.readlines()
+
+        bid_list = []
+        bm_map = {}
+        for line in lines:
+            items = line.split(',')
+            bid = items[0]
+            size = items[2]
+            test = items[-1]
+
+            if bid not in bid_list:
+                bid_list.append(bid)
+            if bid not in bm_map:
+                bm_map[bid] = BenchmarkStat(bid)
+                bm_map[bid].sizes[0] = int(size)
+                bm_map[bid].tests[0] = int(test)
+            else:
+                bm_map[bid].sizes[1] = int(size)
+                bm_map[bid].tests[1] = int(test)
+
+        tools = tools[1:]  # skip 'initial' phase
+        tool_chain = tools[0]
+        for t in tools[1:]:
+            tool_chain += "->" + t
+
+        print()
+        print("=====================================================================")
+        print("                          Debloating Stats:")
+        print("=====================================================================")
+
+        print("Using debloating tool(s): " + tool_chain)
+        for bid in bid_list:
+            bm_map[bid].print_stat()
 
 def write_target_stats(benchmarks):
     ''' WARNING: Deprecated '''
@@ -316,17 +368,14 @@ def download_benchmark(benchmark):
         shutil.copytree(str(EXAMPLES_FOLDER / benchmark.id), str(path))
 
 
-def get_benchmarks(bm_name):
-    if MODE == "TUTORIAL":
-        file_name = EXAMPLES
-    elif MODE == "BENCHMARKING":
-        file_name = BENCHMARKS
-    else:
-        print("Running in unknown mode:", MODE)
+def get_benchmarks(csv_file, bm_name):
+    file_name = str(DATA / (csv_file + ".csv"))
+    if not os.path.exists(file_name):
+        print("Cannot find the benchmark csv file:", str(file_name))
         sys.exit(1)
 
     data = []
-    with open(file_name) as bench_file:
+    with open(str(file_name)) as bench_file:
         reader = csv.reader(bench_file, delimiter=',')
         next(reader)  # skip header
         for row in reader:
@@ -391,6 +440,10 @@ The default sequence is "jinline jshrink jreduce".''')
                             nargs='*',
                             help=str(TOOL_LIST),
                             default=TOOL_LIST)
+    run_parser.add_argument('--csv', type = str, default = 'examples', help = '''\
+Specify the <file name> of the benchmark csv file. The csv file should be put
+under data/ directory and be like data/<file name>.csv.
+Using data/examples.csv by default.''')
     run_parser.add_argument('-b', '--benchmark', type = str, default = 'all', help = '''\
 Specify a certain project to debloat.
 Debloat all benchmarks by default.''')
@@ -406,7 +459,7 @@ def main():
     if args.command == 'clean':
         clean()
     elif args.command == 'run':
-        invoke(args.tools, args.benchmark)
+        invoke(args.tools, args.csv, args.benchmark)
     elif args.command == 'setup':
         setup(args.tools)
 
