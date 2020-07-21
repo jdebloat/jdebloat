@@ -1,7 +1,7 @@
 package edu.ucla.cs.onr.test;
 
-public class Squarer{
-  public int doIt(int a) {
-    return a * a;
+public class Squarer extends Doer {
+  public final int doIt(int val) {
+    return val * val;
   }
-};
+}
