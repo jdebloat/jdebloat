@@ -72,7 +72,7 @@ def main(args):
         print('\033[36mRunning original tests...\033[m')
         subprocess.run(['java',
                         "-XX:+UnlockDiagnosticVMOptions", "-XX:+LogCompilation",
-                        "-Xcomp",
+                        #"-Xcomp",
                         "-XX:MinInliningThreshold=1",
                         "-XX:MaxInlineSize=70",
                         "-cp", classpath] + test_args, cwd=output_dir)
