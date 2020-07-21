@@ -1,7 +1,9 @@
 package edu.ucla.cs.onr.test;
 
 public class Squarer extends Doer {
-  public final int doIt(int val) {
-    return val * val;
+  @Override
+  public int doIt(int val) {
+    int result = val * val;
+    return result;
   }
 }
