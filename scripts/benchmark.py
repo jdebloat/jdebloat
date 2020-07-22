@@ -111,7 +111,10 @@ def main(argv):
     shutil.rmtree(str(extract), ignore_errors=True)
     extract.mkdir(parents=True, exist_ok=True)
 
-    dct = extract_gitinfo(benchmark)
+    if os.path.exists(str(benchmark / ".git")):
+        dct = extract_gitinfo(benchmark)
+    else:
+        dct = {}
 
     print("Looking at: " + str(benchmark))
     if not (benchmark / "target").exists():
