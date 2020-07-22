@@ -148,5 +148,4 @@ listed in `data/benchmarks.csv`.
 
 ## Making the Docker image
 
-    git archive --format=tar.gz HEAD > jdebloat.tar.gz
     docker build -t jdebloat:latest .
