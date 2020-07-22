@@ -4,10 +4,14 @@ public class Application {
   public static int doubleOrSquare(int val, boolean isDouble) {
     Doer doer = null;
     if (isDouble) {
-      doer = new Doubler();
+      Doubler doubler = new Doubler();
+      doubler.foo(val % 2);
+      doer = doubler;
     }
     else {
-      doer = new Squarer();
+      Squarer squarer = new Squarer();
+      squarer.bar(val * 3 + 4);
+      doer = squarer;
     }
 
     if (val > 100) {
