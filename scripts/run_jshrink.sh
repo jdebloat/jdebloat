@@ -58,16 +58,26 @@ lib_jar="${item_dir}/lib.jar"
 test_jar="${item_dir}/test.jar"
 src_dir="${item_dir}/src"
 new_maven_dir="${temp_maven_dir}"
+cache_dir="$(dirname ${TO})/cache/$(basename ${TO})"
 
 DIR="${PWD}/../../../scripts"
 ${DIR}/prepare_for_jshrink.sh "${app_jar}" "${lib_jar}" "${test_jar}" "${src_dir}" "${new_maven_dir}"
+
+if [ -d ${cache_dir}/jshrink_caches ]; then
+	cp -r ${cache_dir}/jshrink_caches ${new_maven_dir}
+elif [ ! -d ${cache_dir} ]; then
+	mkdir -p ${cache_dir}
+fi
 
 #timeout ${TIMEOUT} ${JAVA} -Xmx20g -jar ${DEBLOAT_APP} --jmtrace "${MTRACE_BUILD}" --tamiflex ${TAMIFLEX} --maven-project ${new_maven_dir} -T --use-cache --public-entry --main-entry --test-entry --prune-app --class-collapser --inline --remove-fields --remove-methods --log-directory "${ITEM_LOG_DIR}" --verbose 2>&1 >${temp_file}
 timeout ${TIMEOUT} ${JAVA} -Xmx20g -jar ${DEBLOAT_APP} --jmtrace "${MTRACE_BUILD}" --tamiflex ${TAMIFLEX} --maven-project ${new_maven_dir} -T --use-cache --public-entry --main-entry --test-entry --prune-app --class-collapser --inline --remove-fields --remove-methods --log-directory "${ITEM_LOG_DIR}" --verbose 2>&1 >${temp_file}
 exit_status=$?
 
 cp -r "${new_maven_dir}/src" "${src_dir}"
-cd ${new_maven_dir}/target/classes; rm "${app_jar}" && jar cf "${app_jar}" ./*
+pushd ${new_maven_dir}/target/classes
+rm "${app_jar}" && jar cf "${app_jar}" ./*
+popd
+cp -r ${new_maven_dir}/jshrink_caches ${cache_dir}
 rm -rf "${new_maven_dir}"
 
 
