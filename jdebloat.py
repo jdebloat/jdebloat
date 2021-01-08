@@ -44,8 +44,9 @@ ALL_TARGETS = [
 TOOL_LIST = ['jinline', 'jshrink', 'jreduce']
 
 def invoke(tools, csv_file, benchmark):
-    if(os.path.exists(str(OUTPUT / "all.csv"))):
-        os.remove(str(OUTPUT / "all.csv"))
+    stats_file = csv_file + '-' + benchmark + '.csv'
+    if(os.path.exists(str(OUTPUT / stats_file))):
+        os.remove(str(OUTPUT / stats_file))
         # return
 
     if len(tools) == 0:  # run all 3 tools if `tools` is not specified
@@ -61,8 +62,8 @@ def invoke(tools, csv_file, benchmark):
         for tool in tools:  # then run tools in sequence
             src_dir = run_tool(benchmark, src_dir, tool)
 
-    write_stats(benchmarks, tools)
-    read_stats(tools)
+    write_stats(benchmarks, tools, stats_file)
+    read_stats(benchmarks, tools)
 
 def setup(tools):
     if not shutil.which('javaq'):
@@ -82,7 +83,7 @@ def clean():
     if p.exists():
         shutil.rmtree(str(p))
 
-def write_stats(benchmarks, tools):
+def write_stats(benchmarks, tools, output_file):
     stats = []
     for benchmark in benchmarks:
         target = tools[0]
@@ -93,11 +94,11 @@ def write_stats(benchmarks, tools):
             with open(str(OUTPUT / benchmark.id / target / 'stats.csv')) as f:
                 stats.append(f.readlines()[-1])
 
-    with open(str(OUTPUT / 'all.csv'), 'w') as f:
+    with open(str(OUTPUT / output_file), 'w') as f:
         f.write("id,name,size,methods,classes,fields,instructions,tests\n")
         f.writelines('\n'.join(stats))
 
-def read_stats(tools):
+def read_stats(benchmarks, tools):
     class BenchmarkStat:
         def __init__(self, bid):
             self.id = bid
@@ -114,41 +115,33 @@ def read_stats(tools):
             print("  Total test cases after  debloating: {}, ({} successes, {} failures)".format(
                 self.tests[1], self.tests[1], self.tests[0] - self.tests[1]))
 
-    with open(str(OUTPUT / "all.csv"), "r") as f:
-        f.readline()  # skip the header line
-        lines = f.readlines()
+    before = tools[0]
+    after = '+'.join(tools)
+    tool_chain = '->'.join(tools[1:]) # skip 'initial' phase
 
-        bid_list = []
-        bm_map = {}
-        for line in lines:
-            items = line.split(',')
-            bid = items[0]
-            size = items[2]
-            test = items[-1]
+    print()
+    print("=====================================================================")
+    print("                          Debloating Stats:")
+    print("=====================================================================")
 
-            if bid not in bid_list:
-                bid_list.append(bid)
-            if bid not in bm_map:
-                bm_map[bid] = BenchmarkStat(bid)
-                bm_map[bid].sizes[0] = int(size)
-                bm_map[bid].tests[0] = int(test)
-            else:
-                bm_map[bid].sizes[1] = int(size)
-                bm_map[bid].tests[1] = int(test)
+    print("Using debloating tool(s): " + tool_chain)
+    for benchmark in benchmarks:
+        bm_stat = BenchmarkStat(benchmark.id)
+        with open(str(OUTPUT / benchmark.id / before / 'stats.csv')) as f:
+            items = f.readlines()[-1].split(',')
+            bid, size, test = items[0], items[2], items[-1]
 
-        tools = tools[1:]  # skip 'initial' phase
-        tool_chain = tools[0]
-        for t in tools[1:]:
-            tool_chain += "->" + t
+            bm_stat.sizes[0] = int(size)
+            bm_stat.tests[0] = int(test)
 
-        print()
-        print("=====================================================================")
-        print("                          Debloating Stats:")
-        print("=====================================================================")
+        with open(str(OUTPUT / benchmark.id / after / 'stats.csv')) as f:
+            items = f.readlines()[-1].split(',')
+            bid, size, test = items[0], items[2], items[-1]
 
-        print("Using debloating tool(s): " + tool_chain)
-        for bid in bid_list:
-            bm_map[bid].print_stat()
+            bm_stat.sizes[1] = int(size)
+            bm_stat.tests[1] = int(test)
+
+        bm_stat.print_stat()
 
 def write_target_stats(benchmarks):
     ''' WARNING: Deprecated '''
@@ -228,8 +221,8 @@ def git(*cmd, work_folder="."):
 
 def compile(benchmark, src, dest):
     if(os.path.exists(str(dest / "app.jar"))):
-        shutil.rmtree(str(dest))
-        # return
+        # shutil.rmtree(str(dest))
+        return
 
     run([str(SCRIPTS / "benchmark.py"), str(DATA /
                                             "excluded-tests.txt"), str(src), str(dest)])
