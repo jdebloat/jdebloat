@@ -1,12 +1,12 @@
 [submodule "tools/jreduce"]
 	path = tools/jreduce
-	url = https://github.com/ucla-pls/jreduce.git
+	url = git@github.com:ucla-pls/jreduce.git
 [submodule "tools/jinline"]
 	path = tools/jinline
-	url = git@laforge.cs.ucla.edu:jinline
+	url = git@github.com:eyolfson/jinline.git
 [submodule "tools/jshrink"]
 	path = tools/jshrink
-	url = git@github.com:tianyi-zhang/call-graph-analysis.git
+	url = git@github.com:eyolfson/jshrink.git
 [submodule "tools/javaq"]
 	path = tools/javaq
-	url = git@laforge.cs.ucla.edu:javaq
+	url = git@github.com:ucla-pls/javaq.git
