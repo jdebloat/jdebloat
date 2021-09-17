@@ -28,7 +28,15 @@ More information on this debloating project can be found here.
 There are two options to execute this tool explained below.
 
 ## People 
-This JDebloat project is led by Professor [Miryung Kim](http://web.cs.ucla.edu/~miryung/) in the Computer Science department at [UCLA](https://www.cs.ucla.edu). [JShrink](https://github.com/jdebloat/jshrink)'s main contributors are Professor [Miryung Kim](http://web.cs.ucla.edu/~miryung/), Professor [Tianyi Zhang](https://tianyi-zhang.github.io) (her PhD student), Dr [Bobby Bruce](https://www.bobbybruce.net) (her postdoc), and [Jaspreet Arora](https://jay-ucla.github.io) (her MS student). Its web user interface, [WebJShrink](http://web.cs.ucla.edu/~tianyi.zhang/fse2020-demo-webjshrink.pdf) was developed by [Konner Macias](https://www.facebook.com/konner.macias) (her BS student) and [Mihir Mathur](https://mihirmathur.com/#/) (her MS student). 
+This JDebloat project is led by Professor [Miryung Kim](http://web.cs.ucla.edu/~miryung/) in the Computer Science department at [UCLA](https://www.cs.ucla.edu). 
+
+[JShrink](https://github.com/jdebloat/jshrink)'s main contributors are Professor [Miryung Kim](http://web.cs.ucla.edu/~miryung/), Professor [Tianyi Zhang](https://tianyi-zhang.github.io) (her PhD student), Dr [Bobby Bruce](https://www.bobbybruce.net) (her postdoc), and [Jaspreet Arora](https://jay-ucla.github.io) (her MS student). Its web user interface, [WebJShrink](http://web.cs.ucla.edu/~tianyi.zhang/fse2020-demo-webjshrink.pdf) was developed by [Konner Macias](https://www.facebook.com/konner.macias) (her BS student) and [Mihir Mathur](https://mihirmathur.com/#/) (her MS student). 
+
+[JReduce](https://github.com/jdebloat/jreduce)'s main contributors are Professor [Jens Palsberg](http://web.cs.ucla.edu/~palsberg/) and Dr. [Christian Kalhauge](https://orbit.dtu.dk/en/persons/christian-gram-kalhauge). 
+
+[JInline](https://github.com/jdebloat/jinline)'s main contributors are [Harry Xu](http://web.cs.ucla.edu/~harryxu/) and Dr. [Jon Eyolfson](https://eyl.io) and [Christian Navasca](http://web.cs.ucla.edu/~cnavasca253/)
+
+In addition, JDebloat's integration and end-to-end evaluation effort is supported by [Yifan Qiao](https://web.cs.ucla.edu/~yifan/), [Jiyuan Wang](http://web.cs.ucla.edu/~wangjiyuan/), [Haoran Ma](http://web.cs.ucla.edu/~wangjiyuan/), and Usama Hameed. 
 
 # How to Install and Run
 
