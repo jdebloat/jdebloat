@@ -8,9 +8,9 @@ Modern software is bloated. Demand for new functionality has led developers to i
 JDebloat integrates three static debloating and delayering functionalities:  (1) JReduce: statically reduce unused classes efficiently by taking into dependency based connected component structure while applying Delta Debugging for the purpose of code minimization, (2) JShrink: statically remove the body of uninvoked methods through call graph analysis, (3) JInline: statically inline the body of called methods aggressively, which are currently inlined by JVM’s runtime optimization.
 
 <ol>
-<li> **JShrink** (https://github.com/jdebloat/jshrink)
-<li> **JInline** (https://github.com/jdebloat/jinline)
-<li> **JReduce** (https://github.com/jdebloat/jreduce)
+<li>**JShrink** (https://github.com/jdebloat/jshrink)
+<li>**JInline** (https://github.com/jdebloat/jinline)
+<li>**JReduce** (https://github.com/jdebloat/jreduce)
 </ol>
 
 More information on this debloating project can be found here. 
