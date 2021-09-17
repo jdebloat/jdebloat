@@ -36,7 +36,7 @@ This JDebloat project is led by Professor [Miryung Kim](http://web.cs.ucla.edu/~
 
 [JInline](https://github.com/jdebloat/jinline)'s main contributors are [Harry Xu](http://web.cs.ucla.edu/~harryxu/) and Dr. [Jon Eyolfson](https://eyl.io) and [Christian Navasca](http://web.cs.ucla.edu/~cnavasca253/)
 
-In addition, JDebloat's integration and end-to-end evaluation effort is supported by [Yifan Qiao](https://web.cs.ucla.edu/~yifan/), [Jiyuan Wang](http://web.cs.ucla.edu/~wangjiyuan/), [Haoran Ma](http://web.cs.ucla.edu/~wangjiyuan/), Usama Hameed, and [Akshay Uttere](http://web.cs.ucla.edu/~akshayutture/). 
+In addition, integration of three tools into JDebloat and its end-to-end evaluation effort is supported by [Yifan Qiao](https://web.cs.ucla.edu/~yifan/), [Jiyuan Wang](http://web.cs.ucla.edu/~wangjiyuan/), [Haoran Ma](http://web.cs.ucla.edu/~wangjiyuan/), Usama Hameed, and [Akshay Uttere](http://web.cs.ucla.edu/~akshayutture/). 
 
 # How to Install and Run
 
