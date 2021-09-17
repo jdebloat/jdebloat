@@ -1,6 +1,6 @@
 [submodule "tools/jreduce"]
 	path = tools/jreduce
-	url = git@github.com:ucla-pls/jreduce.git
+	url = git@github.com:jdebloat/jreduce.git
 [submodule "tools/jinline"]
 	path = tools/jinline
 	url = git@github.com:jdebloat/jinline.git
