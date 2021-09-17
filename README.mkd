@@ -1,23 +1,22 @@
 # Synergistic Customization Project for Java Bytecode Debloating and Delayering 
 This project is led by Professor Miryung Kim (PI), Jens Palsberg, and Harry Xu (co-PIs) at UCLA.
 
-Motivation: Modern software is bloated. Demand for new functionality has led developers to include more and more features, many of which become unneeded or unused as software evolves. This phenomenon, known as software bloat, results in software consuming more resources than it otherwise needs to. Various debloating techniques have been proposed since the late 1990s. However, many of these techniques are built upon pure static analysis and have yet to be extended and evaluated in the context of modern Java applications where dynamic language features are prevalent. To this end, we developed an end-to-end bytecode debloating framework called JShrink. It augments traditional static reachability analysis with dynamic profiling and type dependency analysis and renovates existing bytecode transformations to account for new language features in modern Java.  This work is motivated and sponsored by Office of Naval Research Total Protection Cyber Platform program. 
+##Motivation
+Modern software is bloated. Demand for new functionality has led developers to include more and more features, many of which become unneeded or unused as software evolves. This phenomenon, known as software bloat, results in software consuming more resources than it otherwise needs to. Various debloating techniques have been proposed since the late 1990s. However, many of these techniques are built upon pure static analysis and have yet to be extended and evaluated in the context of modern Java applications where dynamic language features are prevalent. To this end, we developed an end-to-end bytecode debloating framework called JShrink. It augments traditional static reachability analysis with dynamic profiling and type dependency analysis and renovates existing bytecode transformations to account for new language features in modern Java.  This work is motivated and sponsored by Office of Naval Research Total Protection Cyber Platform program. 
 
+##Components 
 JDebloat integrates three static debloating and delayering functionalities:  (1) JReduce: statically reduce unused classes efficiently by taking into dependency based connected component structure while applying Delta Debugging for the purpose of code minimization, (2) JShrink: statically remove the body of uninvoked methods through call graph analysis, (3) JInline: statically inline the body of called methods aggressively, which are currently inlined by JVM’s runtime optimization.
 
-
-https://github.com/jdebloat/jshrink
-https://github.com/jdebloat/jinline
-https://github.com/jdebloat/jreduce
+[JShrink](https://github.com/jdebloat/jshrink)
+[JInline](https://github.com/jdebloat/jinline)
+[JReduce](https://github.com/jdebloat/jreduce)
 
 More information on this debloating project can be found here. 
 
-JDebloat Tutorial Presentation Slides
-JDebloat Tutorial Webpage Link 
-JShrink Paper Draft (Accepted to ESEC/FSE 2020)
-JShrink Code and Data (Replication Package for ESEC/FSE 2020 Artifact Evaluation)
-2020 ONR Software Security Summer School
-
+[JDebloat Tutorial Presentation Slides](http://web.cs.ucla.edu/~miryung/Publications/SSSS2020_JDebloat_UCLA_Tutorial_Presentation.pdf)
+[JDebloat Tutorial Webpage Link](http://debloating.cs.ucla.edu/debloat/SSSS20.html) 
+[JShrink Paper (ESEC/FSE 2020)](http://web.cs.ucla.edu/~miryung/Publications/fse2020-jshrink.pdf)
+[JShrink Code and Data: Replication Package for ESEC/FSE 2020 Artifact Evaluation](https://figshare.com/articles/JShrink_Artifact/12435542)
 
 There are two options to execute this tool explained below.
 
