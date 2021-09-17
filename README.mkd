@@ -1,5 +1,7 @@
-# Synergistic Customization Project for Java Bytecode Debloating and Delayering 
+# Java Bytecode Debloating and Delayering 
 This project is led by Professor [Miryung Kim](http://web.cs.ucla.edu/~miryung/) (PI), [Jens Palsberg](http://web.cs.ucla.edu/~palsberg/), and [Harry Xu](http://web.cs.ucla.edu/~harryxu/) (co-PIs) at UCLA.
+
+For more information on Java Bytecode Debloating project at UCLA, please visit http://debloating.cs.ucla.edu. 
 
 ## Motivation
 Modern software is bloated. Demand for new functionality has led developers to include more and more features, many of which become unneeded or unused as software evolves. This phenomenon, known as software bloat, results in software consuming more resources than it otherwise needs to. Various debloating techniques have been proposed since the late 1990s. However, many of these techniques are built upon pure static analysis and have yet to be extended and evaluated in the context of modern Java applications where dynamic language features are prevalent. To this end, we developed an end-to-end bytecode debloating framework called JShrink. It augments traditional static reachability analysis with dynamic profiling and type dependency analysis and renovates existing bytecode transformations to account for new language features in modern Java.  This work is motivated and sponsored by Office of Naval Research Total Protection Cyber Platform program. 
@@ -24,6 +26,11 @@ More information on this debloating project can be found here.
 * [JShrink Code and Data: Replication Package for ESEC/FSE 2020 Artifact Evaluation](https://figshare.com/articles/JShrink_Artifact/12435542)
 
 There are two options to execute this tool explained below.
+
+## People 
+This JDebloat project is led by Professor [Miryung Kim](http://web.cs.ucla.edu/~miryung/) in the Computer Science department at [UCLA](https://www.cs.ucla.edu). [JShrink](https://github.com/jdebloat/jshrink)'s main contributors are Professor [Miryung Kim](http://web.cs.ucla.edu/~miryung/), Professor [Tianyi Zhang](https://tianyi-zhang.github.io) (her PhD student), Dr [Bobby Bruce](https://www.bobbybruce.net) (her postdoc), and [Jaspreet Arora](https://jay-ucla.github.io) (her MS student). Its web user interface, [WebJShrink](http://web.cs.ucla.edu/~tianyi.zhang/fse2020-demo-webjshrink.pdf) was developed by [Konner Macias](https://www.facebook.com/konner.macias) (her BS student) and [Mihir Mathur](https://mihirmathur.com/#/) (her MS student). 
+
+# How to Install and Run
 
 ## Using a VM
 
