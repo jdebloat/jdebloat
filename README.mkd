@@ -41,7 +41,7 @@ In addition, integration of three tools into JDebloat and its end-to-end evaluat
 ## Video 
 
 [JShrink at FSE 2021](https://www.youtube.com/watch?v=MwIqCkxb6Zs&list=PLFWHTJ_eJvv1yUMOGiG6fZ6mdb-8yF9mK)
-[WebJShrink at FSE 2021)(https://www.youtube.com/watch?v=o-9qmg7_9Ug&list=PLFWHTJ_eJvv32r0TVHc9DQg_A0PXkS6dP)
+[WebJShrink at FSE 2021](https://www.youtube.com/watch?v=o-9qmg7_9Ug&list=PLFWHTJ_eJvv32r0TVHc9DQg_A0PXkS6dP)
 
 # How to Install and Run
 
