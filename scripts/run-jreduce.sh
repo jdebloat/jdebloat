@@ -14,12 +14,14 @@ ln -s "$FROM/src" "$TO"
 
 pushd $TO
 
-mkdir -p _jreduce/output
+mkdir -p _jreduce
 
 jreduce $@\
   --work-folder "_jreduce/workfolder" \
   --cp "test.jar" \
   --core "@test.classes.txt" \
+  --jre "$JAVA_HOME/jre" \
+  -S "classes" \
   -o "_jreduce/output" \
   --timelimit 1800 \
   "app+lib.jar" \
