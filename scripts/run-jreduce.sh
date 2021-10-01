@@ -18,22 +18,21 @@ mkdir -p _jreduce
 
 jreduce $@\
   --work-folder "_jreduce/workfolder" \
-  --cp "test.jar" \
-  --core "@test.classes.txt" \
   --jre "$JAVA_HOME/jre" \
-  -S "classes" \
-  -o "_jreduce/output" \
+  -S "items+logic" \
+  --stdlib "../../stdlib.bin" \
+  -o "app+lib.after.jar" \
   --timelimit 1800 \
-  "app+lib.jar" \
-  $(realpath "$SCRIPT_DIR/predicate.sh") $(realpath "$TO") {}
+  app+lib.jar \
+  -- $(realpath "$SCRIPT_DIR/predicate.sh") $(realpath "$TO") {}
 
 # generate the output jar file only if the output folder is not empty.
-if [ "$(find _jreduce/output -mindepth 1 -print -quit 2>/dev/null)" ]
-then
-    ( cd _jreduce/output && jar cf ../../app+lib.after.jar * )
-else
+#if [ "$(find _jreduce/output -mindepth 1 -print -quit 2>/dev/null)" ]
+#then
+#    ( cd _jreduce/output && jar cf ../../app+lib.after.jar * )
+#else
 # else copy the input jar file as the output.
-    cp app+lib.jar app+lib.after.jar
-fi
+#    cp app+lib.jar app+lib.after.jar
+#fi
 
 $SCRIPT_DIR/unjar.py split app+lib.after.jar app.jar lib.jar < seperation.txt
