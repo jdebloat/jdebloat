@@ -22,9 +22,9 @@ jreduce $@\
   -S "items+logic" \
   --stdlib "../../stdlib.bin" \
   -o "app+lib.after.jar" \
-  --timelimit 1800 \
+  --predicate-timelimit 180 \
   app+lib.jar \
-  -- $(realpath "$SCRIPT_DIR/predicate.sh") $(realpath "$TO") {}
+  -- timeout 180 $(realpath "$SCRIPT_DIR/predicate.sh") $(realpath "$TO") {}
 
 # generate the output jar file only if the output folder is not empty.
 #if [ "$(find _jreduce/output -mindepth 1 -print -quit 2>/dev/null)" ]

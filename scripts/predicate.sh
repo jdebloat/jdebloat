@@ -6,7 +6,6 @@ REDUCED_OUTPUT=$(realpath $1);shift
 #SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 SCRIPT_DIR=$(realpath $(dirname "$0"))
 
-echo $SCRIPT_DIR
 # generate jar file from input directory.
 #( cd $REDUCED_OUTPUT && jar cf $WORK_DIR/app+lib.jar . )
 
