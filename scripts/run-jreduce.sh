@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
+set -x
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+
 
 FROM=$(realpath $1); shift
 TO=$(realpath $1); shift
@@ -16,10 +18,15 @@ pushd $TO
 
 mkdir -p _jreduce
 
+# Run the tests and record the set of methods used
+sh $SCRIPT_DIR/run-test-with-wiretap.sh $(realpath "$TO") $(realpath app+lib.jar) $SCRIPT_DIR/../libs/wiretap.jar
+python3 $SCRIPT_DIR/generate-jreduce-core-methods.py _wiretap/methods.txt > jreduce_core.txt
+
 jreduce $@\
   --work-folder "_jreduce/workfolder" \
   --jre "$JAVA_HOME/jre" \
   -S "items+logic" \
+  --core "@jreduce_core.txt" \
   --stdlib "../../stdlib.bin" \
   -o "app+lib.after.jar" \
   --predicate-timelimit 180 \
