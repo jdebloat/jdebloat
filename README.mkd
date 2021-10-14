@@ -67,10 +67,11 @@ cd /vagrant
 You are required to install the following software, described below.
 
 - Stack 1.9.3 (Installation instructions here - https://docs.haskellstack.org/en/stable/install_and_upgrade/)
-    - After installation, run `stack upgrade --binary-version 1.9.3`
+    - After installation, run `stack upgrade`
 - Java 8
 - Git
 - Python 3
+- Maven (needed to run the benchmarks)
 
 To setup, please set the JAVA\_HOME environment variable to point to the Java installation home folder (Instructions here - https://docs.oracle.com/cd/E19182-01/821-0917/inst_jdk_javahome_t/index.html)
 
