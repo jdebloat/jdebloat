@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -x
 FOLDER=$(realpath $1);shift
 MYCLASSPATH=${1:-$FOLDER/app.jar:$FOLDER/lib.jar};shift
 WIRETAP=$(realpath $1);shift
